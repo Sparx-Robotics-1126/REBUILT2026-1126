@@ -1,9 +1,6 @@
 package org.team1126.robot;
 
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.util.Units;
-import org.team1126.robot.util.Vision.CameraConfig;
+// import org.team1126.robot.util.Vision.CameraConfig;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -17,23 +14,23 @@ public final class Constants {
     public static final int DRIVER = 0;
     public static final int CO_DRIVER = 1;
 
-    public static final CameraConfig[] CAMERAS = {
-        new CameraConfig(
-            "center",
-            new Translation3d(.387, 0, Units.inchesToMeters(8.5)),
-            new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(0.0))
-        ),
-        new CameraConfig(
-            "left",
-            new Translation3d(.368, 0.05, Units.inchesToMeters(8.5)),
-            new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(45.0))
-        ),
-        new CameraConfig(
-            "right",
-            new Translation3d(.368, -.05, Units.inchesToMeters(8.5)),
-            new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(-45.0))
-        )
-    };
+    // public static final CameraConfig[] CAMERAS = {
+    //     new CameraConfig(
+    //         "center",
+    //         new Translation3d(.387, 0, Units.inchesToMeters(8.5)),
+    //         new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(0.0))
+    //     ),
+    //     new CameraConfig(
+    //         "left",
+    //         new Translation3d(.368, 0.05, Units.inchesToMeters(8.5)),
+    //         new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(45.0))
+    //     ),
+    //     new CameraConfig(
+    //         "right",
+    //         new Translation3d(.368, -.05, Units.inchesToMeters(8.5)),
+    //         new Rotation3d(0.0, Math.toRadians(0.0), Math.toRadians(-45.0))
+    //     )
+    // };
 
     public static final class LowerCAN {
 

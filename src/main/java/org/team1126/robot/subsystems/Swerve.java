@@ -41,7 +41,8 @@ import org.team1126.robot.Constants.LowerCAN;
 import org.team1126.robot.Constants.RioCAN;
 import org.team1126.robot.util.Field;
 import org.team1126.robot.util.Field.ReefLocation;
-import org.team1126.robot.util.Vision;
+
+// import org.team1126.robot.util.Vision;
 
 // import org.team1126.robot.util.Vision;
 
@@ -144,7 +145,7 @@ public final class Swerve extends GRRSubsystem {
     private final SwerveState state;
 
     private final SwerveAPI api;
-    private final Vision vision;
+    // private final Vision vision;
     private final PAPFController apf;
     private final ProfiledPIDController angularPID;
 
@@ -158,7 +159,7 @@ public final class Swerve extends GRRSubsystem {
 
     public Swerve() {
         api = new SwerveAPI(config);
-        vision = new Vision(Constants.CAMERAS);
+        // vision = new Vision(Constants.CAMERAS);
         apf = new PAPFController(6.0, 0.25, 0.01, true, Field.obstacles);
         angularPID = new ProfiledPIDController(8.0, 0.0, 0.0, new Constraints(10.0, 26.0));
         angularPID.enableContinuousInput(-Math.PI, Math.PI);
@@ -176,10 +177,10 @@ public final class Swerve extends GRRSubsystem {
         api.refresh();
 
         // Apply vision estimates to the pose estimator.
-        var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
-        SmartDashboard.putNumber("Vision X", measurements.length);
-        seesAprilTag = measurements.length > 0;
-        api.addVisionMeasurements(measurements);
+        // var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
+        // SmartDashboard.putNumber("Vision X", measurements.length);
+        // seesAprilTag = measurements.length > 0;
+        // api.addVisionMeasurements(measurements);
 
         // Calculate helpers
         Translation2d reefCenter = Field.reef.get();
@@ -260,7 +261,7 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.tareRotation()")
             .onInitialize(() -> {
                 api.tareRotation(Perspective.OPERATOR);
-                vision.reset();
+                // vision.reset();
             })
             .isFinished(true)
             .ignoringDisable(true);
@@ -275,7 +276,7 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.resetPose()")
             .onInitialize(() -> {
                 api.resetPose(pose.get());
-                vision.reset();
+                // vision.reset();
             })
             .isFinished(true)
             .ignoringDisable(true);
@@ -362,8 +363,8 @@ public final class Swerve extends GRRSubsystem {
                 Rotation2d robotAngle = reefAssist.targetPipe.getTranslation().minus(state.translation).getAngle();
                 Rotation2d xyAngle = !inDeadband
                     ? new Rotation2d(-yInput, -xInput).rotateBy(
-                        Alliance.isBlue() ? Rotation2d.kZero : Rotation2d.k180deg
-                    )
+                          Alliance.isBlue() ? Rotation2d.kZero : Rotation2d.k180deg
+                      )
                     : robotAngle;
 
                 double stickDistance = Math.abs(
@@ -385,9 +386,9 @@ public final class Swerve extends GRRSubsystem {
                         reefAssist.output,
                         !exitLock.value
                             ? angularPID.calculate(
-                                state.rotation.getRadians(),
-                                reefReference.getRotation().getRadians()
-                            )
+                                  state.rotation.getRadians(),
+                                  reefReference.getRotation().getRadians()
+                              )
                             : 0.0
                     ),
                     reefReference.getRotation()
