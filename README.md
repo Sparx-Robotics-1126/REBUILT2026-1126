@@ -20,4 +20,4 @@ Used for April Tag naivation and pose.
 - [WPILib](https://github.com/wpilibsuite/allwpilib/releases) 2026.x
 - [Node.js](https://nodejs.org/en/download) (v24 LTS Recommended)
 
-Node.js is required to support linting via [Spotless](https://github.com/diffplug/spotless), using the [Prettier](https://prettier.io) style guide. You can apply these rules by building, or by running `./gradlew spotlessApply`. Alternatively, if you wish to disable code formatting, you can do so with the following modifications to [build.gradle](build.gradle):
+Node.js is required to support linting via [Spotless](https://github.com/diffplug/spotless), using the [Prettier](https://prettier.io) style guide. You can apply these rules by building, or by running `./gradlew spotlessApply`. 
