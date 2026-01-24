@@ -56,10 +56,7 @@ public final class Swerve extends GRRSubsystem {
     private static final TunableTable tunables = Tunables.getNested("swerve");
     private static final TunableDouble turboSpin = tunables.value("turboSpin", 8.0);
     private static final TunableDouble facingReefTol = tunables.value("facingReefTol", 1.0);
-    private static final TunableDouble dangerDistance = tunables.value("dangerDistance", 0.75);
-    private static final TunableDouble happyDistance = tunables.value("happyDistance", 3.25);
-    private static final TunableDouble goosingDistance = tunables.value("goosingDistance", 1.25);
-
+  
     private static final TunableTable beachTunables = tunables.getNested("beach");
     private static final TunableDouble beachSpeed = beachTunables.value("speed", 3.0);
     private static final TunableDouble beachTolerance = beachTunables.value("tolerance", 0.15);

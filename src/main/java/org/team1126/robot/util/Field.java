@@ -39,13 +39,13 @@ public final class Field {
         new LateralObstacle(robotRadius, 1.1, 2.0),
         new LateralObstacle(FieldInfo.width() - robotRadius, 1.1, 2.0),
         // Coral stations
-        new LineObstacle(coralStart.getBlue(), coralEnd.getBlue(), 1.1, 2.0),
-        new LineObstacle(coralStart.getBlue(true), coralEnd.getBlue(true), 1.1, 2.0),
-        new LineObstacle(coralStart.getRed(), coralEnd.getRed(), 1.1, 2.0),
-        new LineObstacle(coralStart.getRed(true), coralEnd.getRed(true), 1.1, 2.0),
+        // new LineObstacle(coralStart.getBlue(), coralEnd.getBlue(), 1.1, 2.0),
+        // new LineObstacle(coralStart.getBlue(true), coralEnd.getBlue(true), 1.1, 2.0),
+        // new LineObstacle(coralStart.getRed(), coralEnd.getRed(), 1.1, 2.0),
+        // new LineObstacle(coralStart.getRed(true), coralEnd.getRed(true), 1.1, 2.0),
         // Reef
-        new CircleObstacle(reef.getBlue(), 0.83, 4.0, 1.5),
-        new CircleObstacle(reef.getRed(), 0.83, 4.0, 1.5)
+        // new CircleObstacle(reef.getBlue(), 0.83, 4.0, 1.5),
+        // new CircleObstacle(reef.getRed(), 0.83, 4.0, 1.5)
     };
 
     public static enum ReefLocation {
