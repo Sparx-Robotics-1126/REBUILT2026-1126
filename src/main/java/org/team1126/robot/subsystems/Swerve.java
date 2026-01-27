@@ -51,12 +51,12 @@ import org.team1126.robot.util.Vision;
 @Logged
 public final class Swerve extends GRRSubsystem {
 
-    private static final double OFFSET = Units.inchesToMeters(12.5);
+    private static final double OFFSET = Units.inchesToMeters(11.25);
 
     private static final TunableTable tunables = Tunables.getNested("swerve");
     private static final TunableDouble turboSpin = tunables.value("turboSpin", 8.0);
     private static final TunableDouble facingReefTol = tunables.value("facingReefTol", 1.0);
-  
+
     private static final TunableTable beachTunables = tunables.getNested("beach");
     private static final TunableDouble beachSpeed = beachTunables.value("speed", 3.0);
     private static final TunableDouble beachTolerance = beachTunables.value("tolerance", 0.15);
@@ -144,7 +144,7 @@ public final class Swerve extends GRRSubsystem {
     private final Vision vision;
     private final PAPFController apf;
     private final ProfiledPIDController angularPID;
-
+    private boolean visionEnabled = false;
     private final ReefAssistData reefAssist = new ReefAssistData();
 
     private Pose2d reefReference = Pose2d.kZero;
@@ -173,10 +173,13 @@ public final class Swerve extends GRRSubsystem {
         api.refresh();
 
         // Apply vision estimates to the pose estimator.
-        var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
-        SmartDashboard.putNumber("Vision X", measurements.length);
-        seesAprilTag = measurements.length > 0;
-        api.addVisionMeasurements(measurements);
+        if (visionEnabled) {
+            var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
+            SmartDashboard.putNumber("Vision X", measurements.length);
+
+            seesAprilTag = measurements.length > 0;
+            api.addVisionMeasurements(measurements);
+        }
 
         // Calculate helpers
         Translation2d reefCenter = Field.reef.get();

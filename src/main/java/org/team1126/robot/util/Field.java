@@ -2,9 +2,7 @@ package org.team1126.robot.util;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.team1126.lib.math.FieldInfo;
-import org.team1126.lib.math.PAPFController.CircleObstacle;
 import org.team1126.lib.math.PAPFController.LateralObstacle;
-import org.team1126.lib.math.PAPFController.LineObstacle;
 import org.team1126.lib.math.PAPFController.LongitudinalObstacle;
 import org.team1126.lib.math.PAPFController.Obstacle;
 import org.team1126.lib.math.geometry.ExtPose;
@@ -37,7 +35,7 @@ public final class Field {
         new LongitudinalObstacle(robotRadius, 1.1, 2.0),
         new LongitudinalObstacle(FieldInfo.length() - robotRadius, 1.1, 2.0),
         new LateralObstacle(robotRadius, 1.1, 2.0),
-        new LateralObstacle(FieldInfo.width() - robotRadius, 1.1, 2.0),
+        new LateralObstacle(FieldInfo.width() - robotRadius, 1.1, 2.0)
         // Coral stations
         // new LineObstacle(coralStart.getBlue(), coralEnd.getBlue(), 1.1, 2.0),
         // new LineObstacle(coralStart.getBlue(true), coralEnd.getBlue(true), 1.1, 2.0),
