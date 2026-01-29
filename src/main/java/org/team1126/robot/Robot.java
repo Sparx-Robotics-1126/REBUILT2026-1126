@@ -83,7 +83,7 @@ public final class Robot extends LoggedRobot {
         coDriver.povDown().onTrue(selection.decrementLevel());
 
         // Setup lights
-        routines.lightsPreMatch(autos::defaultSelected).schedule();
+        scheduler.schedule(routines.lightsPreMatch(autos::defaultSelected));
 
         RobotModeTriggers.autonomous().whileTrue(lights.sides.flames(false));
 
