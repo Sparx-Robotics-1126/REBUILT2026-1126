@@ -51,7 +51,7 @@ import org.team1126.robot.util.Vision;
 @Logged
 public final class Swerve extends GRRSubsystem {
 
-    private static final double OFFSET = Units.inchesToMeters(11.25);
+    private static final double OFFSET = Units.inchesToMeters(11.125);
 
     private static final TunableTable tunables = Tunables.getNested("swerve");
     private static final TunableDouble turboSpin = tunables.value("turboSpin", 8.0);
@@ -131,7 +131,7 @@ public final class Swerve extends GRRSubsystem {
         //             angularVel: limits the angular velocity so that we dont overuse motors
         //             angularVelDeadband: also self-explanatory
         .setPowerProperties(Constants.VOLTAGE, 100.0, 80.0, 60.0, 60.0)
-        .setMechanicalProperties(243.0 / 38.0, 12.1, Units.inchesToMeters(3.7))
+        .setMechanicalProperties(5.27, (287 / 11), Units.inchesToMeters(4))
         .setOdometryStd(0.1, 0.1, 0.05)
         .setIMU(SwerveIMUs.pigeon2(RioCAN.CANANDGYRO))
         .setPhoenixFeatures(new CANBus(LowerCAN.LOWER_CAN), false, false, false)
@@ -144,7 +144,7 @@ public final class Swerve extends GRRSubsystem {
     private final Vision vision;
     private final PAPFController apf;
     private final ProfiledPIDController angularPID;
-    private boolean visionEnabled = false;
+    private boolean visionEnabled = true;
     private final ReefAssistData reefAssist = new ReefAssistData();
 
     private Pose2d reefReference = Pose2d.kZero;
@@ -182,34 +182,34 @@ public final class Swerve extends GRRSubsystem {
         }
 
         // Calculate helpers
-        Translation2d reefCenter = Field.reef.get();
-        Translation2d reefTranslation = state.translation.minus(reefCenter);
-        Rotation2d reefAngle = new Rotation2d(
-            Math.floor(
-                    reefCenter.minus(state.translation).getAngle().plus(new Rotation2d(Math2.SIXTH_PI)).getRadians()
-                        / Math2.THIRD_PI
-                )
-                * Math2.THIRD_PI
-        );
+        // Translation2d reefCenter = Field.reef.get();
+        // Translation2d reefTranslation = state.translation.minus(reefCenter);
+        // Rotation2d reefAngle = new Rotation2d(
+        //     Math.floor(
+        //             reefCenter.minus(state.translation).getAngle().plus(new Rotation2d(Math2.SIXTH_PI)).getRadians()
+        //                 / Math2.THIRD_PI
+        //         )
+        //         * Math2.THIRD_PI
+        // );
 
         // Save if the reef angle has changed.
-        changedReference = !Math2.isNear(reefReference.getRotation(), reefAngle, 1e-6);
+        // changedReference = !Math2.isNear(reefReference.getRotation(), reefAngle, 1e-6);
 
         // Save the current alliance's reef location, and the rotation
         // to the reef wall relevant to the robot's position.
-        reefReference = new Pose2d(reefCenter, reefAngle);
+        // reefReference = new Pose2d(reefCenter, reefAngle);
 
         // If the robot is rotated to face the reef, within an arbitrary tolerance.
-        facingReef = Math2.isNear(reefAngle, state.rotation, facingReefTol.get());
-        SmartDashboard.putBoolean("Facing Reef", facingReef);
+        // facingReef = Math2.isNear(reefAngle, state.rotation, facingReefTol.get());
+        // SmartDashboard.putBoolean("Facing Reef", facingReef);
         // Calculate the distance from the robot's center to the nearest reef wall face.
-        wallDistance = Math.max(
-            0.0,
-            reefAngle.rotateBy(Rotation2d.k180deg).minus(reefTranslation.getAngle()).getCos()
-                    * reefTranslation.getNorm()
-                - Field.reefWallDist
-        );
-        SmartDashboard.putNumber("Wall Distance", wallDistance);
+        // wallDistance = Math.max(
+        //     0.0,
+        //     reefAngle.rotateBy(Rotation2d.k180deg).minus(reefTranslation.getAngle()).getCos()
+        //             * reefTranslation.getNorm()
+        //         - Field.reefWallDist
+        // );
+        // SmartDashboard.putNumber("Wall Distance", wallDistance);
     }
 
     /**
