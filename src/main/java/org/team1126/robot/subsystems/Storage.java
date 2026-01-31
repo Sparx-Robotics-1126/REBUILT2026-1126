@@ -1,10 +1,9 @@
 package org.team1126.robot.subsystems;
 
 import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.networktables.IntegerTopic;
+import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.photonvision.PhotonCamera;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.robot.Constants;
@@ -14,16 +13,15 @@ public final class Storage extends GRRSubsystem {
 
     private PhotonCamera camera;
     private int fuelCount;
-    // private NetworkTable nt;
-    // private final IntegerTopic fuelTopic;
+    private IntegerPublisher fuelCountPublisher;
 
     public Storage() {
         camera = new PhotonCamera(Constants.OBJ_DETECTION_CAMERA_CONFIG.name());
         fuelCount = 0;
 
-        // nt = NetworkTableInstance.getDefault().getTable("photonvision");
-        // fuelTopic = nt.getIntegerTopic("fuel count");
-        // fuelTopic.publish();
+        NetworkTableInstance nti = NetworkTableInstance.getDefault();
+        NetworkTable table = nti.getTable("vision");
+        fuelCountPublisher = table.getIntegerTopic("fuelCount").publish();
     }
 
     private void updateFuelCount() {
@@ -36,7 +34,6 @@ public final class Storage extends GRRSubsystem {
     @Override
     public void periodic() {
         updateFuelCount();
-        SmartDashboard.putNumber("fuel count", fuelCount);
-        // fuelTopic.publish().set(fuelCount);
+        fuelCountPublisher.set(fuelCount);
     }
 }
