@@ -20,6 +20,7 @@ import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Swerve;
+import org.team1126.robot.util.MatchData;
 import org.team1126.robot.util.ReefSelection;
 
 @Logged
@@ -29,6 +30,8 @@ public final class Robot extends LoggedRobot {
 
     public final Lights lights;
     public final Swerve swerve;
+
+    public final MatchData matchData;
 
     public final ReefSelection selection;
 
@@ -44,6 +47,8 @@ public final class Robot extends LoggedRobot {
         // Initialize subsystems
         lights = new Lights();
         swerve = new Swerve();
+
+        matchData = new MatchData();
 
         // Initialize helpers
         selection = new ReefSelection();
@@ -103,7 +108,7 @@ public final class Robot extends LoggedRobot {
     /**
      * Returns the current match time in seconds.
      */
-    public double matchTime() {
+    public static double matchTime() {
         return Math.max(0.0, DriverStation.getMatchTime());
     }
 
@@ -127,5 +132,7 @@ public final class Robot extends LoggedRobot {
     public void robotPeriodic() {
         Profiler.run("scheduler", scheduler::run);
         Profiler.run("lights", lights::update);
+
+        matchData.isHubActive();
     }
 }
