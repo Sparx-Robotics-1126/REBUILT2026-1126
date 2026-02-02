@@ -108,12 +108,17 @@ spotless {
             exclude '**/build/**', '**/build-*/**'
         }
 
+        def npmExec = "npm"
+        if (!System.properties['os.name'].toLowerCase().contains('windows')) {
+            npmExec = "/bin/npm"
+        }
+
         toggleOffOn()
         endWithNewline()
         removeUnusedImports()
         trimTrailingWhitespace()
         prettier(['prettier': '3.7.4', 'prettier-plugin-java': '2.8.1'])
-            .npmExecutable("${tasks.named('npmSetup').get().npmDir.get()}/bin/npm") 
+            .npmExecutable("${tasks.named('npmSetup').get().npmDir.get()}/${npmExec}") 
             .config([
                 parser: 'java',
                 plugins: ['prettier-plugin-java'],
