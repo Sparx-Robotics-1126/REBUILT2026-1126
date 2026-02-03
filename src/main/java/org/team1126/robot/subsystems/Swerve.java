@@ -131,7 +131,7 @@ public final class Swerve extends GRRSubsystem {
         //             angularVel: limits the angular velocity so that we dont overuse motors
         //             angularVelDeadband: also self-explanatory
         .setPowerProperties(Constants.VOLTAGE, 100.0, 80.0, 60.0, 60.0)
-        .setMechanicalProperties(5.27, (287 / 11), Units.inchesToMeters(4))
+        .setMechanicalProperties(5.27, (287 / 11), Units.inchesToMeters(3.85))
         .setOdometryStd(0.1, 0.1, 0.05)
         .setIMU(SwerveIMUs.pigeon2(RioCAN.CANANDGYRO))
         .setPhoenixFeatures(new CANBus(LowerCAN.LOWER_CAN), false, false, false)
