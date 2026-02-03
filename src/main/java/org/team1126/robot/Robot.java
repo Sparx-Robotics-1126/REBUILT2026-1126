@@ -144,6 +144,6 @@ public final class Robot extends LoggedRobot {
         Profiler.run("scheduler", scheduler::run);
         Profiler.run("lights", lights::update);
 
-        matchData.isHubActive();
+        MatchData.shouldIShoot();
     }
 }

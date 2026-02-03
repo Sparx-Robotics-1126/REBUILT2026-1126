@@ -2,104 +2,84 @@ package org.team1126.robot.util;
 
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.team1126.lib.util.Alliance;
-import org.team1126.robot.Robot;
 
 public class MatchData {
 
-    private boolean isHubActive;
-    private boolean hubActive1And3;
-    private int currentHubShift;
-
-    private BooleanPublisher isHubActivePublisher;
-    private IntegerPublisher currentHubShiftPublisher;
-    private DoublePublisher matchTimePublisher;
+    private static BooleanPublisher shouldIShootPublisher;
+    private static DoublePublisher matchTimePublisher;
+    private static StringPublisher gameSpecificMessagePublisher;
+    private static String whoStartedFirst;
 
     public MatchData() {
-        isHubActive = false;
-        hubActive1And3 = false;
-        currentHubShift = -2;
+        whoStartedFirst = getGameSpecificMessage();
 
         NetworkTableInstance nti = NetworkTableInstance.getDefault();
         NetworkTable table = nti.getTable("FMSInfo");
 
-        isHubActivePublisher = table.getBooleanTopic("isHubActive").publish();
-        currentHubShiftPublisher = table.getIntegerTopic("currentHubShift").publish();
+        shouldIShootPublisher = table.getBooleanTopic("shouldIShoot").publish();
         matchTimePublisher = table.getDoubleTopic("matchTime").publish();
+        gameSpecificMessagePublisher = table.getStringTopic("GameSpecificMessage").publish();
     }
 
-    public boolean isHubActive() {
-        int hubShift = getCurrentHubShift();
-        boolean isActive1And3 = isHubActive1And3();
+    public static boolean shouldIShoot() {
+        double time = DriverStation.getMatchTime();
+        // String whoStartedFirst = getGameSpecificMessage();
+        if (!DriverStation.isFMSAttached()) {
+            gameSpecificMessagePublisher.set(whoStartedFirst);
+        }
+        boolean blue = Alliance.isBlue();
+        boolean winAuto = (blue && "B".equals(whoStartedFirst)) || (!blue && "B".equals(whoStartedFirst));
+        SmartDashboard.putBoolean("winAuto", winAuto);
+        matchTimePublisher.set(time);
 
-        if (isActive1And3) {
-            if (hubShift == 2 || hubShift == 4) {
-                isHubActive = false;
+        if (time < 140 && time > 130) {
+            // auto and transition, everyone is active
+            shouldIShootPublisher.set(true);
+            return true;
+        } else if (time < 130 && time > 105) {
+            // shift 1
+            shouldIShootPublisher.set(!winAuto);
+            return !winAuto;
+        } else if (time < 105 && time > 80) {
+            // shift 2
+            shouldIShootPublisher.set(winAuto);
+            return winAuto;
+        } else if (time < 80 && time > 55) {
+            // shift 3
+            shouldIShootPublisher.set(!winAuto);
+            return !winAuto;
+        } else if (time < 55 && time > 30) {
+            // shift 4
+            shouldIShootPublisher.set(winAuto);
+            return winAuto;
+        } else if (time < 30 && time > 0) {
+            // end game, everyone is active
+            shouldIShootPublisher.set(true);
+            return true;
+        }
+        shouldIShootPublisher.set(false);
+        if (!DriverStation.isFMSAttached() && DriverStation.isDisabled()) {
+            whoStartedFirst = getGameSpecificMessage();
+        }
+        return false;
+    }
+
+    private static String getGameSpecificMessage() {
+        String message = DriverStation.getGameSpecificMessage();
+        if (!DriverStation.isFMSAttached() && message.length() == 0) {
+            int randomInt = (int) Math.floor(Math.random() * 2);
+            if (randomInt == 0) {
+                return "R";
+            } else {
+                return "B";
             }
-        } else {
-            if (hubShift == 1 || hubShift == 3) {
-                isHubActive = false;
-            }
         }
-        isHubActivePublisher.set(isHubActive);
-        return isHubActive;
-    }
-
-    private int getCurrentHubShift() {
-        double currentMatchTime = Robot.matchTime();
-        matchTimePublisher.set(currentMatchTime);
-
-        if (DriverStation.isAutonomous()) {
-            currentHubShift = -1;
-        } else if (currentMatchTime <= 140 && currentMatchTime >= 130) {
-            currentHubShift = 0;
-        } else if (currentMatchTime < 130 && currentMatchTime >= 105) {
-            currentHubShift = 1;
-        } else if (currentMatchTime < 105 && currentMatchTime >= 80) {
-            currentHubShift = 2;
-        } else if (currentMatchTime < 80 && currentMatchTime >= 55) {
-            currentHubShift = 3;
-        } else if (currentMatchTime < 55 && currentMatchTime >= 30) {
-            currentHubShift = 4;
-        } else if (currentMatchTime < 30) {
-            currentHubShift = 5;
-        } else {
-            currentHubShift = -2;
-        }
-        currentHubShiftPublisher.set(currentHubShift);
-        return currentHubShift;
-    }
-
-    /**
-     * Game specific message will either be an empty string (not sent yet), an 'R', or a 'B'.
-     * The charcter it sends is the alliance who will be inactive first and will be active in
-     * shifts 2 and 4. The other alliance will be active in shifts 1 and 3.
-     * @return if our hub is inactive first
-     */
-    private boolean isHubActive1And3() {
-        boolean isBlueAlliance = Alliance.isBlue();
-        String gameMessage = DriverStation.getGameSpecificMessage();
-
-        if (gameMessage.length() < 1) {
-            return false;
-        }
-        char gameMessageChar = gameMessage.charAt(0);
-
-        if (isBlueAlliance && gameMessageChar == 'B') {
-            hubActive1And3 = false;
-        } else if (isBlueAlliance && gameMessageChar == 'R') {
-            hubActive1And3 = true;
-        } else if (!isBlueAlliance && gameMessageChar == 'B') {
-            hubActive1And3 = true;
-        } else if (!isBlueAlliance && gameMessageChar == 'R') {
-            hubActive1And3 = false;
-        } else {
-            hubActive1And3 = false;
-        }
-        return hubActive1And3;
+        return message;
     }
 }
