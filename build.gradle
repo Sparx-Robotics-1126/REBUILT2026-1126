@@ -2,11 +2,19 @@ plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
     id "com.diffplug.spotless" version "8.1.0"
+    id 'com.github.node-gradle.node' version '7.1.0'
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+}
+
+node {
+    download = true
+    version = '24.13.0'
+	// when not setting an explicit `npmWorkDir`, the npm binary will be installed next to the node binary
+    workDir = file("${buildDir}/nodejs")
 }
 
 def ROBOT_MAIN_CLASS = "org.team1126.robot.Main"
@@ -92,6 +100,11 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+def npmExec = "bin/npm"
+if (System.properties['os.name'].toLowerCase().contains('windows')) {
+    npmExec = "npm.cmd"
+}
+
 // Code formatting via spotless
 spotless {
     java {
@@ -105,6 +118,7 @@ spotless {
         removeUnusedImports()
         trimTrailingWhitespace()
         prettier(['prettier': '3.7.4', 'prettier-plugin-java': '2.8.1'])
+            .npmExecutable("${tasks.named('npmSetup').get().npmDir.get()}${File.separator}${npmExec}") 
             .config([
                 parser: 'java',
                 plugins: ['prettier-plugin-java'],
@@ -148,4 +162,8 @@ wpi.java.configureTestTasks(test)
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
     dependsOn 'spotlessApply'
+}
+
+tasks.named('spotlessJavaApply') {
+    dependsOn 'nodeSetup', 'npmSetup'
 }
