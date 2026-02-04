@@ -32,7 +32,6 @@ public final class Constants {
         //     new Translation3d(-0.330, -0.009, 0.14),
         //     new Rotation3d(0.0, Math.toRadians(15.0), Math.toRadians(-53.0))
         // ),
-        new CameraConfig("Fuel", null, null)
     };
 
     public static final CameraConfig OBJ_DETECTION_CAMERA_CONFIG = new CameraConfig("Fuel", null, null);
