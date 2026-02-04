@@ -16,7 +16,7 @@ public final class Constants {
     public static final int DRIVER = 0;
     public static final int CO_DRIVER = 1;
 
-    public static final CameraConfig[] CAMERAS = {
+    public static final CameraConfig[] AT_CAMERAS = {
         new CameraConfig(
             "center",
             new Translation3d(0.315, -0.004, 0.14),
@@ -31,8 +31,11 @@ public final class Constants {
         //     "right",
         //     new Translation3d(-0.330, -0.009, 0.14),
         //     new Rotation3d(0.0, Math.toRadians(15.0), Math.toRadians(-53.0))
-        // )
+        // ),
+        new CameraConfig("Fuel", null, null)
     };
+
+    public static final CameraConfig OBJ_DETECTION_CAMERA_CONFIG = new CameraConfig("Fuel", null, null);
 
     public static final class LowerCAN {
 

@@ -22,6 +22,7 @@ import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
 import org.team1126.robot.subsystems.Lights;
+import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.MatchData;
 import org.team1126.robot.util.ReefSelection;
@@ -33,6 +34,7 @@ public final class Robot extends LoggedRobot {
 
     public final Lights lights;
     public final Swerve swerve;
+    public final Storage storage;
 
     public final MatchData matchData;
 
@@ -50,6 +52,7 @@ public final class Robot extends LoggedRobot {
         // Initialize subsystems
         lights = new Lights();
         swerve = new Swerve();
+        storage = new Storage();
 
         matchData = new MatchData();
 
