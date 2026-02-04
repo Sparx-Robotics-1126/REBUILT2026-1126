@@ -21,7 +21,7 @@ public final class Constants {
             "center",
             new Translation3d(0.315, -0.004, 0.14),
             new Rotation3d(0.0, Math.toRadians(15.0), Math.toRadians(-8.0))
-        )
+        ),
         // new CameraConfig(
         //     "left",
         //     new Translation3d(-0.330, 0.001, 0.14),
