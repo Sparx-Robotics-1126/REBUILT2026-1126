@@ -34,7 +34,7 @@ public class MatchData {
             gameSpecificMessagePublisher.set(whoStartedFirst);
         }
         boolean blue = Alliance.isBlue();
-        boolean winAuto = (blue && "B".equals(whoStartedFirst)) || (!blue && "B".equals(whoStartedFirst));
+        boolean winAuto = (blue && "B".equals(whoStartedFirst)) || (!blue && "R".equals(whoStartedFirst));
         SmartDashboard.putBoolean("winAuto", winAuto);
         matchTimePublisher.set(time);
 
