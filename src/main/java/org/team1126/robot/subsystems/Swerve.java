@@ -52,7 +52,7 @@ import org.team1126.robot.util.Vision;
 public final class Swerve extends GRRSubsystem {
 
     private static final double OFFSET = Units.inchesToMeters(11.125);
-    private static final double OFFSET_TO_BUMPER = 0.0425; // 425mm to the edge of the bumper
+    private static final double OFFSET_TO_BUMPER = 0.425; // 425mm to the edge of the bumper
 
     private static final TunableTable tunables = Tunables.getNested("swerve");
     private static final TunableDouble turboSpin = tunables.value("turboSpin", 8.0);
@@ -290,7 +290,7 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.resetOdometry()")
             .onInitialize(() -> {
                 Rotation2d originRotation = new Rotation2d(0);
-                Translation2d originOffset = new Translation2d(-OFFSET_TO_BUMPER, -OFFSET_TO_BUMPER);
+                Translation2d originOffset = new Translation2d(OFFSET_TO_BUMPER, OFFSET_TO_BUMPER);
                 api.resetPose(new Pose2d(originOffset, originRotation));
             })
             .isFinished(true)
