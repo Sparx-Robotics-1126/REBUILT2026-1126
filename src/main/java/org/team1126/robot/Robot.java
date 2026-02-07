@@ -7,7 +7,6 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -81,15 +80,10 @@ public final class Robot extends LoggedRobot {
         driver.leftTrigger().onTrue(swerve.tareRotation());
 
         // driver.povLeft().onTrue(swerve.tareRotation());
-        driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2, 2, Rotation2d.fromDegrees(90)), () -> 0.25));
-        driver
-            .x()
-            .whileTrue(
-                swerve.apfDrive(
-                    () -> new Pose2d(Units.inchesToMeters(145), Units.inchesToMeters(150), Rotation2d.fromDegrees(0)),
-                    () -> 0.25
-                )
-            );
+        driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
+        driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.523, 0.594, Rotation2d.fromDegrees(0)), () -> 0.8));
+
+        driver.b().whileTrue(swerve.apfDrive(() -> new Pose2d(6.844, 0.693, Rotation2d.fromDegrees(180)), () -> 0.3));
         driver.povLeft().whileTrue(swerve.apfDrive(selection::isLeft, () -> true, selection::isL4));
         driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
         driver.rightTrigger().whileTrue(swerve.resetOdometry());

@@ -51,7 +51,7 @@ import org.team1126.robot.util.Vision;
 @Logged
 public final class Swerve extends GRRSubsystem {
 
-    private static final double OFFSET = Units.inchesToMeters(11.125);
+    private static final double OFFSET = 0.2875; // 575mm from cancoder to cancoder
     private static final double OFFSET_TO_BUMPER = 0.425; // 425mm to the edge of the bumper
 
     private static final TunableTable tunables = Tunables.getNested("swerve");
