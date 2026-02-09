@@ -1,7 +1,6 @@
 package org.team1126.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
-import static org.team1126.robot.util.Field.ReefLocation.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import org.team1126.lib.tunable.TunableTable;
@@ -56,10 +55,6 @@ public final class Autos {
      */
     public boolean defaultSelected() {
         return chooser.defaultSelected().getAsBoolean();
-    }
-
-    private Command avoid(boolean left) {
-        return swerve.apfDrive(() -> Field.avoid.get(left), avoidDecel::get, avoidTol::get);
     }
 
     // ********** Sim / Testing **********

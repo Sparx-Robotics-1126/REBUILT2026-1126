@@ -40,7 +40,6 @@ import org.team1126.robot.Constants;
 import org.team1126.robot.Constants.LowerCAN;
 import org.team1126.robot.Constants.RioCAN;
 import org.team1126.robot.util.Field;
-import org.team1126.robot.util.Field.ReefLocation;
 // import org.team1126.robot.util.Vision;
 
 import org.team1126.robot.util.Vision;
@@ -157,7 +156,7 @@ public final class Swerve extends GRRSubsystem {
     public Swerve() {
         api = new SwerveAPI(config);
         vision = new Vision(Constants.AT_CAMERAS);
-        apf = new PAPFController(6.0, 0.25, 0.01, true, Field.obstacles);
+        apf = new PAPFController(6.0, 0.25, 0.01, true, Field.OBSTACLES);
         angularPID = new ProfiledPIDController(8.0, 0.0, 0.0, new Constraints(10.0, 26.0));
         angularPID.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -433,14 +432,15 @@ public final class Swerve extends GRRSubsystem {
      * @param ready If the robot is ready to approach the scoring location.
      * @param l4 If the robot is scoring L4.
      */
-    public Command apfDrive(ReefLocation location, BooleanSupplier ready, BooleanSupplier l4) {
-        return apfDrive(
-            () -> Alliance.isBlue() ? location.side : location.side.rotateBy(Rotation2d.k180deg),
-            () -> location.left,
-            ready,
-            l4
-        );
-    }
+    // This is really not needed anymore, leaving in commented while we figure out how we want to move.
+    // public Command apfDrive(ReefLocation location, BooleanSupplier ready, BooleanSupplier l4) {
+    //     return apfDrive(
+    //         () -> Alliance.isBlue() ? location.side : location.side.rotateBy(Rotation2d.k180deg),
+    //         () -> location.left,
+    //         ready,
+    //         l4
+    //     );
+    // }
 
     /**
      * Internal function, converts reef side to APF drive controller.
@@ -590,13 +590,15 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.stop(" + lock + ")").onExecute(() -> api.applyStop(lock));
     }
 
+    // out concerns are not with the Reef this year...let's figure out another way to generate what we are focused on.
     private Pose2d generateReefLocation(double xOffset, Rotation2d side, boolean left) {
-        return new Pose2d(
-            reefReference
-                .getTranslation()
-                .plus(new Translation2d(-xOffset, Field.pipeY * (left ? 1.0 : -1.0)).rotateBy(side)),
-            side
-        );
+        // return new Pose2d(
+        //     reefReference
+        //         .getTranslation()
+        //         .plus(new Translation2d(-xOffset, Field.pipeY * (left ? 1.0 : -1.0)).rotateBy(side)),
+        //     side
+        // );
+        return Pose2d.kZero;
     }
 
     @Logged
