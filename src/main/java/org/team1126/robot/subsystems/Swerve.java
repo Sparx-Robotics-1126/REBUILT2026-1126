@@ -55,7 +55,6 @@ public final class Swerve extends GRRSubsystem {
 
     private static final TunableTable tunables = Tunables.getNested("swerve");
     private static final TunableDouble turboSpin = tunables.value("turboSpin", 8.0);
-    private static final TunableDouble facingReefTol = tunables.value("facingReefTol", 1.0);
 
     private static final TunableTable beachTunables = tunables.getNested("beach");
     private static final TunableDouble beachSpeed = beachTunables.value("speed", 3.0);
@@ -150,8 +149,6 @@ public final class Swerve extends GRRSubsystem {
     private Pose2d reefReference = Pose2d.kZero;
     private boolean seesAprilTag = false;
     private boolean changedReference = false;
-    private boolean facingReef = false;
-    private double wallDistance = 0.0;
 
     public Swerve() {
         api = new SwerveAPI(config);

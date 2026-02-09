@@ -1,5 +1,7 @@
 package org.team1126.robot.util;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.util.Units;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.PAPFController.LateralObstacle;
 import org.team1126.lib.math.PAPFController.LineObstacle;
@@ -7,13 +9,11 @@ import org.team1126.lib.math.PAPFController.LongitudinalObstacle;
 import org.team1126.lib.math.PAPFController.Obstacle;
 import org.team1126.lib.math.geometry.ExtTranslation;
 
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.util.Units;
-
 /**
  * Field locations and utilities.
  */
 public final class Field {
+
     /** The center of the field over its length (X direction). Also the CENTER LINE. */
     public static final double X_CENTER = FieldInfo.length() / 2.0;
     /** The center of the field over its width (Y direction). */
@@ -48,51 +48,23 @@ public final class Field {
     private static final double TRENCH_OFFSET = Units.inchesToMeters(96.5);
     private static final double TRENCH_NEAR = BLUE_ZONE;
     private static final double TRENCH_FAR = TRENCH_NEAR + TRENCH_DEPTH;
-    
-    // BUMP location helpers
-    private static final double BUMP_WIDTH = Units.inchesToMeters(73.0);
-    private static final double BUMP_DEPTH = Units.inchesToMeters(44.40);
-    private static final double BUMP_OFFSET = Units.inchesToMeters(23.5);
-
-    private static final double robotRadius = 0.253;
 
     // spotless:off
 
-    /** The near BUMP side corner of the left TRENCH base, from the perspective of the DRIVER STATION. */
-    private static final ExtTranslation LEFT_TRENCH_BASE_NEAR_BUMP_CORNER = new ExtTranslation(TRENCH_NEAR, Y_CENTER + TRENCH_OFFSET);
-    /** The far BUMP side corner of the left TRENCH base, from the perspective of the DRIVER STATION. */
-    private static final ExtTranslation LEFT_TRENCH_BASE_FAR_BUMP_CORNER = new ExtTranslation(TRENCH_FAR, Y_CENTER + TRENCH_OFFSET);
     /** The near opening side corner of the left TRENCH base, from the perspective of the DRIVER STATION. */
     private static final ExtTranslation LEFT_TRENCH_BASE_NEAR_OPENING_CORNER = new ExtTranslation(TRENCH_NEAR, Y_CENTER + TRENCH_OFFSET + TRENCH_BASE_WIDTH);
     /** The far opening side corner of the left TRENCH base, from the perspective of the DRIVER STATION. */
     private static final ExtTranslation LEFT_TRENCH_BASE_FAR_OPENING_CORNER = new ExtTranslation(TRENCH_FAR, Y_CENTER + TRENCH_OFFSET + TRENCH_BASE_WIDTH);
     /** The near field boundary corner of the left TRENCH, from the perspective of the DRIVER STATION. */
-    private static final ExtTranslation LEFT_TRENCH_NEAR_FIELD_CORNER = new ExtTranslation(TRENCH_NEAR, FieldInfo.width());
-    /** The far field boundary corner of the left TRENCH, from the perspective of the DRIVER STATION. */
-    private static final ExtTranslation LEFT_TRENCH_FAR_FIELD_CORNER = new ExtTranslation(TRENCH_FAR, FieldInfo.width());
 
-    /** The near BUMP side corner of the right TRENCH base, from the perspective of the DRIVER STATION. */
-    private static final ExtTranslation RIGHT_TRENCH_BASE_NEAR_BUMP_CORNER = new ExtTranslation(TRENCH_NEAR, Y_CENTER - TRENCH_OFFSET);
-    /** The far BUMP side corner of the right TRENCH base, from the perspective of the DRIVER STATION. */
-    private static final ExtTranslation RIGHT_TRENCH_BASE_FAR_BUMP_CORNER = new ExtTranslation(TRENCH_FAR, Y_CENTER - TRENCH_OFFSET);
     /** The near opening side corner of the right TRENCH base, from the perspective of the DRIVER STATION. */
     private static final ExtTranslation RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER = new ExtTranslation(TRENCH_NEAR, Y_CENTER - TRENCH_OFFSET - TRENCH_BASE_WIDTH);
     /** The far opening side corner of the right TRENCH base, from the perspective of the DRIVER STATION. */
     private static final ExtTranslation RIGHT_TRENCH_BASE_FAR_OPENING_CORNER = new ExtTranslation(TRENCH_FAR, Y_CENTER - TRENCH_OFFSET - TRENCH_BASE_WIDTH);
-    /** The near field boundary corner of the right TRENCH, from the perspective of the DRIVER STATION. */
-    private static final ExtTranslation RIGHT_TRENCH_NEAR_FIELD_CORNER = new ExtTranslation(TRENCH_NEAR, 0.0);
-    /** The far field boundary corner of the right TRENCH, from the perspective of the DRIVER STATION. */
-    private static final ExtTranslation RIGHT_TRENCH_FAR_FIELD_CORNER = new ExtTranslation(TRENCH_FAR, 0.0);
 
     /** Obstacles for the P-APF. */
     public static final Obstacle[] OBSTACLES = {
-        // Old Field boundary - leaving this in for the robot radius so that we can decide if we want to keep it.
-        new LongitudinalObstacle(robotRadius, 1.1, 2.0),
-        new LongitudinalObstacle(FieldInfo.length() - robotRadius, 1.1, 2.0),
-        new LateralObstacle(robotRadius, 1.1, 2.0),
-
-        // New Field boundary
-        new LateralObstacle(FieldInfo.width() - robotRadius, 1.1, 2.0),
+        // Field boundary
         new LongitudinalObstacle(0.0, 2.0, 2.0),
         new LongitudinalObstacle(FieldInfo.length(), 2.0, 2.0),
         new LateralObstacle(0.0, 2.0, 2.0),
@@ -100,54 +72,15 @@ public final class Field {
         
         // Blue No-Go Zone
         new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-
-        // Blue HUB
-        new LineObstacle(HUB_NEAR_LEFT_CORNER.getBlue(), HUB_NEAR_RIGHT_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(HUB_FAR_LEFT_CORNER.getBlue(), HUB_FAR_RIGHT_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(HUB_NEAR_LEFT_CORNER.getBlue(), HUB_FAR_LEFT_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(HUB_NEAR_RIGHT_CORNER.getBlue(), HUB_FAR_RIGHT_CORNER.getBlue(), 2.0, 2.0),
-
-        // Red HUB
-        new LineObstacle(HUB_NEAR_LEFT_CORNER.getRed(), HUB_NEAR_RIGHT_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(HUB_FAR_LEFT_CORNER.getRed(), HUB_FAR_RIGHT_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(HUB_NEAR_LEFT_CORNER.getRed(), HUB_FAR_LEFT_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(HUB_NEAR_RIGHT_CORNER.getRed(), HUB_FAR_RIGHT_CORNER.getRed(), 2.0, 2.0),
-
-        // Blue left TRENCH base
-        new LineObstacle(LEFT_TRENCH_BASE_NEAR_BUMP_CORNER.getBlue(), LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_BASE_FAR_BUMP_CORNER.getBlue(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_BASE_NEAR_BUMP_CORNER.getBlue(), LEFT_TRENCH_BASE_FAR_BUMP_CORNER.getBlue(), 2.0, 2.0),
         new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-
-        // Blue right TRENCH base
-        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_BUMP_CORNER.getBlue(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_BASE_FAR_BUMP_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_BUMP_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_BUMP_CORNER.getBlue(), 2.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
         new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
 
-        // Red left TRENCH base
-        new LineObstacle(LEFT_TRENCH_BASE_NEAR_BUMP_CORNER.getRed(), LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_BASE_FAR_BUMP_CORNER.getRed(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_BASE_NEAR_BUMP_CORNER.getRed(), LEFT_TRENCH_BASE_FAR_BUMP_CORNER.getRed(), 2.0, 2.0),
+        // Red No-Go Zone
+        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), 2.0, 2.0),
         new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-
-        // Red right TRENCH base
-        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_BUMP_CORNER.getRed(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_BASE_FAR_BUMP_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_BUMP_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_BUMP_CORNER.getRed(), 2.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
         new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-
-        // Blue right BUMP 
-        new LineObstacle(LEFT_TRENCH_NEAR_FIELD_CORNER.getBlue(), LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_FAR_FIELD_CORNER.getBlue(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_NEAR_FIELD_CORNER.getBlue(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_FAR_FIELD_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-
-        // Red right BUMP
-        new LineObstacle(LEFT_TRENCH_NEAR_FIELD_CORNER.getRed(), LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_FAR_FIELD_CORNER.getRed(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_NEAR_FIELD_CORNER.getRed(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_FAR_FIELD_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
     };
 
     // spotless:on
