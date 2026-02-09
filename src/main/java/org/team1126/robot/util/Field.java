@@ -48,6 +48,10 @@ public final class Field {
     private static final double TRENCH_OFFSET = Units.inchesToMeters(96.5);
     private static final double TRENCH_NEAR = BLUE_ZONE;
     private static final double TRENCH_FAR = TRENCH_NEAR + TRENCH_DEPTH;
+    
+    // BUMP location helpers
+    private static final double BUMP_WIDTH = Units.inchesToMeters(73.0);
+    private static final double BUMP_DEPTH = Units.inchesToMeters(44.40);
 
     private static final double robotRadius = 0.253;
 
