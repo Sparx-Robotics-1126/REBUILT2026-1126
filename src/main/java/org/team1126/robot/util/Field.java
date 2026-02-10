@@ -33,6 +33,35 @@ public final class Field {
     /** The center of the HUB. */
     public static final ExtTranslation HUB = new ExtTranslation(HUB_NEAR + HUB_HALF_WIDTH, Y_CENTER);
 
+    // LADDER location helpers
+    public static final double BLUE_ZONE_LADDER = getTag(31).getX();
+
+    private static final double LADDER_WIDTH = Units.inchesToMeters(47.0);
+    private static final double LADDER_HALF_WIDTH = LADDER_WIDTH / 2.0;
+    private static final double LADDER_DRIVER_STATION = BLUE_ZONE_LADDER;
+    private static final double LADDER_CLIMBING_RAILS = LADDER_DRIVER_STATION + Units.inchesToMeters(41.56);
+
+    /** TODO: Comment me */
+    public static final ExtTranslation LADDER_CLIMBING_RAILS_OUTPOST_SIDE = new ExtTranslation(
+        LADDER_CLIMBING_RAILS - LADDER_HALF_WIDTH,
+        LADDER_CLIMBING_RAILS
+    );
+
+    public static final ExtTranslation LADDER_CLIMBING_RAILS_DEPOT_SIDE = new ExtTranslation(
+        LADDER_CLIMBING_RAILS + LADDER_HALF_WIDTH,
+        LADDER_CLIMBING_RAILS
+    );
+
+    public static final ExtTranslation LADDER_DRIVER_STATION_OUTPOST_SIDE = new ExtTranslation(
+        LADDER_CLIMBING_RAILS - LADDER_HALF_WIDTH,
+        LADDER_DRIVER_STATION
+    );
+
+    public static final ExtTranslation LADDER_DRIVER_STATION_DEPOT_SIDE = new ExtTranslation(
+        LADDER_CLIMBING_RAILS + LADDER_HALF_WIDTH,
+        LADDER_DRIVER_STATION
+    );
+
     /** The near left corner of the HUB, from the perspective of the DRIVER STATION. */
     public static final ExtTranslation HUB_NEAR_LEFT_CORNER = new ExtTranslation(HUB_NEAR, Y_CENTER + HUB_HALF_WIDTH);
     /** The near right corner of the HUB, from the perspective of the DRIVER STATION. */
@@ -81,6 +110,12 @@ public final class Field {
         new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
         new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
         new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
+        
+        // Blue Ladder Zone
+        new LineObstacle(LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), 2.0, 2.0),
+        new LineObstacle(LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), 2.0, 2.0),
+        new LineObstacle(LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), 2.0, 2.0),
+        new LineObstacle(LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), 2.0, 2.0),
     };
 
     // spotless:on
