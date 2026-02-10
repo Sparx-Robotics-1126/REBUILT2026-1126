@@ -6,16 +6,27 @@ import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+
+import org.photonvision.PhotonCamera;
+
+import org.photonvision.PhotonCamera;
+
+import org.photonvision.targeting.PhotonTrackedTarget;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.Math2;
@@ -35,6 +46,7 @@ import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.Alliance;
 import org.team1126.lib.util.Mutable;
+import org.team1126.lib.util.command.CommandBuilder;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.robot.Constants;
 import org.team1126.robot.Constants.LowerCAN;
@@ -153,12 +165,18 @@ public final class Swerve extends GRRSubsystem {
     private boolean facingReef = false;
     private double wallDistance = 0.0;
 
+    private PhotonCamera fuelCamera;
+    private boolean fuelTargetLost;
+
     public Swerve() {
         api = new SwerveAPI(config);
         vision = new Vision(Constants.AT_CAMERAS);
         apf = new PAPFController(6.0, 0.25, 0.01, true, Field.obstacles);
         angularPID = new ProfiledPIDController(8.0, 0.0, 0.0, new Constraints(10.0, 26.0));
         angularPID.enableContinuousInput(-Math.PI, Math.PI);
+
+        fuelCamera = new PhotonCamera(Constants.OBJ_DETECTION_CAMERA_CONFIG.name());
+        fuelTargetLost = true;
 
         state = api.state;
 
@@ -582,6 +600,55 @@ public final class Swerve extends GRRSubsystem {
             side
         );
     }
+
+    private PhotonTrackedTarget getBestestTarget() {
+        var result = fuelCamera.getLatestResult();
+        PhotonTrackedTarget highestAreaTarget = null;
+        if (result != null && result.hasTargets()) {
+            List<PhotonTrackedTarget> targets = result.getTargets();
+            highestAreaTarget = targets.stream()
+                .max(Comparator.comparing(PhotonTrackedTarget::getArea))
+                .orElse(null);
+        }
+        if(highestAreaTarget == null) {
+            fuelTargetLost = true;
+        } else {
+            fuelTargetLost = false;
+        }
+        return highestAreaTarget;
+    }
+
+    private Transform3d getTransformToFuel() {
+        PhotonTrackedTarget bestestTarget = getBestestTarget();
+        if(bestestTarget != null) {
+            fuelTargetLost = false;
+            return bestestTarget.getBestCameraToTarget();
+        } else {
+            fuelTargetLost = true;
+            return null;
+        }
+    }
+
+    public Pose2d getFuelPose() {
+        Transform3d transform3d = getTransformToFuel();
+        if(transform3d != null) {
+            Pose2d currentPose = state.pose;
+            Transform2d transform2d = new Transform2d(transform3d.getTranslation().toTranslation2d(), transform3d.getRotation().toRotation2d());
+            Pose2d fuelPose = currentPose.plus(transform2d);
+            fuelTargetLost = false;
+            SmartDashboard.putString("fuelPose", fuelPose.toString());
+            return fuelPose;
+        } else {
+            fuelTargetLost = true;
+            return null;
+        }
+    }
+
+    // public Command driveToFuel() {
+    //     return commandBuilder("Swerve.driveToFuel()")
+    //         .onExecute(apfDrive(() -> swerve.getFuelPose(), () -> 0.25))
+    //         .until(fuelTargetLost);
+    // }
 
     @Logged
     public final class ReefAssistData {
