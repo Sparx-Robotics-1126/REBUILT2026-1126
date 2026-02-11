@@ -152,6 +152,11 @@ public final class Robot extends LoggedRobot {
         Profiler.run("lights", lights::update);
 
         MatchData.shouldIShoot();
-        SmartDashboard.putString("fuelPose", swerve.getFuelPose().toString());
+        try {
+            SmartDashboard.putString("fuelPose", swerve.getFuelPose().toString());
+        } catch(Exception e) {
+            
+        }
+        
     }
 }
