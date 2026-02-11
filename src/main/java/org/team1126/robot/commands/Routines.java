@@ -64,6 +64,6 @@ public final class Routines {
     }
 
     public Command refuelFromDepot() {
-        return swerve.apfDrive(() -> new Pose2d(0, 0, Rotation2d.fromDegrees(180)), () -> 0.8);
+        return swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Rotation2d.fromDegrees(Field.DEPOT_ROT)), () -> 0.8);
     }
 }

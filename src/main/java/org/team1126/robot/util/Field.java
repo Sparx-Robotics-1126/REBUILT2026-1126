@@ -24,6 +24,11 @@ public final class Field {
     /** The X coordinate of the edge of the red ALLIANCE ZONE. */
     public static final double RED_ZONE = getTag(10).getX();
 
+    // DEPOT Drive Coordinates
+    public static final double DEPOT_X = 27.0;
+    public static final double DEPOT_Y = 213.85;
+    public static final int DEPOT_ROT = 135;
+
     // HUB location helpers
     private static final double HUB_WIDTH = Units.inchesToMeters(47.0);
     private static final double HUB_HALF_WIDTH = HUB_WIDTH / 2.0;
