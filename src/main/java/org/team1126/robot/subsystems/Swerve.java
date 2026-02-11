@@ -12,20 +12,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-
 import org.photonvision.PhotonCamera;
-
 import org.photonvision.PhotonCamera;
-
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.math.FieldInfo;
@@ -637,11 +632,9 @@ public final class Swerve extends GRRSubsystem {
         PhotonTrackedTarget highestAreaTarget = null;
         if (result != null && result.hasTargets()) {
             List<PhotonTrackedTarget> targets = result.getTargets();
-            highestAreaTarget = targets.stream()
-                .max(Comparator.comparing(PhotonTrackedTarget::getArea))
-                .orElse(null);
+            highestAreaTarget = targets.stream().max(Comparator.comparing(PhotonTrackedTarget::getArea)).orElse(null);
         }
-        if(highestAreaTarget == null) {
+        if (highestAreaTarget == null) {
             fuelTargetLost = true;
         } else {
             fuelTargetLost = false;
@@ -651,7 +644,7 @@ public final class Swerve extends GRRSubsystem {
 
     private Transform3d getTransformToFuel() {
         PhotonTrackedTarget bestestTarget = getBestestTarget();
-        if(bestestTarget != null) {
+        if (bestestTarget != null) {
             fuelTargetLost = false;
             return bestestTarget.getBestCameraToTarget();
         } else {
@@ -662,9 +655,12 @@ public final class Swerve extends GRRSubsystem {
 
     public Pose2d getFuelPose() {
         Transform3d transform3d = getTransformToFuel();
-        if(transform3d != null) {
+        if (transform3d != null) {
             Pose2d currentPose = state.pose;
-            Transform2d transform2d = new Transform2d(transform3d.getTranslation().toTranslation2d(), transform3d.getRotation().toRotation2d());
+            Transform2d transform2d = new Transform2d(
+                transform3d.getTranslation().toTranslation2d(),
+                transform3d.getRotation().toRotation2d()
+            );
             Pose2d fuelPose = currentPose.plus(transform2d);
             fuelTargetLost = false;
             return fuelPose;

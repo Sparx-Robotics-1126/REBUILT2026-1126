@@ -90,7 +90,11 @@ public final class Robot extends LoggedRobot {
         driver.povLeft().whileTrue(swerve.apfDrive(selection::isLeft, () -> true, selection::isL4));
         driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
 
-        driver.povRight().whileTrue((swerve.apfDrive(() -> swerve.getFuelPose(), () -> 0.25)).until(() -> swerve.getFuelPose() == null));
+        driver
+            .povRight()
+            .whileTrue(
+                (swerve.apfDrive(() -> swerve.getFuelPose(), () -> 0.25)).until(() -> swerve.getFuelPose() == null)
+            );
         driver.rightTrigger().whileTrue(swerve.resetOdometry());
 
         // changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
