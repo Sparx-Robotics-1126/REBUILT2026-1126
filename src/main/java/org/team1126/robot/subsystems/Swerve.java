@@ -147,6 +147,7 @@ public final class Swerve extends GRRSubsystem {
     private final ReefAssistData reefAssist = new ReefAssistData();
 
     private Pose2d reefReference = Pose2d.kZero;
+    private Pose2d hubReference = Pose2d.kZero;
     private boolean seesAprilTag = false;
     private boolean changedReference = false;
 
@@ -540,8 +541,9 @@ public final class Swerve extends GRRSubsystem {
             .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
             .onExecute(() -> {
                 Pose2d goal = target.get();
-                var speeds = apf.calculate(state.pose, goal.getTranslation(), apfVel.get(), deceleration.getAsDouble());
-
+                
+               
+                var speeds = apf.calculate(state.pose, goal.getTranslation(), apfVel.get(), deceleration.getAsDouble(),Field.OBSTACLES);
                 speeds.omegaRadiansPerSecond = angularPID.calculate(
                     state.rotation.getRadians(),
                     goal.getRotation().getRadians()
@@ -597,6 +599,15 @@ public final class Swerve extends GRRSubsystem {
         // );
         return Pose2d.kZero;
     }
+    //   private Pose2d generateHubLocation(double xOffset, Rotation2d side, boolean left) {
+    //     return new Pose2d(
+    //         hubReference
+    //             .getTranslation()
+    //             .plus(new Translation2d(-xOffset, Field.HUB_NEAR_LEFT_CORNER * (left ? 1.0 : -1.0)).rotateBy(side)),
+    //         side
+    //     );
+    //     // return Pose2d.kZero;
+    // }
 
     @Logged
     public final class ReefAssistData {
