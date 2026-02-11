@@ -55,8 +55,8 @@ public final class Routines {
         return swerve.apfDrive(
             () ->
                 new Pose2d(
-                    Field.X_CENTER - Units.inchesToMeters(90.95),
-                    Field.Y_CENTER - Units.inchesToMeters(35.95),
+                    Field.X_CENTER - Units.inchesToMeters(35.95),
+                    Field.Y_CENTER - Units.inchesToMeters(90.95),
                     Rotation2d.fromDegrees(225)
                 ),
             () -> 0.3
