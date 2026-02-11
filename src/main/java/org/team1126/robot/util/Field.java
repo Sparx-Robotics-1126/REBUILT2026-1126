@@ -1,6 +1,7 @@
 package org.team1126.robot.util;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.PAPFController.LateralObstacle;
@@ -25,9 +26,9 @@ public final class Field {
     public static final double RED_ZONE = getTag(10).getX();
 
     // DEPOT Drive Coordinates
-    public static final double DEPOT_X = 27.0;
-    public static final double DEPOT_Y = 213.85;
-    public static final int DEPOT_ROT = 135;
+    public static final double DEPOT_X = Units.inchesToMeters(27.0);
+    public static final double DEPOT_Y = Units.inchesToMeters(213.85);
+    public static final Rotation2d DEPOT_ROT = Rotation2d.fromDegrees(135);
 
     // HUB location helpers
     private static final double HUB_WIDTH = Units.inchesToMeters(47.0);
