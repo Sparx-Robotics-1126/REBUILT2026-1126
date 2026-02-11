@@ -19,19 +19,19 @@ public final class Constants {
     public static final CameraConfig[] AT_CAMERAS = {
         new CameraConfig(
             "center",
-            new Translation3d(0.315, -0.004, 0.14),
-            new Rotation3d(0.0, Math.toRadians(15.0), Math.toRadians(-8.0))
+            new Translation3d(0.001, .0, 0.3),
+            new Rotation3d(0.0, Math.toRadians(24), Math.toRadians(0.0))
         ),
-        // new CameraConfig(
-        //     "left",
-        //     new Translation3d(-0.330, 0.001, 0.14),
-        //     new Rotation3d(0.0, Math.toRadians(15.0), Math.toRadians(37.0))
-        // ),
-        // new CameraConfig(
-        //     "right",
-        //     new Translation3d(-0.330, -0.009, 0.14),
-        //     new Rotation3d(0.0, Math.toRadians(15.0), Math.toRadians(-53.0))
-        // ),
+        new CameraConfig(
+            "left",
+            new Translation3d(0.000, 0.005, 0.3),
+            new Rotation3d(0.0, Math.toRadians(15), Math.toRadians(45.0))
+        ),
+        new CameraConfig(
+            "right",
+            new Translation3d(-0.000, -0.005, 0.3),
+            new Rotation3d(0.0, Math.toRadians(15), Math.toRadians(-45.0))
+        )
     };
 
     public static final CameraConfig OBJ_DETECTION_CAMERA_CONFIG = new CameraConfig("Fuel", null, null);

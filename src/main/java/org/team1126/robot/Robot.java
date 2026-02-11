@@ -7,17 +7,16 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+// import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.util.DisableWatchdog;
-import org.team1126.lib.util.command.RumbleCommand;
+// import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
@@ -71,9 +70,9 @@ public final class Robot extends LoggedRobot {
         swerve.setDefaultCommand(swerve.drive(this::driverX, this::driverY, this::driverAngular));
 
         // Create triggers
-        Trigger allowGoosing = coDriver.a().negate();
-        Trigger changedReference = RobotModeTriggers.teleop().and(swerve::changedReference);
-        Trigger poo = (driver.leftBumper().or(driver.rightBumper()).negate()).and(selection::isL1);
+        // Trigger allowGoosing = coDriver.a().negate();
+        // Trigger changedReference = RobotModeTriggers.teleop().and(swerve::changedReference);
+        // Trigger poo = (driver.leftBumper().or(driver.rightBumper()).negate()).and(selection::isL1);
 
         // Driver bindings
         driver.axisLessThan(kRightY.value, -0.5).onTrue(selection.incrementLevel());
@@ -81,21 +80,19 @@ public final class Robot extends LoggedRobot {
         driver.leftTrigger().onTrue(swerve.tareRotation());
 
         // driver.povLeft().onTrue(swerve.tareRotation());
-        driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2, 2, Rotation2d.fromDegrees(90)), () -> 0.25));
-        driver
-            .x()
-            .whileTrue(
-                swerve.apfDrive(
-                    () -> new Pose2d(Units.inchesToMeters(145), Units.inchesToMeters(150), Rotation2d.fromDegrees(0)),
-                    () -> 0.25
-                )
-            );
+        driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
+        driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
+
+        // driver.b().whileTrue(swerve.apfDrive(() -> new Pose2d(6.844, 0.693, Rotation2d.fromDegrees(180)), () -> 0.3));
+        driver.a().whileTrue(routines.refuelFromDepot());
+        driver.b().whileTrue(routines.refuelFromNeutral());
         driver.povLeft().whileTrue(swerve.apfDrive(selection::isLeft, () -> true, selection::isL4));
         driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
 
         driver.povRight().whileTrue((swerve.apfDrive(() -> swerve.getFuelPose(), () -> 0.25)).until(() -> swerve.getFuelPose() == null));
+        driver.rightTrigger().whileTrue(swerve.resetOdometry());
 
-        changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
+        // changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
 
         // Co-driver bindings
         coDriver.a().onTrue(none()); // Reserved (No goosing around)

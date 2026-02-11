@@ -2,6 +2,9 @@ package org.team1126.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
 import org.team1126.lib.tunable.TunableTable;
@@ -10,6 +13,7 @@ import org.team1126.lib.tunable.Tunables.TunableBoolean;
 import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Swerve;
+import org.team1126.robot.util.Field;
 import org.team1126.robot.util.ReefSelection;
 
 /**
@@ -45,5 +49,21 @@ public final class Routines {
         return lights
             .preMatch(swerve::getPose, swerve::seesAprilTag, defaultAutoSelected::getAsBoolean)
             .withName("Routines.lightsPreMatch()");
+    }
+
+    public Command refuelFromNeutral() {
+        return swerve.apfDrive(
+            () ->
+                new Pose2d(
+                    Field.X_CENTER - Units.inchesToMeters(35.95),
+                    Field.Y_CENTER - Units.inchesToMeters(90.95),
+                    Rotation2d.fromDegrees(225)
+                ),
+            () -> 0.3
+        );
+    }
+
+    public Command refuelFromDepot() {
+        return swerve.apfDrive(() -> new Pose2d(0, 0, Rotation2d.fromDegrees(180)), () -> 0.8);
     }
 }

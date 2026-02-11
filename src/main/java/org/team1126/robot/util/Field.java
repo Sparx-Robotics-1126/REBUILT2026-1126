@@ -1,81 +1,135 @@
 package org.team1126.robot.util;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.util.Units;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.PAPFController.LateralObstacle;
+import org.team1126.lib.math.PAPFController.LineObstacle;
 import org.team1126.lib.math.PAPFController.LongitudinalObstacle;
 import org.team1126.lib.math.PAPFController.Obstacle;
-import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.math.geometry.ExtTranslation;
-import org.team1126.lib.tunable.TunableTable;
-import org.team1126.lib.tunable.Tunables;
 
 /**
  * Field locations and utilities.
  */
 public final class Field {
 
-    public static final double pipeY = 0.164;
-    public static final double reefWallDist = 0.781;
+    /** The center of the field over its length (X direction). Also the CENTER LINE. */
+    public static final double X_CENTER = FieldInfo.length() / 2.0;
+    /** The center of the field over its width (Y direction). */
+    public static final double Y_CENTER = FieldInfo.width() / 2.0;
 
-    public static final ExtTranslation reef = new ExtTranslation(4.489, FieldInfo.width() / 2.0);
+    /** The X coordinate of the edge of the blue ALLIANCE ZONE. */
+    public static final double BLUE_ZONE = getTag(26).getX();
+    /** The X coordinate of the edge of the red ALLIANCE ZONE. */
+    public static final double RED_ZONE = getTag(10).getX();
 
-    public static final ExtPose loadStraight = new ExtPose(1.54, 0.71, Rotation2d.fromDegrees(54.0));
-    public static final ExtPose loadForwards = new ExtPose(1.54, 0.71, Rotation2d.fromDegrees(-36.0));
-    public static final ExtPose loadBackwards = new ExtPose(1.29, 0.89, Rotation2d.fromDegrees(144.0));
+    // HUB location helpers
+    private static final double HUB_WIDTH = Units.inchesToMeters(47.0);
+    private static final double HUB_HALF_WIDTH = HUB_WIDTH / 2.0;
+    private static final double HUB_NEAR = BLUE_ZONE;
+    private static final double HUB_FAR = HUB_NEAR + HUB_WIDTH;
 
-    public static final ExtPose avoid = new ExtPose(6.45, 0.9, Rotation2d.k180deg);
+    /** The center of the HUB. */
+    public static final ExtTranslation HUB = new ExtTranslation(HUB_NEAR + HUB_HALF_WIDTH, Y_CENTER);
 
-    private static final double robotRadius = 0.253;
-    private static final ExtTranslation coralStart = new ExtTranslation(robotRadius, 1.125 + robotRadius);
-    private static final ExtTranslation coralEnd = new ExtTranslation(1.6 + robotRadius, robotRadius);
+    // LADDER location helpers
+    public static final double BLUE_ZONE_LADDER = getTag(31).getX();
 
-    public static final Obstacle[] obstacles = {
-        // Walls
-        new LongitudinalObstacle(robotRadius, 1.1, 2.0),
-        new LongitudinalObstacle(FieldInfo.length() - robotRadius, 1.1, 2.0),
-        new LateralObstacle(robotRadius, 1.1, 2.0),
-        new LateralObstacle(FieldInfo.width() - robotRadius, 1.1, 2.0)
-        // Coral stations
-        // new LineObstacle(coralStart.getBlue(), coralEnd.getBlue(), 1.1, 2.0),
-        // new LineObstacle(coralStart.getBlue(true), coralEnd.getBlue(true), 1.1, 2.0),
-        // new LineObstacle(coralStart.getRed(), coralEnd.getRed(), 1.1, 2.0),
-        // new LineObstacle(coralStart.getRed(true), coralEnd.getRed(true), 1.1, 2.0),
-        // Reef
-        // new CircleObstacle(reef.getBlue(), 0.83, 4.0, 1.5),
-        // new CircleObstacle(reef.getRed(), 0.83, 4.0, 1.5)
+    private static final double LADDER_WIDTH = Units.inchesToMeters(47.0);
+    private static final double LADDER_HALF_WIDTH = LADDER_WIDTH / 2.0;
+    private static final double LADDER_DRIVER_STATION = BLUE_ZONE_LADDER;
+    private static final double LADDER_CLIMBING_RAILS = LADDER_DRIVER_STATION + Units.inchesToMeters(41.56);
+
+    /** TODO: Comment me */
+    public static final ExtTranslation LADDER_CLIMBING_RAILS_OUTPOST_SIDE = new ExtTranslation(
+        LADDER_CLIMBING_RAILS - LADDER_HALF_WIDTH,
+        LADDER_CLIMBING_RAILS
+    );
+
+    public static final ExtTranslation LADDER_CLIMBING_RAILS_DEPOT_SIDE = new ExtTranslation(
+        LADDER_CLIMBING_RAILS + LADDER_HALF_WIDTH,
+        LADDER_CLIMBING_RAILS
+    );
+
+    public static final ExtTranslation LADDER_DRIVER_STATION_OUTPOST_SIDE = new ExtTranslation(
+        LADDER_CLIMBING_RAILS - LADDER_HALF_WIDTH,
+        LADDER_DRIVER_STATION
+    );
+
+    public static final ExtTranslation LADDER_DRIVER_STATION_DEPOT_SIDE = new ExtTranslation(
+        LADDER_CLIMBING_RAILS + LADDER_HALF_WIDTH,
+        LADDER_DRIVER_STATION
+    );
+
+    /** The near left corner of the HUB, from the perspective of the DRIVER STATION. */
+    public static final ExtTranslation HUB_NEAR_LEFT_CORNER = new ExtTranslation(HUB_NEAR, Y_CENTER + HUB_HALF_WIDTH);
+    /** The near right corner of the HUB, from the perspective of the DRIVER STATION. */
+    public static final ExtTranslation HUB_NEAR_RIGHT_CORNER = new ExtTranslation(HUB_NEAR, Y_CENTER - HUB_HALF_WIDTH);
+    /** The far left corner of the HUB, from the perspective of the DRIVER STATION. */
+    public static final ExtTranslation HUB_FAR_LEFT_CORNER = new ExtTranslation(HUB_FAR, Y_CENTER + HUB_HALF_WIDTH);
+    /** The far right corner of the HUB, from the perspective of the DRIVER STATION. */
+    public static final ExtTranslation HUB_FAR_RIGHT_CORNER = new ExtTranslation(HUB_FAR, Y_CENTER - HUB_HALF_WIDTH);
+
+    // TRENCH location helpers
+    private static final double TRENCH_DEPTH = Units.inchesToMeters(47.0);
+    private static final double TRENCH_BASE_WIDTH = Units.inchesToMeters(12.0);
+    private static final double TRENCH_OFFSET = Units.inchesToMeters(96.5);
+    private static final double TRENCH_NEAR = BLUE_ZONE;
+    private static final double TRENCH_FAR = TRENCH_NEAR + TRENCH_DEPTH;
+
+    // spotless:off
+
+    /** The near opening side corner of the left TRENCH base, from the perspective of the DRIVER STATION. */
+    private static final ExtTranslation LEFT_TRENCH_BASE_NEAR_OPENING_CORNER = new ExtTranslation(TRENCH_NEAR, Y_CENTER + TRENCH_OFFSET + TRENCH_BASE_WIDTH);
+    /** The far opening side corner of the left TRENCH base, from the perspective of the DRIVER STATION. */
+    private static final ExtTranslation LEFT_TRENCH_BASE_FAR_OPENING_CORNER = new ExtTranslation(TRENCH_FAR, Y_CENTER + TRENCH_OFFSET + TRENCH_BASE_WIDTH);
+    /** The near field boundary corner of the left TRENCH, from the perspective of the DRIVER STATION. */
+
+    /** The near opening side corner of the right TRENCH base, from the perspective of the DRIVER STATION. */
+    private static final ExtTranslation RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER = new ExtTranslation(TRENCH_NEAR, Y_CENTER - TRENCH_OFFSET - TRENCH_BASE_WIDTH);
+    /** The far opening side corner of the right TRENCH base, from the perspective of the DRIVER STATION. */
+    private static final ExtTranslation RIGHT_TRENCH_BASE_FAR_OPENING_CORNER = new ExtTranslation(TRENCH_FAR, Y_CENTER - TRENCH_OFFSET - TRENCH_BASE_WIDTH);
+
+    /** Obstacles for the P-APF. */
+    public static final Obstacle[] OBSTACLES = {
+        // Field boundary
+        new LongitudinalObstacle(0.0, 2.0, 2.0),
+        new LongitudinalObstacle(FieldInfo.length(), 2.0, 2.0),
+        new LateralObstacle(0.0, 2.0, 2.0),
+        new LateralObstacle(FieldInfo.width(), 2.0, 2.0),
+        
+        // Blue No-Go Zone
+        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
+        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
+
+        // Red No-Go Zone
+        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), 2.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
+        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
+        
+        // Blue Ladder Zone
+        new LineObstacle(LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), 2.0, 2.0),
+        new LineObstacle(LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), 2.0, 2.0),
+        new LineObstacle(LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), 2.0, 2.0),
+        new LineObstacle(LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), 2.0, 2.0),
     };
 
-    public static enum ReefLocation {
-        A(0.0, true, false),
-        B(0.0, false, false),
-        C(60.0, true, false),
-        D(60.0, false, false),
-        E(120.0, true, true),
-        F(120.0, false, true),
-        G(180.0, true, true),
-        H(180.0, false, true),
-        I(-120.0, true, true),
-        J(-120.0, false, true),
-        K(-60.0, true, false),
-        L(-60.0, false, false);
+    // spotless:on
 
-        public final Rotation2d side;
-        public final boolean left;
-        public final boolean back;
-
-        private ReefLocation(double degrees, boolean left, boolean back) {
-            this.side = Rotation2d.fromDegrees(degrees);
-            this.left = left;
-            this.back = back;
-        }
+    /**
+     * Returns the pose of the specified AprilTag on the field.
+     * @param id The ID of the tag.
+     * @return A {@link Pose3d} representing the tag's blue origin relative field position.
+     */
+    private static Pose3d getTag(int id) {
+        return FieldInfo.aprilTags().getTagPose(id).get();
     }
 
-    static {
-        TunableTable tunables = Tunables.getNested("field");
-        tunables.add("loadStraight", loadStraight);
-        tunables.add("loadForwards", loadForwards);
-        tunables.add("loadBackwards", loadBackwards);
-        tunables.add("avoid", avoid);
+    private Field() {
+        throw new UnsupportedOperationException("This is a utility class!");
     }
 }

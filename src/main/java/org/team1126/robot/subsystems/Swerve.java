@@ -51,7 +51,6 @@ import org.team1126.robot.Constants;
 import org.team1126.robot.Constants.LowerCAN;
 import org.team1126.robot.Constants.RioCAN;
 import org.team1126.robot.util.Field;
-import org.team1126.robot.util.Field.ReefLocation;
 // import org.team1126.robot.util.Vision;
 
 import org.team1126.robot.util.Vision;
@@ -62,11 +61,11 @@ import org.team1126.robot.util.Vision;
 @Logged
 public final class Swerve extends GRRSubsystem {
 
-    private static final double OFFSET = Units.inchesToMeters(11.125);
+    private static final double OFFSET = 0.2525; // 575mm from cancoder to cancoder
+    // private static final double OFFSET_TO_BUMPER = 0.425; // 425mm to the edge of the bumper
 
     private static final TunableTable tunables = Tunables.getNested("swerve");
     private static final TunableDouble turboSpin = tunables.value("turboSpin", 8.0);
-    private static final TunableDouble facingReefTol = tunables.value("facingReefTol", 1.0);
 
     private static final TunableTable beachTunables = tunables.getNested("beach");
     private static final TunableDouble beachSpeed = beachTunables.value("speed", 3.0);
@@ -159,10 +158,9 @@ public final class Swerve extends GRRSubsystem {
     private final ReefAssistData reefAssist = new ReefAssistData();
 
     private Pose2d reefReference = Pose2d.kZero;
+    private Pose2d hubReference = Pose2d.kZero;
     private boolean seesAprilTag = false;
     private boolean changedReference = false;
-    private boolean facingReef = false;
-    private double wallDistance = 0.0;
 
     private PhotonCamera fuelCamera;
     private boolean fuelTargetLost;
@@ -170,7 +168,7 @@ public final class Swerve extends GRRSubsystem {
     public Swerve() {
         api = new SwerveAPI(config);
         vision = new Vision(Constants.AT_CAMERAS);
-        apf = new PAPFController(6.0, 0.25, 0.01, true, Field.obstacles);
+        apf = new PAPFController(6.0, 0.25, 0.01, true, Field.OBSTACLES);
         angularPID = new ProfiledPIDController(8.0, 0.0, 0.0, new Constraints(10.0, 26.0));
         angularPID.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -277,7 +275,7 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.tareRotation()")
             .onInitialize(() -> {
                 api.tareRotation(Perspective.OPERATOR);
-                // vision.reset();
+                vision.reset();
             })
             .isFinished(true)
             .ignoringDisable(true);
@@ -292,7 +290,22 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.resetPose()")
             .onInitialize(() -> {
                 api.resetPose(pose.get());
-                // vision.reset();
+                vision.reset();
+            })
+            .isFinished(true)
+            .ignoringDisable(true);
+    }
+
+    /**
+     * Hard reset of odometry to origin relative to blue origin. This will assume the robot's back
+     * right corner is on 0,0.
+     */
+    public Command resetOdometry() {
+        return commandBuilder("Swerve.resetOdometry()")
+            .onInitialize(() -> {
+                Rotation2d originRotation = new Rotation2d(0);
+                // Translation2d originOffset = new Translation2d(OFFSET_TO_BUMPER, OFFSET_TO_BUMPER);
+                // api.resetPose(new Pose2d(originOffset, originRotation));
             })
             .isFinished(true)
             .ignoringDisable(true);
@@ -434,14 +447,15 @@ public final class Swerve extends GRRSubsystem {
      * @param ready If the robot is ready to approach the scoring location.
      * @param l4 If the robot is scoring L4.
      */
-    public Command apfDrive(ReefLocation location, BooleanSupplier ready, BooleanSupplier l4) {
-        return apfDrive(
-            () -> Alliance.isBlue() ? location.side : location.side.rotateBy(Rotation2d.k180deg),
-            () -> location.left,
-            ready,
-            l4
-        );
-    }
+    // This is really not needed anymore, leaving in commented while we figure out how we want to move.
+    // public Command apfDrive(ReefLocation location, BooleanSupplier ready, BooleanSupplier l4) {
+    //     return apfDrive(
+    //         () -> Alliance.isBlue() ? location.side : location.side.rotateBy(Rotation2d.k180deg),
+    //         () -> location.left,
+    //         ready,
+    //         l4
+    //     );
+    // }
 
     /**
      * Internal function, converts reef side to APF drive controller.
@@ -544,8 +558,13 @@ public final class Swerve extends GRRSubsystem {
             .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
             .onExecute(() -> {
                 Pose2d goal = target.get();
-                var speeds = apf.calculate(state.pose, goal.getTranslation(), apfVel.get(), deceleration.getAsDouble());
-
+                var speeds = apf.calculate(
+                    state.pose,
+                    goal.getTranslation(),
+                    apfVel.get(),
+                    deceleration.getAsDouble(),
+                    Field.OBSTACLES
+                );
                 speeds.omegaRadiansPerSecond = angularPID.calculate(
                     state.rotation.getRadians(),
                     goal.getRotation().getRadians()
@@ -591,14 +610,26 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.stop(" + lock + ")").onExecute(() -> api.applyStop(lock));
     }
 
+    // out concerns are not with the Reef this year...let's figure out another way to generate what we are focused on.
     private Pose2d generateReefLocation(double xOffset, Rotation2d side, boolean left) {
-        return new Pose2d(
-            reefReference
-                .getTranslation()
-                .plus(new Translation2d(-xOffset, Field.pipeY * (left ? 1.0 : -1.0)).rotateBy(side)),
-            side
-        );
+        // return new Pose2d(
+        //     reefReference
+        //         .getTranslation()
+        //         .plus(new Translation2d(-xOffset, Field.pipeY * (left ? 1.0 : -1.0)).rotateBy(side)),
+        //     side
+        // );
+        return Pose2d.kZero;
     }
+
+    //   private Pose2d generateHubLocation(double xOffset, Rotation2d side, boolean left) {
+    //     return new Pose2d(
+    //         hubReference
+    //             .getTranslation()
+    //             .plus(new Translation2d(-xOffset, Field.HUB_NEAR_LEFT_CORNER * (left ? 1.0 : -1.0)).rotateBy(side)),
+    //         side
+    //     );
+    //     // return Pose2d.kZero;
+    // }
 
     private PhotonTrackedTarget getBestestTarget() {
         var result = fuelCamera.getLatestResult();
