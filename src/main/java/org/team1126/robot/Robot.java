@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -147,6 +148,6 @@ public final class Robot extends LoggedRobot {
         Profiler.run("lights", lights::update);
 
         MatchData.shouldIShoot();
-        swerve.getFuelPose();
+        SmartDashboard.putString("fuelPose", swerve.getFuelPose().toString());
     }
 }

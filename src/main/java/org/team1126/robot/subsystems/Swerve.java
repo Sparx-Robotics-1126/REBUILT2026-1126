@@ -666,7 +666,6 @@ public final class Swerve extends GRRSubsystem {
             Transform2d transform2d = new Transform2d(transform3d.getTranslation().toTranslation2d(), transform3d.getRotation().toRotation2d());
             Pose2d fuelPose = currentPose.plus(transform2d);
             fuelTargetLost = false;
-            SmartDashboard.putString("fuelPose", fuelPose.toString());
             return fuelPose;
         } else {
             fuelTargetLost = true;
