@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -88,6 +89,12 @@ public final class Robot extends LoggedRobot {
         driver.b().whileTrue(routines.refuelFromNeutral());
         driver.povLeft().whileTrue(swerve.apfDrive(selection::isLeft, () -> true, selection::isL4));
         driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
+
+        driver
+            .povRight()
+            .whileTrue(
+                (swerve.apfDrive(() -> swerve.getFuelPose(), () -> 0.25)).until(() -> swerve.getFuelPose() == null)
+            );
         driver.rightTrigger().whileTrue(swerve.resetOdometry());
 
         // changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
@@ -145,5 +152,6 @@ public final class Robot extends LoggedRobot {
         Profiler.run("lights", lights::update);
 
         MatchData.shouldIShoot();
+        SmartDashboard.putString("fuelPose", swerve.getFuelPose().toString());
     }
 }
