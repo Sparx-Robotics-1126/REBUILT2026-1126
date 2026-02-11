@@ -172,14 +172,14 @@ public final class Swerve extends GRRSubsystem {
 
         // Apply vision estimates to the pose estimator.
         // if (visionEnabled) {
-            var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
-            SmartDashboard.putNumber("Vision X", measurements.length);
+        var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
+        SmartDashboard.putNumber("Vision X", measurements.length);
 
-            seesAprilTag = measurements.length > 0;
-            api.addVisionMeasurements(measurements);
+        seesAprilTag = measurements.length > 0;
+        api.addVisionMeasurements(measurements);
         // }
-SmartDashboard.putNumber("Goal X", apf.getGoal().getX());
-SmartDashboard.putNumber("Goal Y", apf.getGoal().getY());
+        SmartDashboard.putNumber("Goal X", apf.getGoal().getX());
+        SmartDashboard.putNumber("Goal Y", apf.getGoal().getY());
         // Calculate helpers
         // Translation2d reefCenter = Field.reef.get();
         // Translation2d reefTranslation = state.translation.minus(reefCenter);
