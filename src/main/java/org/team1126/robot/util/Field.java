@@ -49,23 +49,23 @@ public final class Field {
 
     /** TODO: Comment me */
     public static final ExtTranslation LADDER_CLIMBING_RAILS_OUTPOST_SIDE = new ExtTranslation(
-        LADDER_CLIMBING_RAILS - LADDER_HALF_WIDTH,
-        LADDER_CLIMBING_RAILS
+        LADDER_CLIMBING_RAILS,
+        LADDER_CLIMBING_RAILS - LADDER_HALF_WIDTH
     );
 
     public static final ExtTranslation LADDER_CLIMBING_RAILS_DEPOT_SIDE = new ExtTranslation(
-        LADDER_CLIMBING_RAILS + LADDER_HALF_WIDTH,
-        LADDER_CLIMBING_RAILS
+        LADDER_CLIMBING_RAILS,
+        LADDER_CLIMBING_RAILS + LADDER_HALF_WIDTH
     );
 
     public static final ExtTranslation LADDER_DRIVER_STATION_OUTPOST_SIDE = new ExtTranslation(
-        LADDER_CLIMBING_RAILS - LADDER_HALF_WIDTH,
-        LADDER_DRIVER_STATION
+        LADDER_DRIVER_STATION,
+        LADDER_CLIMBING_RAILS - LADDER_HALF_WIDTH
     );
 
     public static final ExtTranslation LADDER_DRIVER_STATION_DEPOT_SIDE = new ExtTranslation(
-        LADDER_CLIMBING_RAILS + LADDER_HALF_WIDTH,
-        LADDER_DRIVER_STATION
+        LADDER_DRIVER_STATION,
+        LADDER_CLIMBING_RAILS + LADDER_HALF_WIDTH
     );
 
     /** The near left corner of the HUB, from the perspective of the DRIVER STATION. */
