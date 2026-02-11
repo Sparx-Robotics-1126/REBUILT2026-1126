@@ -46,7 +46,6 @@ import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.Alliance;
 import org.team1126.lib.util.Mutable;
-import org.team1126.lib.util.command.CommandBuilder;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.robot.Constants;
 import org.team1126.robot.Constants.LowerCAN;
@@ -643,12 +642,6 @@ public final class Swerve extends GRRSubsystem {
             return null;
         }
     }
-
-    // public Command driveToFuel() {
-    //     return commandBuilder("Swerve.driveToFuel()")
-    //         .onExecute(apfDrive(() -> swerve.getFuelPose(), () -> 0.25))
-    //         .until(fuelTargetLost);
-    // }
 
     @Logged
     public final class ReefAssistData {
