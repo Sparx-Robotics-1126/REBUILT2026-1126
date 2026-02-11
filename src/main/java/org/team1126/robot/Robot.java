@@ -81,9 +81,11 @@ public final class Robot extends LoggedRobot {
 
         // driver.povLeft().onTrue(swerve.tareRotation());
         driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
-        driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.523, 0.594, Rotation2d.fromDegrees(0)), () -> 0.8));
+        driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
 
-        driver.b().whileTrue(swerve.apfDrive(() -> new Pose2d(6.844, 0.693, Rotation2d.fromDegrees(180)), () -> 0.3));
+        // driver.b().whileTrue(swerve.apfDrive(() -> new Pose2d(6.844, 0.693, Rotation2d.fromDegrees(180)), () -> 0.3));
+        driver.a().whileTrue(routines.refuelFromDepot());
+        driver.b().whileTrue(routines.refuelFromNeutral());
         driver.povLeft().whileTrue(swerve.apfDrive(selection::isLeft, () -> true, selection::isL4));
         driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
         driver.rightTrigger().whileTrue(swerve.resetOdometry());

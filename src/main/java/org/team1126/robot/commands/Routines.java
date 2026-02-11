@@ -50,13 +50,20 @@ public final class Routines {
             .preMatch(swerve::getPose, swerve::seesAprilTag, defaultAutoSelected::getAsBoolean)
             .withName("Routines.lightsPreMatch()");
     }
-    
 
     public Command refuelFromNeutral() {
-        return swerve.apfDrive(() -> new Pose2d(Field.X_CENTER - Units.inchesToMeters(90.95), Field.Y_CENTER - Units.inchesToMeters(35.95), Rotation2d.fromDegrees(225)), () -> 0.3);
+        return swerve.apfDrive(
+            () ->
+                new Pose2d(
+                    Field.X_CENTER - Units.inchesToMeters(90.95),
+                    Field.Y_CENTER - Units.inchesToMeters(35.95),
+                    Rotation2d.fromDegrees(225)
+                ),
+            () -> 0.3
+        );
     }
-    
+
     public Command refuelFromDepot() {
-        return swerve.apfDrive(() -> new Pose2d(0,0, Rotation2d.fromDegrees(180)), () -> 0.8);
+        return swerve.apfDrive(() -> new Pose2d(0, 0, Rotation2d.fromDegrees(180)), () -> 0.8);
     }
 }
