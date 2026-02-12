@@ -20,7 +20,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.math.FieldInfo;
@@ -645,6 +644,9 @@ public final class Swerve extends GRRSubsystem {
     private Transform3d getTransformToFuel() {
         PhotonTrackedTarget bestestTarget = getBestestTarget();
         if (bestestTarget != null) {
+            try {
+                SmartDashboard.putString("cameraTargetTransform", getFuelPose().toString());
+            } catch(Exception e) { }
             fuelTargetLost = false;
             return bestestTarget.getBestCameraToTarget();
         } else {
