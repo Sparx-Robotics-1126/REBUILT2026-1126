@@ -645,8 +645,8 @@ public final class Swerve extends GRRSubsystem {
         PhotonTrackedTarget bestestTarget = getBestestTarget();
         if (bestestTarget != null) {
             try {
-                SmartDashboard.putString("cameraTargetTransform", getFuelPose().toString());
-            } catch(Exception e) { }
+                SmartDashboard.putString("cameraTargetTransform", bestestTarget.getBestCameraToTarget().toString());
+            } catch (Exception e) {}
             fuelTargetLost = false;
             return bestestTarget.getBestCameraToTarget();
         } else {

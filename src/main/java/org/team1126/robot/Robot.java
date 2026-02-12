@@ -154,6 +154,6 @@ public final class Robot extends LoggedRobot {
         MatchData.shouldIShoot();
         try {
             SmartDashboard.putString("fuelPose", swerve.getFuelPose().toString());
-        } catch(Exception e) { }
+        } catch (Exception e) {}
     }
 }
