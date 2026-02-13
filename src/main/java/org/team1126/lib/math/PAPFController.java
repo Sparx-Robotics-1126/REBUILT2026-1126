@@ -195,7 +195,7 @@ public final class PAPFController implements Tunable {
                 }
 
                 double d = Math.abs(e_y * net_x - e_x * net_y + seg_c) / error;
-                if (d > resolution && d >= d_max) {
+                if (d >= d_max) {
                     rk_x = net_x;
                     rk_y = net_y;
                     d_max = d;

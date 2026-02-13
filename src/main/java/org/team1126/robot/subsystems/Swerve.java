@@ -543,7 +543,7 @@ public final class Swerve extends GRRSubsystem {
                 Pose2d goal = target.get();
                 
                
-                var speeds = apf.calculate(state.pose, goal.getTranslation(), apfVel.get(), deceleration.getAsDouble(),Field.OBSTACLES);
+                var speeds = apf.calculate(state.pose, goal.getTranslation(), apfVel.get(), deceleration.getAsDouble());
                 speeds.omegaRadiansPerSecond = angularPID.calculate(
                     state.rotation.getRadians(),
                     goal.getRotation().getRadians()

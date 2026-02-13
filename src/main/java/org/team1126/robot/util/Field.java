@@ -94,28 +94,28 @@ public final class Field {
     /** Obstacles for the P-APF. */
     public static final Obstacle[] OBSTACLES = {
         // Field boundary
-        new LongitudinalObstacle(0.0, 2.0, 2.0),
-        new LongitudinalObstacle(FieldInfo.length(), 2.0, 2.0),
-        new LateralObstacle(0.0, 2.0, 2.0),
-        new LateralObstacle(FieldInfo.width(), 2.0, 2.0),
+        new LongitudinalObstacle(0.0, 10.0, 2.0),
+        new LongitudinalObstacle(FieldInfo.length(), 10.0, 2.0),
+        new LateralObstacle(0.0, 10.0, 2.0),
+        new LateralObstacle(FieldInfo.width(), 10.0, 2.0),
         
         // Blue No-Go Zone
-        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 2.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), 10.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 10.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 10.0, 2.0),
+        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 10.0, 2.0),
 
         // Red No-Go Zone
-        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 2.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), 10.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 10.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 10.0, 2.0),
+        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 10.0, 2.0),
         
         // Blue Ladder Zone
-        new LineObstacle(LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), 2.0, 2.0),
-        new LineObstacle(LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), 2.0, 2.0),
-        new LineObstacle(LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), 2.0, 2.0),
-        new LineObstacle(LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), 2.0, 2.0),
+        new LineObstacle(LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), 10.0, 2.0),
+        new LineObstacle(LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), 10.0, 2.0),
+        new LineObstacle(LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), 10.0, 2.0),
+        new LineObstacle(LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), 10.0, 2.0),
     };
 
     // spotless:on
