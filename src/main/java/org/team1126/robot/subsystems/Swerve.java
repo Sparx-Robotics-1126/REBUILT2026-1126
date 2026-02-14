@@ -48,6 +48,7 @@ import org.team1126.robot.util.Field;
 // import org.team1126.robot.util.Vision;
 
 import org.team1126.robot.util.Vision;
+// import org.team1126.robot.util.Vision.Camera;
 
 /**
  * The robot's swerve drivetrain.
@@ -679,5 +680,28 @@ public final class Swerve extends GRRSubsystem {
         private boolean running = false;
         private double error = 0.0;
         private double output = 0.0;
+    }
+
+    /**
+     * Aims at the most recently seen April Tag
+     */
+    public void aimAtTarget() {
+        boolean tagVisible = false;
+        double targetYaw = 0.0;
+        PhotonCamera[] camera = vision.getCameras();
+        for(int ind = 0; ind < camera.length; ind++) {   
+            var results = camera[ind].getAllUnreadResults();
+            if(!results.isEmpty()) {
+                var result = results.get(results.size() - 1);
+                if(result.hasTargets()) {
+                    for(var target: result.getTargets()) {
+                        if(target.getFiducialId() == 26) {
+                            targetYaw = target.getYaw();
+                            tagVisible = true;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

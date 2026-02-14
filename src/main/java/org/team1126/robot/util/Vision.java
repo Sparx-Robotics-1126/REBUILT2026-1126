@@ -227,5 +227,25 @@ public final class Vision {
             // Only utilize the current alliance's reef tags.
             return Alliance.isBlue() ? (id >= 17 && id <= 22) : (id >= 6 && id <= 11);
         }
+
+        /**
+         * Returns the camera
+         * @return camera
+         */
+        public PhotonCamera getCamera() {
+            return camera;
+        }
+    }
+
+    /**
+     * Gets the camera array
+     * @return the camera array
+     */
+    public PhotonCamera[] getCameras() {
+        PhotonCamera[] photonCameras = new PhotonCamera[3];
+        for(int ind = 0; ind < cameras.length; ind++){
+            photonCameras[ind] = cameras[ind].getCamera();
+        }
+        return photonCameras;
     }
 }
