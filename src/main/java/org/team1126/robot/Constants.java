@@ -34,7 +34,11 @@ public final class Constants {
         )
     };
 
-    public static final CameraConfig OBJ_DETECTION_CAMERA_CONFIG = new CameraConfig("Fuel", null, null);
+    public static final CameraConfig OBJ_DETECTION_CAMERA_CONFIG = new CameraConfig(
+        "Fuel",
+        new Translation3d(0, 0, 0),
+        new Rotation3d(0, 0, 0)
+    );
 
     public static final class LowerCAN {
 

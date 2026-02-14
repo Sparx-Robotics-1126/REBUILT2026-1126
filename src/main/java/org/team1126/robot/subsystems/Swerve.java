@@ -7,7 +7,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -641,14 +640,19 @@ public final class Swerve extends GRRSubsystem {
         return highestAreaTarget;
     }
 
-    private Transform3d getTransformToFuel() {
+    private Transform2d getTransformToFuel() {
         PhotonTrackedTarget bestestTarget = getBestestTarget();
         if (bestestTarget != null) {
             try {
                 SmartDashboard.putString("cameraTargetTransform", bestestTarget.getBestCameraToTarget().toString());
             } catch (Exception e) {}
             fuelTargetLost = false;
-            return bestestTarget.getBestCameraToTarget();
+            Transform2d transformToFuel = new Transform2d(
+                bestestTarget.getSkew(),
+                bestestTarget.getPitch(),
+                new Rotation2d(bestestTarget.getYaw())
+            );
+            return transformToFuel; // bestestTarget.getBestCameraToTarget();
         } else {
             fuelTargetLost = true;
             return null;
@@ -656,13 +660,13 @@ public final class Swerve extends GRRSubsystem {
     }
 
     public Pose2d getFuelPose() {
-        Transform3d transform3d = getTransformToFuel();
-        if (transform3d != null) {
+        Transform2d transform2d = getTransformToFuel();
+        if (transform2d != null) {
             Pose2d currentPose = state.pose;
-            Transform2d transform2d = new Transform2d(
-                transform3d.getTranslation().toTranslation2d(),
-                transform3d.getRotation().toRotation2d()
-            );
+            // Transform2d transform2d = new Transform2d(
+            //     transform3d.getTranslation().toTranslation2d(),
+            //     transform3d.getRotation().toRotation2d()
+            // );
             Pose2d fuelPose = currentPose.plus(transform2d);
             fuelTargetLost = false;
             return fuelPose;
