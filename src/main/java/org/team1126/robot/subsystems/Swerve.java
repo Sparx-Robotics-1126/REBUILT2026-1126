@@ -148,11 +148,11 @@ public final class Swerve extends GRRSubsystem {
     private final Vision vision;
     private final PAPFController apf;
     private final ProfiledPIDController angularPID;
-    private boolean visionEnabled = true;
+    // private boolean visionEnabled = true;
     private final ReefAssistData reefAssist = new ReefAssistData();
 
     private Pose2d reefReference = Pose2d.kZero;
-    private Pose2d hubReference = Pose2d.kZero;
+    // private Pose2d hubReference = Pose2d.kZero;
     private boolean seesAprilTag = false;
     private boolean changedReference = false;
 
@@ -298,7 +298,7 @@ public final class Swerve extends GRRSubsystem {
     public Command resetOdometry() {
         return commandBuilder("Swerve.resetOdometry()")
             .onInitialize(() -> {
-                Rotation2d originRotation = new Rotation2d(0);
+                // Rotation2d originRotation = new Rotation2d(0);
                 // Translation2d originOffset = new Translation2d(OFFSET_TO_BUMPER, OFFSET_TO_BUMPER);
                 // api.resetPose(new Pose2d(originOffset, originRotation));
             })
