@@ -626,7 +626,12 @@ public final class Swerve extends GRRSubsystem {
     // }
 
     private PhotonTrackedTarget getBestestTarget() {
-        var result = fuelCamera.getLatestResult();
+        var resultsList = fuelCamera.getAllUnreadResults();
+        if (resultsList == null || resultsList.size() > 0) {
+            fuelTargetLost = false;
+            return null;
+        }
+        var result = resultsList.get(0);
         PhotonTrackedTarget highestAreaTarget = null;
         if (result != null && result.hasTargets()) {
             List<PhotonTrackedTarget> targets = result.getTargets();

@@ -93,7 +93,7 @@ public final class Robot extends LoggedRobot {
             .whileTrue(
                 (swerve.apfDrive(() -> swerve.getFuelPose(), () -> 0.25)).until(() -> swerve.getFuelPose() == null)
             );
-        driver.rightTrigger().whileTrue(swerve.resetOdometry());
+        driver.rightBumper().whileTrue(swerve.resetOdometry());
 
         // changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
 
@@ -140,8 +140,8 @@ public final class Robot extends LoggedRobot {
 
     @NotLogged
     public double driverAngular() {
-        return -driver.getRightX();
-        // return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
+        //return -driver.getRightX();
+        return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
     }
 
     @Override
