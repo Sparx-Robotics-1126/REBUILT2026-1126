@@ -60,7 +60,7 @@ public final class Routines {
                 return new Pose2d(
                     Field.X_CENTER - Units.inchesToMeters(35.95),
                     Field.Y_CENTER - Units.inchesToMeters(35.95),
-                    Rotation2d.fromDegrees(225)
+                    Rotation2d.fromDegrees(0)
                 );
             },
             () -> 0.3
