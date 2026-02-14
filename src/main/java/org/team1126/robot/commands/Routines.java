@@ -51,14 +51,18 @@ public final class Routines {
             .withName("Routines.lightsPreMatch()");
     }
 
+    /**
+     * Method that allows us to go where we would expect to find fuel in the neutral zone.
+     */
     public Command refuelFromNeutral() {
         return swerve.apfDrive(
-            () ->
-                new Pose2d(
+            () -> {
+                return new Pose2d(
                     Field.X_CENTER - Units.inchesToMeters(35.95),
-                    Field.Y_CENTER - Units.inchesToMeters(90.95),
-                    Rotation2d.fromDegrees(225)
-                ),
+                    Field.Y_CENTER - Units.inchesToMeters(35.95),
+                    Rotation2d.fromDegrees(0)
+                );
+            },
             () -> 0.3
         );
     }
