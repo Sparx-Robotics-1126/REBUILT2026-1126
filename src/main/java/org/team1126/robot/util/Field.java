@@ -140,31 +140,31 @@ public final class Field {
 
         // Blue No-Go Zone
         new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), 10.0, 2.0),
-        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 1.0, 0.25),
-        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 10.0, 2.0),
-        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 1.0, 0.25),
+        new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 1.0, 0.05),
+        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 10.0, 1.0),
+        new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getBlue(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getBlue(), 1.0, 0.05),
 
         // Red No-Go Zone
         new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), 10.0, 2.0),
         new LineObstacle(LEFT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 1.0, 0.25),
-        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 10.0, 2.0),
+        new LineObstacle(LEFT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 10.0, 1.0),
         new LineObstacle(RIGHT_TRENCH_BASE_NEAR_OPENING_CORNER.getRed(), RIGHT_TRENCH_BASE_FAR_OPENING_CORNER.getRed(), 1.0, 0.25),
         
         // Temporarily highly repulsed from the ladder. That will need to change if/when we can climb
         // Blue Ladder Zone
-        new LineObstacle(LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), 5.0, 3.0),
-        new LineObstacle(LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), 5.0, 3.0),
-        new LineObstacle(LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), 5.0, 3.0),
-        new LineObstacle(LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), 5.0, 3.0),
+        new LineObstacle(LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), 5.0, 1.0),
+        new LineObstacle(LADDER_DRIVER_STATION_OUTPOST_SIDE.getBlue(), LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), 5.0, 1.0),
+        new LineObstacle(LADDER_DRIVER_STATION_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), 5.0, 1.0),
+        new LineObstacle(LADDER_CLIMBING_RAILS_DEPOT_SIDE.getBlue(), LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getBlue(), 1.0, 0.25),
         
         // Red Ladder Zone
-        new LineObstacle(LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getRed(), LADDER_DRIVER_STATION_OUTPOST_SIDE.getRed(), 5.0, 3.0),
-        new LineObstacle(LADDER_DRIVER_STATION_OUTPOST_SIDE.getRed(), LADDER_DRIVER_STATION_DEPOT_SIDE.getRed(), 5.0, 3.0),
-        new LineObstacle(LADDER_DRIVER_STATION_DEPOT_SIDE.getRed(), LADDER_CLIMBING_RAILS_DEPOT_SIDE.getRed(), 5.0, 3.0),
-        new LineObstacle(LADDER_CLIMBING_RAILS_DEPOT_SIDE.getRed(), LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getRed(), 5.0, 3.0),
+        new LineObstacle(LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getRed(), LADDER_DRIVER_STATION_OUTPOST_SIDE.getRed(), 5.0, 1.0),
+        new LineObstacle(LADDER_DRIVER_STATION_OUTPOST_SIDE.getRed(), LADDER_DRIVER_STATION_DEPOT_SIDE.getRed(), 5.0, 1.0),
+        new LineObstacle(LADDER_DRIVER_STATION_DEPOT_SIDE.getRed(), LADDER_CLIMBING_RAILS_DEPOT_SIDE.getRed(), 5.0, 1.0),
+        new LineObstacle(LADDER_CLIMBING_RAILS_DEPOT_SIDE.getRed(), LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getRed(), 1.0, 0.25),
         
         // Attractive Trench Blue Right
-        new LineObstacle(TRENCH_ATTRACTIVE_PATH_RIGHT_START.getBlue(), TRENCH_ATTRACTIVE_PATH_RIGHT_END.getBlue(), -100.0, 1.668),
+        new LineObstacle(TRENCH_ATTRACTIVE_PATH_RIGHT_START.getBlue(), TRENCH_ATTRACTIVE_PATH_RIGHT_END.getBlue(), -100.0, 1.268),
     };
 
     // spotless:on
