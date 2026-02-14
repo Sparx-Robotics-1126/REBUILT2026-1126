@@ -15,6 +15,8 @@ import org.team1126.lib.math.geometry.ExtTranslation;
  */
 public final class Field {
 
+    public static final double ATTRACTIVE_LINE_HALF_LENGTH = 1.5; // 1500 cm
+
     /** The center of the field over its length (X direction). Also the CENTER LINE. */
     public static final double X_CENTER = FieldInfo.length() / 2.0;
     /** The center of the field over its width (Y direction). */
@@ -29,6 +31,14 @@ public final class Field {
     public static final double DEPOT_X = Units.inchesToMeters(27.0);
     public static final double DEPOT_Y = Units.inchesToMeters(213.85);
     public static final Rotation2d DEPOT_ROT = Rotation2d.fromDegrees(135);
+
+    // TRENCH - RIGHT - Attractive Path
+    public static final double TRENCH_RIGHT_NEAR_CENTER_BLUE_X = getTag(28).getX();
+    public static final double TRENCH_RIGHT_CENTER_BLUE_Y = getTag(28).getY();
+    public static final double TRENCH_RIGHT_NEAR_POINT_BLUE_X =
+        TRENCH_RIGHT_NEAR_CENTER_BLUE_X - ATTRACTIVE_LINE_HALF_LENGTH;
+    public static final double TRENCH_RIGHT_FAR_POINT_BLUE_X =
+        TRENCH_RIGHT_NEAR_CENTER_BLUE_X + ATTRACTIVE_LINE_HALF_LENGTH;
 
     // HUB location helpers
     private static final double HUB_WIDTH = Units.inchesToMeters(47.0);
@@ -66,6 +76,22 @@ public final class Field {
     public static final ExtTranslation LADDER_DRIVER_STATION_DEPOT_SIDE = new ExtTranslation(
         LADDER_DRIVER_STATION,
         LADDER_CLIMBING_RAILS + LADDER_HALF_WIDTH
+    );
+
+    /**
+     * Start of the attractive trench line on the right side coming from the BLUE zone.
+     */
+    public static final ExtTranslation TRENCH_ATTRACTIVE_PATH_RIGHT_START = new ExtTranslation(
+        TRENCH_RIGHT_NEAR_POINT_BLUE_X,
+        TRENCH_RIGHT_CENTER_BLUE_Y
+    );
+
+    /**
+     * Start of the attractive trench line on the right side coming from the BLUE zone.
+     */
+    public static final ExtTranslation TRENCH_ATTRACTIVE_PATH_RIGHT_END = new ExtTranslation(
+        TRENCH_RIGHT_FAR_POINT_BLUE_X,
+        TRENCH_RIGHT_CENTER_BLUE_Y
     );
 
     /** The near left corner of the HUB, from the perspective of the DRIVER STATION. */
@@ -136,6 +162,9 @@ public final class Field {
         new LineObstacle(LADDER_DRIVER_STATION_OUTPOST_SIDE.getRed(), LADDER_DRIVER_STATION_DEPOT_SIDE.getRed(), 5.0, 3.0),
         new LineObstacle(LADDER_DRIVER_STATION_DEPOT_SIDE.getRed(), LADDER_CLIMBING_RAILS_DEPOT_SIDE.getRed(), 5.0, 3.0),
         new LineObstacle(LADDER_CLIMBING_RAILS_DEPOT_SIDE.getRed(), LADDER_CLIMBING_RAILS_OUTPOST_SIDE.getRed(), 5.0, 3.0),
+        
+        // Attractive Trench Blue Right
+        new LineObstacle(TRENCH_ATTRACTIVE_PATH_RIGHT_START.getBlue(), TRENCH_ATTRACTIVE_PATH_RIGHT_END.getBlue(), -100.0, 1.668),
     };
 
     // spotless:on
