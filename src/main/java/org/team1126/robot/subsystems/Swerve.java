@@ -653,9 +653,9 @@ public final class Swerve extends GRRSubsystem {
             } catch (Exception e) {}
             fuelTargetLost = false;
             Transform2d transformToFuel = new Transform2d(
-                bestestTarget.getSkew(),
-                bestestTarget.getPitch(),
-                new Rotation2d(bestestTarget.getYaw())
+                bestestTarget.getPitch() + 2.5,
+                bestestTarget.getYaw(),
+                new Rotation2d(-bestestTarget.getYaw())
             );
             return transformToFuel; // bestestTarget.getBestCameraToTarget();
         } else {
