@@ -3,7 +3,6 @@ package org.team1126.robot.subsystems;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -28,7 +27,6 @@ import org.team1126.lib.util.Alliance;
 import org.team1126.lib.util.Mutable;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.robot.Constants.RioIO;
-import org.team1126.robot.util.ReefSelection;
 
 @Logged
 public final class Lights {
@@ -169,32 +167,6 @@ public final class Lights {
         }
 
         /**
-         * Displays the currently selected reef level.
-         * @param selection The reef selection.
-         */
-        public Command levelSelection(ReefSelection selection) {
-            return commandBuilder()
-                .onExecute(() -> {
-                    for (int i = 0; i < LENGTH; i++) {
-                        for (int j = 0; j <= 1; j++) {
-                            boolean blink = selection.isScoring() && (selection.isLeft() ? 0 : 1) == j;
-
-                            if (
-                                (blink ? RobotController.getRSLState() : true) && i < ((28 / 4) * selection.getLevel())
-                            ) {
-                                setSingle(j == 0, i, Color.LEVEL);
-                            } else {
-                                setSingle(j == 0, i, Color.OFF);
-                            }
-                        }
-                    }
-                })
-                .onEnd(() -> setBoth(Color.OFF))
-                .ignoringDisable(true)
-                .withName("Lights.Sides.levelSelection()");
-        }
-
-        /**
          * Displays the percentage of the climber deploy position.
          * @param percent The climber's distance from the deploy position as a percent from [0.0, 1.0].
          */
@@ -330,51 +302,6 @@ public final class Lights {
         private void set(int i, Color color) {
             if (i >= LENGTH) return;
             buffer.setRGB(LENGTH + i, color.r(), color.g(), color.b());
-        }
-
-        /**
-         * Displays the coral state.
-         */
-        public Command coralDisplay(
-            BooleanSupplier hasCoral,
-            BooleanSupplier goosing,
-            DoubleSupplier goosePosition,
-            ReefSelection selection
-        ) {
-            final double GOOSE_RANGE = 0.15;
-            final double HALF_RANGE = GOOSE_RANGE / 2.0;
-
-            Timer timer = new Timer();
-
-            return sequence(
-                run(() -> set(Color.OFF)).until(hasCoral::getAsBoolean),
-                run(() -> {
-                    if (!goosing.getAsBoolean()) {
-                        set(RobotController.getRSLState() ? Color.HAS_CORAL : Color.OFF);
-                    } else {
-                        double position = goosePosition.getAsDouble();
-                        double percent =
-                            (MathUtil.clamp(Math.abs(position), 0.5 - HALF_RANGE, 0.5 + HALF_RANGE)
-                                - (0.5 - HALF_RANGE))
-                            * (1.0 / GOOSE_RANGE);
-                        if (position < 0.0) percent = 1.0 - percent;
-                        int closestLED = (int) Math.round(percent * (LENGTH - 1));
-                        for (int i = 0; i < LENGTH; i++) {
-                            if (Math.abs(closestLED - i) <= 1) {
-                                set(i, Color.GOOSE);
-                            } else {
-                                set(i, Color.OFF);
-                            }
-                        }
-                    }
-                }).until(() -> !hasCoral.getAsBoolean()),
-                run(() -> set(timer.get() % 0.2 > 0.1 ? Color.SCORED : Color.OFF))
-                    .beforeStarting(timer::restart)
-                    .withTimeout(1.5)
-            )
-                .repeatedly()
-                .ignoringDisable(true)
-                .withName("Lights.Top.coralDisplay()");
         }
 
         /**

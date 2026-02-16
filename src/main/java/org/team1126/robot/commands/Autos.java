@@ -9,7 +9,6 @@ import org.team1126.lib.util.command.AutoChooser;
 import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Swerve;
-import org.team1126.robot.util.ReefSelection;
 
 /**
  * The Autos class declares autonomous modes, and adds them
@@ -31,7 +30,6 @@ public final class Autos {
     private final Swerve swerve;
 
     private final Routines routines;
-    private final ReefSelection selection;
 
     private final AutoChooser chooser;
 
@@ -41,7 +39,6 @@ public final class Autos {
         lights = robot.lights;
         swerve = robot.swerve;
 
-        selection = robot.selection;
         routines = robot.routines;
 
         // Create the auto chooser

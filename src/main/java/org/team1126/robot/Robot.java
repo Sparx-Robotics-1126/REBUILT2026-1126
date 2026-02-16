@@ -23,7 +23,6 @@ import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.MatchData;
-import org.team1126.robot.util.ReefSelection;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -35,8 +34,6 @@ public final class Robot extends LoggedRobot {
     public final Storage storage;
 
     public final MatchData matchData;
-
-    public final ReefSelection selection;
 
     public final Routines routines;
     public final Autos autos;
@@ -53,9 +50,6 @@ public final class Robot extends LoggedRobot {
         storage = new Storage();
 
         matchData = new MatchData();
-
-        // Initialize helpers
-        selection = new ReefSelection();
 
         // Initialize compositions
         routines = new Routines(this);
@@ -74,8 +68,6 @@ public final class Robot extends LoggedRobot {
         // Trigger poo = (driver.leftBumper().or(driver.rightBumper()).negate()).and(selection::isL1);
 
         // Driver bindings
-        driver.axisLessThan(kRightY.value, -0.5).onTrue(selection.incrementLevel());
-        driver.axisGreaterThan(kRightY.value, 0.5).onTrue(selection.decrementLevel());
         driver.leftTrigger().onTrue(swerve.tareRotation());
 
         // driver.povLeft().onTrue(swerve.tareRotation());
@@ -85,8 +77,6 @@ public final class Robot extends LoggedRobot {
         // driver.b().whileTrue(swerve.apfDrive(() -> new Pose2d(6.844, 0.693, Rotation2d.fromDegrees(180)), () -> 0.3));
         driver.a().whileTrue(routines.refuelFromDepot());
         driver.b().whileTrue(routines.refuelFromNeutral());
-        driver.povLeft().whileTrue(swerve.apfDrive(selection::isLeft, () -> true, selection::isL4));
-        driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
 
         driver
             .povRight()
@@ -100,15 +90,10 @@ public final class Robot extends LoggedRobot {
         // Co-driver bindings
         coDriver.a().onTrue(none()); // Reserved (No goosing around)
 
-        coDriver.povUp().onTrue(selection.incrementLevel());
-        coDriver.povDown().onTrue(selection.decrementLevel());
-
         // Setup lights
         scheduler.schedule(routines.lightsPreMatch(autos::defaultSelected));
 
         RobotModeTriggers.autonomous().whileTrue(lights.sides.flames(false));
-
-        lights.sides.setDefaultCommand(lights.sides.levelSelection(selection));
 
         // Disable loop overrun warnings from the command
         // scheduler, since we already log loop timings
@@ -140,8 +125,8 @@ public final class Robot extends LoggedRobot {
 
     @NotLogged
     public double driverAngular() {
-        //return -driver.getRightX();
-        return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
+        return -driver.getRightX();
+        // return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
     }
 
     @Override

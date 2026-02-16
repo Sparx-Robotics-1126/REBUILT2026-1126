@@ -14,7 +14,6 @@ import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.Field;
-import org.team1126.robot.util.ReefSelection;
 
 /**
  * The Routines class contains command compositions, such as sequences
@@ -32,13 +31,10 @@ public final class Routines {
     private final Lights lights;
     private final Swerve swerve;
 
-    private final ReefSelection selection;
-
     public Routines(Robot robot) {
         this.robot = robot;
         lights = robot.lights;
         swerve = robot.swerve;
-        selection = robot.selection;
     }
 
     /**
