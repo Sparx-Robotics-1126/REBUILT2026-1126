@@ -10,6 +10,7 @@ import java.util.function.BooleanSupplier;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableBoolean;
+import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Swerve;
@@ -25,6 +26,9 @@ public final class Routines {
     private static final TunableTable tunables = Tunables.getNested("routines");
 
     private static final TunableBoolean autoDrive = tunables.value("autoDrive", true);
+    
+    private static final TunableDouble pivotDecel = tunables.value("pivotDecel", 10.0);
+    private static final TunableDouble pivotTol = tunables.value("pivotTol", 0.25);
 
     private final Robot robot;
 
@@ -65,5 +69,9 @@ public final class Routines {
 
     public Command refuelFromDepot() {
         return swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.8);
+    }
+    
+    public Command pivot(boolean left) {
+        return swerve.apfDrive(() -> Field.pivot.get(left), pivotDecel::get, pivotTol::get);
     }
 }
