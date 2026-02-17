@@ -40,6 +40,11 @@ public final class Constants {
         new Rotation3d(0, 0, 0)
     );
 
+    //Storage
+    public static final int STORAGE_MOTOR = 20;
+    public static final int FEEDER_MOTOR = 25;
+    public static final int SHOOTER_MOTOR = 26;
+
     public static final class LowerCAN {
 
         public static final String LOWER_CAN = "LowerCAN";
@@ -59,10 +64,7 @@ public final class Constants {
         public static final int BL_ENCODER = 12;
         public static final int BR_ENCODER = 13;
 
-        // Elevator
-        public static final int ELEVATOR_LEAD = 20;
-        public static final int ELEVATOR_FOLLOW = 21;
-        public static final int ELEVATOR_CANDI = 22;
+
     }
 
     public static final class RioCAN {
@@ -70,17 +72,7 @@ public final class Constants {
         // Swerve
         public static final int CANANDGYRO = 14;
 
-        // Goose
-        public static final int GOOSE_NECK = 30;
-        public static final int GOOSE_BEAK = 31;
-        public static final int GOOSE_CANDI = 32;
 
-        // Intake
-        public static final int INTAKE_MOTOR = 40;
-        public static final int INTAKE_CANRANGE = 41;
-
-        // Climber
-        public static final int CLIMBER_MOTOR = 50;
     }
 
     public static final class RioIO {
