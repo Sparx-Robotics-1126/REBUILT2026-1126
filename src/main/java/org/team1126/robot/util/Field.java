@@ -8,6 +8,7 @@ import org.team1126.lib.math.PAPFController.LateralObstacle;
 import org.team1126.lib.math.PAPFController.LineObstacle;
 import org.team1126.lib.math.PAPFController.LongitudinalObstacle;
 import org.team1126.lib.math.PAPFController.Obstacle;
+import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.math.geometry.ExtTranslation;
 import org.team1126.robot.subsystems.Swerve;
 
@@ -15,6 +16,14 @@ import org.team1126.robot.subsystems.Swerve;
  * Field locations and utilities.
  */
 public final class Field {
+    
+    /** X location of pivot point, relative to blue, right. */
+    public static final double PIVOT_X = getTag(28).getX() - (Swerve.OFFSET * 2.5);
+    /** Y location of pivot point, relative to blue, right. */
+    public static final double PIVOT_Y = getTag(28).getY();
+
+    /** Inline with the trench (to pass through), so facing opposite of april tag. */
+    public static final ExtPose pivot = new ExtPose(PIVOT_X, PIVOT_Y, Rotation2d.kZero);
 
     // Temporary
     // DEPOT Drive Coordinates
@@ -44,7 +53,6 @@ public final class Field {
     /** Center X of the hub is half way between AT26 and AT20. */
     public static final double HUB_CENTER_X = getTag(26).getX() + (getTag(20).getX() - getTag(26).getX());
 
-    // TODO: Determine if this is actually needed.
     /** Picking the center of the hub as the hub's location, for the purpose of aiming. */
     public static final ExtTranslation HUB = new ExtTranslation(HUB_CENTER_X, HUB_CENTER_Y);
 
