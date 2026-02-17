@@ -125,8 +125,8 @@ public final class Robot extends LoggedRobot {
 
     @NotLogged
     public double driverAngular() {
-        return -driver.getRightX();
-        // return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
+        // return -driver.getRightX();
+        return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
     }
 
     @Override

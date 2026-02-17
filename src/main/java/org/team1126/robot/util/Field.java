@@ -79,7 +79,7 @@ public final class Field {
     /** Depth of the tower base from the end wall to the edge of the plate. */
     public static final double TOWER_DEPTH = Units.inchesToMeters(45.18);
     /** Half of the width of the tower base. */
-    public static final double TOWER_HALF_WIDTH = Units.inchesToMeters(39.0) / 2;
+    public static final double TOWER_HALF_WIDTH = Units.inchesToMeters(39.0);
 
     /** Y coordinate of the depot side of the tower. */
     public static final double TOWER_DEPOT_Y = getTag(31).getY() + TOWER_HALF_WIDTH;
@@ -111,7 +111,7 @@ public final class Field {
         new LateralObstacle(FieldInfo.width(), 1.5, 0.1),
         
         // Center Line should only be an obstacle during autos.
-        new LateralObstacle(X_CENTER, 10, 0.1),
+        new LongitudinalObstacle(X_CENTER, 10, Swerve.OFFSET + 0.5),
         
         // No-Go Zone:
         // We want to repulse from the edges where the hub and the bump are very strongly, but not too far to shoot.
@@ -139,14 +139,14 @@ public final class Field {
         new LineObstacle(BARRIER_FAR_RIGHT_CORNER.getRed(), BARRIER_NEAR_RIGHT_CORNER.getRed(), 5.0, 0.05),
         
         // Blue Tower
-        new LineObstacle(TOWER_DEPOT_NEAR_CORNER.getBlue(), TOWER_DEPOT_FAR_CORNER.getBlue(), 10.0, (Swerve.OFFSET + 0.25)),
-        new LineObstacle(TOWER_DEPOT_FAR_CORNER.getBlue(), TOWER_OUTPOST_FAR_CORNER.getBlue(), 1.0, (Swerve.OFFSET + 0.25)),
-        new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getBlue(), TOWER_OUTPOST_FAR_CORNER.getBlue(), 10.0, (Swerve.OFFSET + 0.25)),
+        new LineObstacle(TOWER_DEPOT_NEAR_CORNER.getBlue(), TOWER_DEPOT_FAR_CORNER.getBlue(), 10.0, 0.5),
+        new LineObstacle(TOWER_DEPOT_FAR_CORNER.getBlue(), TOWER_OUTPOST_FAR_CORNER.getBlue(), 10.0, 0.5), 
+        new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getBlue(), TOWER_OUTPOST_FAR_CORNER.getBlue(), 10.0, 0.5),
         
         // Red Tower
-        new LineObstacle(TOWER_DEPOT_NEAR_CORNER.getRed(), TOWER_DEPOT_FAR_CORNER.getRed(), 10.0, (Swerve.OFFSET + 0.25)),
-        new LineObstacle(TOWER_DEPOT_FAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 1.0, (Swerve.OFFSET + 0.25)),
-        new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, (Swerve.OFFSET + 0.25)),
+        new LineObstacle(TOWER_DEPOT_NEAR_CORNER.getRed(), TOWER_DEPOT_FAR_CORNER.getRed(), 10.0, 0.5),
+        new LineObstacle(TOWER_DEPOT_FAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5), 
+        new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5),
     };
 
     // spotless:on

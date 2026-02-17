@@ -2,8 +2,7 @@ package org.team1126.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
@@ -51,12 +50,11 @@ public final class Routines {
      * Method that allows us to go where we would expect to find fuel in the neutral zone.
      */
     public Command refuelFromNeutral() {
-        return swerve.apfDrive(
+        return swerve.aimAtHub(
             () -> {
-                return new Pose2d(
+                return new Translation2d(
                     Field.X_CENTER - Units.inchesToMeters(35.95),
-                    Field.Y_CENTER - Units.inchesToMeters(35.95),
-                    Rotation2d.fromDegrees(0)
+                    Field.Y_CENTER - Units.inchesToMeters(35.95)
                 );
             },
             () -> 0.3
@@ -64,6 +62,6 @@ public final class Routines {
     }
 
     public Command refuelFromDepot() {
-        return swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.8);
+        return swerve.aimAtHub(() -> new Translation2d(Field.DEPOT_X, Field.DEPOT_Y), () -> 0.5);
     }
 }
