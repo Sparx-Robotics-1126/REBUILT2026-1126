@@ -63,16 +63,12 @@ public final class Constants {
         public static final int FR_ENCODER = 11;
         public static final int BL_ENCODER = 12;
         public static final int BR_ENCODER = 13;
-
-
     }
 
     public static final class RioCAN {
 
         // Swerve
         public static final int CANANDGYRO = 14;
-
-
     }
 
     public static final class RioIO {

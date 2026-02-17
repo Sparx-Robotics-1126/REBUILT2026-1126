@@ -1,4 +1,4 @@
-﻿package org.team1126.robot.subsystems;
+package org.team1126.robot.subsystems;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -13,7 +13,7 @@ import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.util.command.GRRSubsystem;
 
 import static org.team1126.robot.Constants.FEEDER_MOTOR;
-import static org.team1126.robot.Constants.STORAGE_MOTOR;
+import static org.team1126.robot.Constants.SHOOTER_MOTOR;
 
 public final class Shooter extends GRRSubsystem {
     private static final TunableTable tunables = Tunables.getNested("shooter");
@@ -58,7 +58,7 @@ public final class Shooter extends GRRSubsystem {
 
         tunables.add("Feeder Motor", feederMotor);
 
-        shooterMotor = new SparkFlex(STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
+        shooterMotor = new SparkFlex(SHOOTER_MOTOR, SparkLowLevel.MotorType.kBrushless);
 
         shooterConfig = new SparkFlexConfig();
         shooterConfig.smartCurrentLimit(40)

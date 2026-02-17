@@ -36,7 +36,6 @@ public final class Robot extends LoggedRobot {
     public final Storage storage;
     public final Shooter shooter;
 
-
     public final MatchData matchData;
 
     public final ReefSelection selection;
@@ -92,8 +91,6 @@ public final class Robot extends LoggedRobot {
         driver.povLeft().whileTrue(swerve.apfDrive(selection::isLeft, () -> true, selection::isL4));
         driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
 
-
-
         driver
             .povRight()
             .whileTrue(
@@ -105,8 +102,8 @@ public final class Robot extends LoggedRobot {
 
         // Co-driver bindings
         //coDriver.a().onTrue(none()); // Reserved (No goosing around)
-//        coDriver.x().onTrue(storage.moveMotorCommand(true));
-//        coDriver.b().onTrue(storage.moveMotorCommand(false));
+        //        coDriver.x().onTrue(storage.moveMotorCommand(true));
+        //        coDriver.b().onTrue(storage.moveMotorCommand(false));
 
         coDriver.rightTrigger().onTrue(shooter.readyShooter());
         coDriver.leftTrigger().onTrue(shooter.feedShooter());
@@ -117,10 +114,7 @@ public final class Robot extends LoggedRobot {
         coDriver.x().onTrue(routines.shootFuel());
         coDriver.b().onTrue(routines.releaseAll());
 
-//
-
-
-
+        //
 
         // Setup lights
         scheduler.schedule(routines.lightsPreMatch(autos::defaultSelected));

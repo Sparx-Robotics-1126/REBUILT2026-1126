@@ -36,7 +36,7 @@ public final class Routines {
     private final Shooter shooter;
     private final Storage storage;
 
-//    private final ReefSelection selection;
+    //    private final ReefSelection selection;
 
     public Routines(Robot robot) {
         this.robot = robot;
@@ -44,29 +44,20 @@ public final class Routines {
         swerve = robot.swerve;
         shooter = robot.shooter;
         storage = robot.storage;
-//        selection = robot.selection;
+        //        selection = robot.selection;
     }
 
-    public Command shootFuel(){
-
+    public Command shootFuel() {
         return sequence(
-                //this readies shooter
-                deadline(
-                        shooter.readyShooter(),
-                        waitUntil(shooter::isReady)
-                ),
-                //this shoots fuel
-                parallel(
-                        storage.feedShooter(),
-                        shooter.feedShooter()
-                       ))
-                        .withName("Routines.score()");
+            //this readies shooter
+            deadline(shooter.readyShooter(), waitUntil(shooter::isReady)),
+            //this shoots fuel
+            parallel(storage.feedShooter(), shooter.feedShooter())
+        ).withName("Routines.score()");
     }
 
-    public Command releaseAll(){
-        return parallel(
-                storage.spill()
-        ).withName("Spill Fuel");
+    public Command releaseAll() {
+        return parallel(storage.spill()).withName("Spill Fuel");
     }
 
     /**
