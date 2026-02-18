@@ -20,6 +20,7 @@ import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
 import org.team1126.robot.subsystems.Lights;
+import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.MatchData;
@@ -32,6 +33,7 @@ public final class Robot extends LoggedRobot {
     public final Lights lights;
     public final Swerve swerve;
     public final Storage storage;
+    public final Shooter shooter;
 
     public final MatchData matchData;
 
@@ -48,6 +50,7 @@ public final class Robot extends LoggedRobot {
         lights = new Lights();
         swerve = new Swerve();
         storage = new Storage();
+        shooter = new Shooter();
 
         matchData = new MatchData();
 
@@ -88,7 +91,20 @@ public final class Robot extends LoggedRobot {
         // changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
 
         // Co-driver bindings
-        coDriver.a().onTrue(none()); // Reserved (No goosing around)
+        //coDriver.a().onTrue(none()); // Reserved (No goosing around)
+        //        coDriver.x().onTrue(storage.moveMotorCommand(true));
+        //        coDriver.b().onTrue(storage.moveMotorCommand(false));
+
+        coDriver.rightTrigger().onTrue(shooter.readyShooter());
+        coDriver.leftTrigger().onTrue(shooter.feedShooter());
+
+        coDriver.a().onTrue(storage.spill());
+        coDriver.y().onTrue(storage.feedShooter());
+
+        coDriver.x().onTrue(routines.shootFuel());
+        coDriver.b().onTrue(routines.releaseAll());
+
+        //
 
         // Setup lights
         scheduler.schedule(routines.lightsPreMatch(autos::defaultSelected));

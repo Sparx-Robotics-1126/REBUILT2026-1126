@@ -37,6 +37,7 @@ import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.Alliance;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.robot.Constants;
+import org.team1126.robot.Robot;
 import org.team1126.robot.Constants.LowerCAN;
 import org.team1126.robot.Constants.RioCAN;
 import org.team1126.robot.util.Field;
@@ -138,11 +139,14 @@ public final class Swerve extends GRRSubsystem {
     public Swerve() {
         api = new SwerveAPI(config);
         vision = new Vision(Constants.AT_CAMERAS);
+      
+           
         apf = new PAPFController(6.0, 0.25, 0.01, true, Field.OBSTACLES);
         angularPID = new ProfiledPIDController(8.0, 0.0, 0.0, new Constraints(10.0, 26.0));
         angularPID.enableContinuousInput(-Math.PI, Math.PI);
-
-        fuelCamera = new PhotonCamera(Constants.OBJ_DETECTION_CAMERA_CONFIG.name());
+        
+                fuelCamera = new PhotonCamera(Constants.OBJ_DETECTION_CAMERA_CONFIG.name());
+                
         fuelTargetLost = true;
 
         state = api.state;
@@ -158,8 +162,9 @@ public final class Swerve extends GRRSubsystem {
         api.refresh();
 
         // Apply vision estimates to the pose estimator.
-        final var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
-        SmartDashboard.putNumber("Vision X", measurements.length);
+        if (Robot.isReal()) {
+            var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
+            SmartDashboard.putNumber("Vision X", measurements.length);
 
         seesAprilTag = measurements.length > 0;
         api.addVisionMeasurements(measurements);
