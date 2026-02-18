@@ -28,7 +28,7 @@ public final class Routines {
     private static final TunableTable tunables = Tunables.getNested("routines");
 
     private static final TunableBoolean autoDrive = tunables.value("autoDrive", true);
-    
+
     private static final TunableDouble pivotDecel = tunables.value("pivotDecel", 10.0);
     private static final TunableDouble pivotTol = tunables.value("pivotTol", 0.25);
 
@@ -91,7 +91,7 @@ public final class Routines {
     public Command refuelFromDepot() {
         return swerve.aimAtHub(() -> new Translation2d(Field.DEPOT_X, Field.DEPOT_Y), () -> 0.5);
     }
-    
+
     public Command pivot(boolean left) {
         return swerve.apfDrive(() -> Field.pivot.get(left), pivotDecel::get, pivotTol::get);
     }

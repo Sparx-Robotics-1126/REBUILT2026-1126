@@ -65,7 +65,7 @@ public class PhotonPoseEstimator {
     private static int InstanceCount = 0;
 
     /**
-     * Tuning handles we have over the CONSTRAINED_SOLVEPNP {@link PhotonPoseEstimator.PoseStrategy}.
+     * Tuning handles we have over the CONSTRAINED_SOLVEPNP.
      * Internally, the cost function is a sum-squared of pixel reprojection error + (optionally)
      * heading error * heading scale factor.
      *

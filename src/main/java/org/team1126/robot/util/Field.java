@@ -16,7 +16,7 @@ import org.team1126.robot.subsystems.Swerve;
  * Field locations and utilities.
  */
 public final class Field {
-    
+
     /** X location of pivot point, relative to blue, right. */
     public static final double PIVOT_X = getTag(28).getX() - (Swerve.OFFSET * 2.5);
     /** Y location of pivot point, relative to blue, right. */

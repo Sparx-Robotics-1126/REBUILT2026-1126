@@ -40,7 +40,7 @@ public final class Math2 {
      * @param speeds The continuous speeds.
      * @param dtSeconds The duration of the timestep the speeds should be applied for.
      * @return The provided speeds object.
-     * @see {@link ChassisSpeeds#discretize(ChassisSpeeds, double)}
+     * @see ChassisSpeeds#discretize(ChassisSpeeds, double)
      */
     public static ChassisSpeeds discretizeChassisSpeeds(ChassisSpeeds speeds, double dtSeconds) {
         double dtheta = speeds.omegaRadiansPerSecond * dtSeconds;

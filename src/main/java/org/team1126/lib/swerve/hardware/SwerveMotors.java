@@ -107,7 +107,7 @@ public final class SwerveMotors {
     }
 
     /**
-     * Configures a {@link CANSparkMax Spark Max}.
+     * Configures a {@link SparkMax Spark Max}.
      * @param id CAN ID of the device, as configured in the REV Hardware Client.
      * @param inverted If the motor is inverted.
      */
@@ -227,7 +227,7 @@ public final class SwerveMotors {
     }
 
     /**
-     * Configures a {@link CANSparkFlex Spark Flex}.
+     * Configures a {@link SparkFlex Spark Flex}.
      * @param id CAN ID of the device, as configured in the REV Hardware Client.
      * @param inverted If the motor is inverted.
      */

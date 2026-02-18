@@ -7,7 +7,6 @@ import edu.wpi.first.math.numbers.N3;
 
 /**
  * Represents a measurement from vision to apply to a pose estimator.
- * @see {@link PoseEstimator#addVisionMeasurement(Pose2d, double, Matrix)}.
  */
 public final record VisionMeasurement(
     Pose2d pose,
@@ -16,7 +15,6 @@ public final record VisionMeasurement(
 ) implements Comparable<VisionMeasurement> {
     /**
      * Represents a measurement from vision to apply to a pose estimator.
-     * @see {@link PoseEstimator#addVisionMeasurement(Pose2d, double)}.
      */
     public VisionMeasurement(Pose2d pose, double timestamp) {
         this(pose, timestamp, null);

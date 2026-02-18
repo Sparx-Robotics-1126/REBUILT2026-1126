@@ -79,7 +79,6 @@ public final class Profiler {
      * {@link Profiler#start(String)}, {user code}, {@link Profiler#end()}.
      * @param <T> The return type of the supplier.
      * @param name The name of the call. Must be unique.
-     * @param runnable The user code to be ran.
      * @return The value returned from the supplier.
      */
     public static <T> T run(String name, Supplier<T> supplier) {
