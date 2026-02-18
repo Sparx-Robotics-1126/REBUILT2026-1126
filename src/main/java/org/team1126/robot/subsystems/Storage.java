@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
@@ -22,7 +23,7 @@ public final class Storage extends GRRSubsystem {
     private final SparkMax rollerMotor;
     private SparkMaxConfig rollerConfig;
     private final RelativeEncoder rollerEncoder;
-    private SparkClosedLoopController rollerontroller;
+    private SparkClosedLoopController rollerController;
     private static final TunableTable tunables = Tunables.getNested("storage");
 
     private final TunableDouble voltage;
@@ -34,7 +35,7 @@ public final class Storage extends GRRSubsystem {
         rollerEncoder = rollerMotor.getEncoder();
         rollerConfig = new SparkMaxConfig();
 
-        rollerontroller = rollerMotor.getClosedLoopController();
+        rollerController = rollerMotor.getClosedLoopController();
         rollerConfig
             .smartCurrentLimit(40)
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
@@ -67,5 +68,11 @@ public final class Storage extends GRRSubsystem {
         return commandBuilder()
             .onExecute(() -> moveMotor(true))
             .onEnd(() -> rollerMotor.set(0));
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putBoolean("Intake at set point?", rollerController.isAtSetpoint());
+        SmartDashboard.putNumber("Velocity", this.rollerEncoder.getVelocity());
     }
 }

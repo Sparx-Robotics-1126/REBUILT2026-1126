@@ -10,6 +10,7 @@ import com.revrobotics.spark.*;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
@@ -125,6 +126,9 @@ public final class Shooter extends GRRSubsystem {
                 SparkBase.ControlType.kMAXMotionVelocityControl
             );
         }
+
+        SmartDashboard.putNumber("Velocity", shooterEncoder.getVelocity());
+        SmartDashboard.putBoolean("Is at speed?", shooterController.isAtSetpoint());
     }
 
     private void setState(ShooterStates state) {
