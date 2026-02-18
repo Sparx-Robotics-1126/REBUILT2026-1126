@@ -1,7 +1,6 @@
 package org.team1126.robot;
 
 import static edu.wpi.first.wpilibj.XboxController.Axis.*;
-import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
@@ -25,6 +24,8 @@ import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.MatchData;
 import org.team1126.robot.util.ReefSelection;
+
+import java.util.Objects;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -94,7 +95,7 @@ public final class Robot extends LoggedRobot {
         driver
             .povRight()
             .whileTrue(
-                (swerve.apfDrive(() -> swerve.getFuelPose(), () -> 0.25)).until(() -> swerve.getFuelPose() == null)
+                (swerve.apfDrive(swerve::getFuelPose, () -> 0.25)).until(() -> swerve.getFuelPose() == null)
             );
         driver.rightBumper().whileTrue(swerve.resetOdometry());
 
@@ -164,7 +165,7 @@ public final class Robot extends LoggedRobot {
 
         MatchData.shouldIShoot();
         try {
-            SmartDashboard.putString("fuelPose", swerve.getFuelPose().toString());
-        } catch (Exception e) {}
+            SmartDashboard.putString("fuelPose", Objects.requireNonNull(swerve.getFuelPose()).toString());
+        } catch (Exception ignored) {}
     }
 }
