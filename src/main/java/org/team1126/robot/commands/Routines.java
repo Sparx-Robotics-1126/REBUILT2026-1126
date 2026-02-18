@@ -11,12 +11,14 @@ import java.util.function.BooleanSupplier;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableBoolean;
+import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.Field;
+import org.team1126.robot.util.Field.WaypointHeading;
 
 /**
  * The Routines class contains command compositions, such as sequences
@@ -26,6 +28,9 @@ import org.team1126.robot.util.Field;
 public final class Routines {
 
     private static final TunableTable tunables = Tunables.getNested("routines");
+
+    private static final TunableDouble waypointDecel = tunables.value("waypointDecel", 12.0);
+    private static final TunableDouble waypointTol = tunables.value("waypointTol", 0.25);
 
     private static final TunableBoolean autoDrive = tunables.value("autoDrive", true);
 
@@ -68,6 +73,41 @@ public final class Routines {
         return lights
             .preMatch(swerve::getPose, swerve::seesAprilTag, defaultAutoSelected::getAsBoolean)
             .withName("Routines.lightsPreMatch()");
+    }
+
+    private Command waypoint(WaypointHeading heading, boolean left) {
+        switch (heading) {
+            case NORTH:
+                return swerve.apfDrive(() -> Field.WAYPOINT_FAR.get(left), waypointDecel::get, waypointTol::get);
+            case SOUTH:
+                return swerve.apfDrive(() -> Field.WAYPOINT_NEAR.get(left), waypointDecel::get, waypointTol::get);
+            default:
+                return null;
+        }
+    }
+
+    private Command endpoint(WaypointHeading heading) {
+        switch (heading) {
+            case NORTH:
+                return swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), waypointDecel::get, waypointTol::get);
+            case SOUTH:
+                return swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), waypointDecel::get, waypointTol::get);
+            default:
+                return null;
+        }
+    }
+
+    public Command trench(BooleanSupplier left) {
+        // compound command that will
+        // 1. determine where the robot is on the field
+        // 2. determine the intermediate waypoint based on where we are and which trench we want to go through
+        // 3. go to the waypoint
+        // 4. go to the goal point
+        return sequence(
+            waypoint(WaypointHeading.NORTH, left.getAsBoolean()),
+            endpoint(WaypointHeading.NORTH),
+            swerve.stop(true)
+        );
     }
 
     /**
