@@ -31,7 +31,7 @@ public final class Routines {
 
     private static final TunableTable tunables = Tunables.getNested("routines");
 
-    private static final TunableDouble waypointDecel = tunables.value("waypointDecel", 12.0);
+    private static final TunableDouble waypointDecel = tunables.value("waypointDecel", 0.3);
     private static final TunableDouble waypointTol = tunables.value("waypointTol", 0.25);
 
     private static final TunableBoolean autoDrive = tunables.value("autoDrive", true);
@@ -145,6 +145,14 @@ public final class Routines {
                         .getDistance(waypoint(heading, left.getAsBoolean()).getTranslation())
                     > 0.1
             ),
+            driveWaypoint(WaypointHeading.SOUTH, left.getAsBoolean()).onlyWhile(
+                () ->
+                    swerve
+                        .getPose()
+                        .getTranslation()
+                        .getDistance(waypoint(WaypointHeading.SOUTH, left.getAsBoolean()).getTranslation())
+                    > 0.1
+            ),
             driveEndpoint(heading)
         );
     }
@@ -166,6 +174,6 @@ public final class Routines {
     }
 
     public Command refuelFromDepot() {
-        return swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.8);
+        return swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.2);
     }
 }

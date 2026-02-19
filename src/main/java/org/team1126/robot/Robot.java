@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import java.util.Objects;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.util.DisableWatchdog;
@@ -107,7 +106,7 @@ public final class Robot extends LoggedRobot {
         //        coDriver.x().onTrue(storage.moveMotorCommand(true));
         //        coDriver.b().onTrue(storage.moveMotorCommand(false));
 
-        shooter.setDefaultCommand(shooter.idleShooterCommand());
+        // shooter.setDefaultCommand(shooter.idleShooterCommand());
         coDriver.rightTrigger().whileTrue(shooter.readyShooter());
         coDriver.leftTrigger().whileTrue(shooter.feedShooter());
 
@@ -158,8 +157,8 @@ public final class Robot extends LoggedRobot {
 
     @NotLogged
     public double driverAngular() {
-        //return -driver.getRightX();
-        return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
+        return -driver.getRightX();
+        // return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
     }
 
     @Override

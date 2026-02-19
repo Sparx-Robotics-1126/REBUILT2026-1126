@@ -19,18 +19,18 @@ public final class Constants {
     public static final CameraConfig[] AT_CAMERAS = {
         new CameraConfig(
             "center",
-            new Translation3d(0.001, .0, 0.3),
-            new Rotation3d(0.0, Math.toRadians(24), Math.toRadians(0.0))
+            new Translation3d(.195, .0, 0.535),
+            new Rotation3d(0.0, Math.toRadians(5), Math.toRadians(0.0))
         ),
         new CameraConfig(
             "left",
-            new Translation3d(0.000, 0.005, 0.3),
-            new Rotation3d(0.0, Math.toRadians(15), Math.toRadians(45.0))
+            new Translation3d(.175, 0.005, 0.535),
+            new Rotation3d(0.0, Math.toRadians(10), Math.toRadians(45.0))
         ),
         new CameraConfig(
             "right",
-            new Translation3d(-0.000, -0.005, 0.3),
-            new Rotation3d(0.0, Math.toRadians(15), Math.toRadians(-45.0))
+            new Translation3d(.175, -0.005, 0.535),
+            new Rotation3d(0.0, Math.toRadians(5), Math.toRadians(-45.0))
         )
     };
 
