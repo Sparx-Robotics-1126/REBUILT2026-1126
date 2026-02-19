@@ -49,7 +49,7 @@ public final class Shooter extends GRRSubsystem {
         feederConfig
             .smartCurrentLimit(40)
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
-            .inverted(false)
+            .inverted(true)
             .openLoopRampRate(0.25)
             .closedLoopRampRate(0.25);
 
@@ -57,7 +57,7 @@ public final class Shooter extends GRRSubsystem {
 
         feederAbsoluteEncoder = feederMotor.getAbsoluteEncoder();
 
-        feederSpeed = tunables.value("Feeder Speed", .2);
+        feederSpeed = tunables.value("Feeder Speed", .8);
         feederMotor.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
         tunables.add("Feeder Motor", feederMotor);
@@ -68,14 +68,14 @@ public final class Shooter extends GRRSubsystem {
         shooterConfig
             .smartCurrentLimit(40)
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
-            .inverted(false)
+            .inverted(true)
             .openLoopRampRate(0.25)
             .closedLoopRampRate(0.25)
             .encoder.positionConversionFactor(1)
             .velocityConversionFactor(1);
 
-        shooterShootSpeed = tunables.value("Shooter Speed", .2);
-        shooterIdleSpeed = tunables.value("Shooter Idle Speed", .05);
+        shooterShootSpeed = tunables.value("Shoot Speed", 0.8);
+        shooterIdleSpeed = tunables.value("Idle Speed", 0.2);
 
         shooterEncoder = shooterMotor.getEncoder();
 
@@ -99,16 +99,16 @@ public final class Shooter extends GRRSubsystem {
             // kV is now in Volts, so we multiply by the nominal voltage (12V)
             .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
 
-        shooterConfig.closedLoop.maxMotion
-            // Set MAXMotion parameters for position control. We don't need to pass
-            // a closed loop slot, as it will default to slot 0.
-            .cruiseVelocity(1000)
-            .maxAcceleration(1000)
-            .allowedProfileError(1)
-            // Set MAXMotion parameters for velocity control in slot 1
-            .maxAcceleration(500, ClosedLoopSlot.kSlot1)
-            .cruiseVelocity(6000, ClosedLoopSlot.kSlot1)
-            .allowedProfileError(1, ClosedLoopSlot.kSlot1);
+        // shooterConfig.closedLoop.maxMotion
+        //     // Set MAXMotion parameters for position control. We don't need to pass
+        //     // a closed loop slot, as it will default to slot 0.
+        //     // .cruiseVelocity(1000)
+        //     .maxAcceleration(1000)
+        //     .allowedProfileError(1)
+        //     // Set MAXMotion parameters for velocity control in slot 1
+        //     .maxAcceleration(500, ClosedLoopSlot.kSlot1)
+        //     .cruiseVelocity(6000, ClosedLoopSlot.kSlot1)
+        //     .allowedProfileError(1, ClosedLoopSlot.kSlot1);
 
         shooterMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
@@ -118,17 +118,25 @@ public final class Shooter extends GRRSubsystem {
 
     @Override
     public void periodic() {
-        if (state == ShooterStates.kIdle) {
-            shooterController.setSetpoint(this.shooterIdleSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-        } else {
-            shooterController.setSetpoint(
-                this.shooterShootSpeed.get(),
-                SparkBase.ControlType.kMAXMotionVelocityControl
-            );
-        }
+        // if (state == ShooterStates.kIdle) {
+        //     shooterController.setSetpoint(this.shooterIdleSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        // } else {
+        //     shooterController.setSetpoint(
+        //         this.shooterShootSpeed.get(),
+        //         SparkBase.ControlType.kMAXMotionVelocityControl
+        //     );
+        // }
 
         SmartDashboard.putNumber("Velocity", shooterEncoder.getVelocity());
         SmartDashboard.putBoolean("Is at speed?", shooterController.isAtSetpoint());
+    }
+
+    private void idleShooter() {
+        this.shooterMotor.set(shooterIdleSpeed.get());
+    }
+
+    private void stopShooter() {
+        this.shooterMotor.set(0);
     }
 
     private void setState(ShooterStates state) {
@@ -144,10 +152,20 @@ public final class Shooter extends GRRSubsystem {
         return state;
     }
 
+    public Command idleShooterCommand() {
+        return commandBuilder().onExecute(() -> idleShooter());
+        // .onEnd(() -> stopShooter());
+        // return commandBuilder()
+        //     .onExecute(() -> setState(ShooterStates.kIdle))
+        //     .onEnd(() -> setState(ShooterStates.kIdle));
+        //        setState(ShooterStates.kIdle);
+        //        this.shooterShootSpeed.set(this.shooterIdleSpeed.get());
+    }
+
     public Command readyShooter() {
         return commandBuilder()
-            .onExecute(() -> setState(ShooterStates.kShooting))
-            .onEnd(() -> setState(ShooterStates.kIdle));
+            .onExecute(() -> this.shooterShootSpeed.set(this.shooterShootSpeed.get()))
+            .onEnd(() -> idleShooter());
         //        setState(ShooterStates.kShooting);
         //        this.shooterShootSpeed.set(this.shooterShootSpeed.get());
     }
@@ -169,6 +187,6 @@ public final class Shooter extends GRRSubsystem {
     }
 
     public Command feedShooter() {
-        return commandBuilder().onExecute(this::feedShooter).onEnd(this::stopFeeder);
+        return commandBuilder().onExecute(this::setFeederSpeed).onEnd(this::stopFeeder);
     }
 }

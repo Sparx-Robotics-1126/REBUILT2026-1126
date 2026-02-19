@@ -6,7 +6,6 @@ import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -19,8 +18,6 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonTrackedTarget;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.Math2;
@@ -153,7 +150,7 @@ public final class Swerve extends GRRSubsystem {
     private boolean seesAprilTag = false;
     private boolean changedReference = false;
 
-    private PhotonCamera fuelCamera;
+    // private PhotonCamera fuelCamera;
     private boolean fuelTargetLost;
 
     private boolean facingHub = false;
@@ -166,7 +163,7 @@ public final class Swerve extends GRRSubsystem {
         angularPID = new ProfiledPIDController(8.0, 0.0, 0.0, new Constraints(10.0, 26.0));
         angularPID.enableContinuousInput(-Math.PI, Math.PI);
 
-        fuelCamera = new PhotonCamera(Constants.OBJ_DETECTION_CAMERA_CONFIG.name());
+        // fuelCamera = new PhotonCamera(Constants.OBJ_DETECTION_CAMERA_CONFIG.name());
 
         fuelTargetLost = true;
 
@@ -427,59 +424,67 @@ public final class Swerve extends GRRSubsystem {
         );
     }
 
-    private PhotonTrackedTarget getBestestTarget() {
-        var resultsList = fuelCamera.getAllUnreadResults();
-        if (resultsList == null || resultsList.size() > 0) {
-            fuelTargetLost = false;
-            return null;
-        }
-        var result = resultsList.get(0);
-        PhotonTrackedTarget highestAreaTarget = null;
-        if (result != null && result.hasTargets()) {
-            List<PhotonTrackedTarget> targets = result.getTargets();
-            highestAreaTarget = targets.stream().max(Comparator.comparing(PhotonTrackedTarget::getArea)).orElse(null);
-        }
-        if (highestAreaTarget == null) {
-            fuelTargetLost = true;
-        } else {
-            fuelTargetLost = false;
-        }
-        return highestAreaTarget;
-    }
+    // private PhotonTrackedTarget getBestestTarget() {
+    //     var resultsList = fuelCamera.getAllUnreadResults();
+    //     if (resultsList == null || resultsList.size() > 0) {
+    //         fuelTargetLost = false;
+    //         return null;
+    //     }
+    //     var result = resultsList.get(0);
+    //     PhotonTrackedTarget highestAreaTarget = null;
+    //     if (result != null && result.hasTargets()) {
+    //         List<PhotonTrackedTarget> targets = result.getTargets();
+    //         highestAreaTarget = targets.stream().max(Comparator.comparing(PhotonTrackedTarget::getArea)).orElse(null);
+    //     }
+    //     if (highestAreaTarget == null) {
+    //         fuelTargetLost = true;
+    //     } else {
+    //         fuelTargetLost = false;
+    //     }
+    //     return highestAreaTarget;
+    // }
 
-    private Transform2d getTransformToFuel() {
-        PhotonTrackedTarget bestestTarget = getBestestTarget();
-        if (bestestTarget != null) {
-            try {
-                SmartDashboard.putString("cameraTargetTransform", bestestTarget.getBestCameraToTarget().toString());
-            } catch (Exception e) {}
-            fuelTargetLost = false;
-            Transform2d transformToFuel = new Transform2d(
-                bestestTarget.getPitch() + 2.5,
-                bestestTarget.getYaw(),
-                new Rotation2d(-bestestTarget.getYaw())
-            );
-            return transformToFuel; // bestestTarget.getBestCameraToTarget();
-        } else {
-            fuelTargetLost = true;
-            return null;
-        }
-    }
+    // private Transform2d getTransformToFuel() {
+    //     PhotonTrackedTarget bestestTarget = getBestestTarget();
+    //     if (bestestTarget != null) {
+    //         try {
+    //             SmartDashboard.putString("cameraTargetTransform", bestestTarget.getBestCameraToTarget().toString());
+    //         } catch (Exception e) {}
+    //         fuelTargetLost = false;
+    //         Transform2d transformToFuel = new Transform2d(
+    //             bestestTarget.getPitch() + 2.5,
+    //             bestestTarget.getYaw(),
+    //             new Rotation2d(-bestestTarget.getYaw())
+    //         );
+    //         return transformToFuel; // bestestTarget.getBestCameraToTarget();
+    //     } else {
+    //         fuelTargetLost = true;
+    //         return null;
+    //     }
+    // }
 
-    public Pose2d getFuelPose() {
-        Transform2d transform2d = getTransformToFuel();
-        if (transform2d != null) {
-            Pose2d currentPose = state.pose;
-            // Transform2d transform2d = new Transform2d(
-            //     transform3d.getTranslation().toTranslation2d(),
-            //     transform3d.getRotation().toRotation2d()
-            // );
-            Pose2d fuelPose = currentPose.plus(transform2d);
-            fuelTargetLost = false;
-            return fuelPose;
-        } else {
-            fuelTargetLost = true;
-            return null;
-        }
-    }
+    // public Pose2d getFuelPose() {
+    //     Transform2d transform2d = getTransformToFuel();
+    //     if (transform2d != null) {
+    //         Pose2d currentPose = state.pose;
+    //         // Transform2d transform2d = new Transform2d(
+    //         //     transform3d.getTranslation().toTranslation2d(),
+    //         //     transform3d.getRotation().toRotation2d()
+    //         // );
+    //         Pose2d fuelPose = currentPose.plus(transform2d);
+    //         fuelTargetLost = false;
+    //         return fuelPose;
+    //     } else {
+    //         fuelTargetLost = true;
+    //         return null;
+    //     }
+    // }
 }
+// @Logged
+// public final class ReefAssistData {
+
+//     private Pose2d targetPipe = Pose2d.kZero;
+//     private boolean running = false;
+//     private double error = 0.0;
+//     private double output = 0.0;
+// }

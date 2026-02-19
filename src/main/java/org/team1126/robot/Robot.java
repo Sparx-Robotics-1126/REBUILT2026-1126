@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -108,14 +107,17 @@ public final class Robot extends LoggedRobot {
         //        coDriver.x().onTrue(storage.moveMotorCommand(true));
         //        coDriver.b().onTrue(storage.moveMotorCommand(false));
 
-        coDriver.rightTrigger().onTrue(shooter.readyShooter());
-        coDriver.leftTrigger().onTrue(shooter.feedShooter());
+        shooter.setDefaultCommand(shooter.idleShooterCommand());
+        coDriver.rightTrigger().whileTrue(shooter.readyShooter());
+        coDriver.leftTrigger().whileTrue(shooter.feedShooter());
 
-        coDriver.a().onTrue(storage.spill());
-        coDriver.y().onTrue(storage.feedShooter());
+        coDriver.a().whileTrue(storage.spill());
+        coDriver.y().whileTrue(storage.feedShooter());
 
-        coDriver.x().onTrue(routines.shootFuel());
-        coDriver.b().onTrue(routines.releaseAll());
+        coDriver.x().whileTrue(routines.shootFuel());
+        coDriver.b().whileTrue(routines.releaseAll());
+        coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
+        coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
 
         //
 
@@ -166,8 +168,8 @@ public final class Robot extends LoggedRobot {
         Profiler.run("lights", lights::update);
 
         MatchData.shouldIShoot();
-        try {
-            SmartDashboard.putString("fuelPose", Objects.requireNonNull(swerve.getFuelPose()).toString());
-        } catch (Exception ignored) {}
+        // try {
+        //     SmartDashboard.putString("fuelPose", Objects.requireNonNull(swerve.getFuelPose()).toString());
+        // } catch (Exception ignored) {}
     }
 }
