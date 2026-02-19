@@ -40,7 +40,10 @@ import org.team1126.robot.Constants.LowerCAN;
 import org.team1126.robot.Constants.RioCAN;
 import org.team1126.robot.Robot;
 import org.team1126.robot.util.Field;
+import com.ctre.phoenix6.Orchestra;
 // import org.team1126.robot.util.Vision;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.swerve.SwerveModule;
 
 import org.team1126.robot.util.Vision;
 
@@ -154,8 +157,47 @@ public final class Swerve extends GRRSubsystem {
 
     private boolean facingHub = false;
 
+    // private final Orchestra orchestra;
+
     public Swerve() {
+
+       
+
         api = new SwerveAPI(config);
+    
+// // Get all swerve modules
+//         var modules = api.getSwerveModules();
+   
+//         // Add each module's drive and steer motors to the orchestra
+//         for (int i = 0; i < modules.length; i++) {
+//             var module = modules[i];
+//             TalonFX moveFX = (TalonFX) module.moveMotor;
+//             orchestra.addInstrument(module.moveMotor, 1);
+//             orchestra.addInstrument(module.getSteerMotor(), 0);
+//         }
+
+
+//  orchestra = new Orchestra();
+//         var mods = api.modules[0].moveMotor;
+// TalonFX moveFX = (TalonFX) mods;
+
+
+//        for (SwerveModule module : api.modules) {
+//     Object moveMotorAPI = module.moveMotor.getAPI();
+//     Object turnMotorAPI = module.turnMotor.getAPI();
+    
+//     if (moveMotorAPI instanceof TalonFX) {
+//         TalonFX moveFX = (TalonFX) moveMotorAPI;
+//         // Use the TalonFX instance
+//     }
+// }
+        // for (int i = 0; i < api.modules.length; i++) {
+        //     var module = mods[i];
+        //     orchestra.addInstrument(module.getDriveMotor(), 1);
+        //     orchestra.addInstrument(module.getSteerMotor(), 0);
+        // }
+
+
         vision = new Vision(Constants.AT_CAMERAS);
 
         apf = new PAPFController(6.0, 0.02, 0.01, true, Field.OBSTACLES);

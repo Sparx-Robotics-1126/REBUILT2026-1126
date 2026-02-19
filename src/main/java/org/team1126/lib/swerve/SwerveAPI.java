@@ -47,7 +47,7 @@ public class SwerveAPI implements Tunable, AutoCloseable {
     public final SwerveState state;
     public final SwerveConfig config;
 
-    final SwerveModule[] modules;
+    public final SwerveModule[] modules;
     final SwerveIMU imu;
 
     private final int moduleCount;
@@ -107,7 +107,9 @@ public class SwerveAPI implements Tunable, AutoCloseable {
         odometryThread = new SwerveOdometryThread();
         configExecutors = Executors.newFixedThreadPool(moduleCount);
     }
-
+public SwerveModule[] getSwerveModules(){
+    return modules;
+}
     /**
      * Refreshes inputs from all swerve hardware. This must be called periodically
      * in order for the API to function. Typically, this method is called at the
