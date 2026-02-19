@@ -19,38 +19,22 @@ import org.team1126.robot.subsystems.Swerve;
 public final class Field {
 
     /** The center of the field over its length (X direction). Also the CENTER LINE. */
-    public static final double X_CENTER = FieldInfo.length() / 2.0;
+    public static final double CENTER_X = FieldInfo.length() / 2.0;
     /** The center of the field over its width (Y direction). */
-    public static final double Y_CENTER = FieldInfo.width() / 2.0;
+    public static final double CENTER_Y = FieldInfo.width() / 2.0;
 
-    /** X location of pivot point, relative to blue, right. */
-    public static final double TRENCH_PIVOT_X = getTag(28).getX() - (Swerve.OFFSET * 1.5);
-    /** Y location of pivot point, relative to blue, right. */
-    public static final double TRENCH_PIVOT_Y = getTag(28).getY();
-
-    /** Inline with the trench (to pass through), so facing opposite of april tag. */
-    public static final ExtPose TRENCH_PIVOT = new ExtPose(TRENCH_PIVOT_X, TRENCH_PIVOT_Y, Rotation2d.kZero);
-
-    public static final double ZONE_PIVOT_X = getTag(26).getX() - (Swerve.OFFSET * 2);
-    public static final double ZONE_PIVOT_Y = getTag(26).getY() + (Swerve.OFFSET * 2);
-
-    public static final ExtPose ZONE_PIVOT = new ExtPose(ZONE_PIVOT_X, ZONE_PIVOT_Y, Rotation2d.kCW_90deg);
-
-    public static final ExtPose NEUTRAL_ZONE = new ExtPose(
-        (FieldInfo.width() / 2.0),
-        (FieldInfo.length() / 2.0),
-        Rotation2d.k180deg
-    );
-
-    public static final ExtPose WAYPOINT_NEAR = new ExtPose(
-        new Pose2d((getTag(23).getX() - 1), getTag(23).getY(), Rotation2d.kZero)
-    );
     public static final ExtPose WAYPOINT_FAR = new ExtPose(
-        new Pose2d((getTag(22).getX() - 1), getTag(22).getY(), Rotation2d.k180deg)
+        new Pose2d(getTag(17).getX(), getTag(17).getY(), Rotation2d.k180deg)
+    );
+    public static final ExtPose WAYPOINT_NEAR = new ExtPose(
+        new Pose2d(getTag(28).getX(), getTag(28).getY(), Rotation2d.kZero)
     );
 
-    public static final ExtPose WAYPOINT_GOAL_FAR = new ExtPose(new Pose2d(X_CENTER, Y_CENTER, Rotation2d.kCCW_Pi_2));
-    public static final ExtPose WAYPOINT_GOAL_NEAR = new ExtPose(new Pose2d(1.25, Y_CENTER, Rotation2d.kZero));
+    public static final ExtPose WAYPOINT_GOAL_FAR = new ExtPose(new Pose2d(CENTER_X, CENTER_Y, Rotation2d.kZero));
+    // public static final ExtPose WAYPOINT_GOAL_NEAR = new ExtPose(
+    // new Pose2d((getTag(26).getX() - (Swerve.OFFSET * 2.0)), CENTER_Y, Rotation2d.kZero)
+    // );
+    public static final ExtPose WAYPOINT_GOAL_NEAR = new ExtPose(new Pose2d(1.0, CENTER_Y, Rotation2d.kZero));
 
     public static enum WaypointHeading {
         NORTH,
@@ -91,9 +75,9 @@ public final class Field {
 
     // BARRIER helper coordinates.
     /** LEFT Y coordinate of the barrier. */
-    public static final double BARRIER_LEFT_Y = Y_CENTER + BARRIER_HALF_WIDTH;
+    public static final double BARRIER_LEFT_Y = CENTER_Y + BARRIER_HALF_WIDTH;
     /** RIGHT Y coordinate of the barrier. */
-    public static final double BARRIER_RIGHT_Y = Y_CENTER - BARRIER_HALF_WIDTH;
+    public static final double BARRIER_RIGHT_Y = CENTER_Y - BARRIER_HALF_WIDTH;
     /** NEAR X coordinate of the barrier. */
     public static final double BARRIER_NEAR_X = getTag(26).getX();
     /** FAR X coordinate of the barrier.  */
@@ -146,7 +130,7 @@ public final class Field {
         new LateralObstacle(FieldInfo.width(), 1.5, 0.1),
         
         // Center Line should only be an obstacle during autos.
-        new LongitudinalObstacle(X_CENTER, 10, Swerve.OFFSET + 0.5),
+        new LongitudinalObstacle(CENTER_X, 10, Swerve.OFFSET + 0.5),
         
         // No-Go Zone:
         // We want to repulse from the edges where the hub and the bump are very strongly, but not too far to shoot.

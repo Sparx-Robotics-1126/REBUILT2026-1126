@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import java.util.Objects;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.util.DisableWatchdog;
@@ -24,8 +25,6 @@ import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.MatchData;
 import org.team1126.robot.util.ReefSelection;
-
-import java.util.Objects;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -89,6 +88,8 @@ public final class Robot extends LoggedRobot {
         // driver.b().whileTrue(swerve.apfDrive(() -> new Pose2d(6.844, 0.693, Rotation2d.fromDegrees(180)), () -> 0.3));
         driver.a().whileTrue(routines.refuelFromDepot());
         driver.b().whileTrue(routines.refuelFromNeutral());
+        // driver.povLeft().whileTrue(swerve.attractiveTrench(() -> false, () -> 0.5));
+        // driver.povRight().whileTrue(swerve.attractiveTrench(() -> true, () -> 0.5));
         driver.povLeft().whileTrue(routines.trench(() -> true));
         driver.povRight().whileTrue(routines.trench(() -> false));
         driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));

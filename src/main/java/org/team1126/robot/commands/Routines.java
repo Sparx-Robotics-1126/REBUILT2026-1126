@@ -6,12 +6,14 @@ import static edu.wpi.first.wpilibj2.command.Commands.deadline;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableBoolean;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
+import org.team1126.lib.util.Alliance;
 import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
@@ -75,38 +77,75 @@ public final class Routines {
             .withName("Routines.lightsPreMatch()");
     }
 
-    private Command waypoint(WaypointHeading heading, boolean left) {
-        switch (heading) {
-            case NORTH:
-                return swerve.apfDrive(() -> Field.WAYPOINT_FAR.get(left), waypointDecel::get, waypointTol::get);
-            case SOUTH:
-                return swerve.apfDrive(() -> Field.WAYPOINT_NEAR.get(left), waypointDecel::get, waypointTol::get);
-            default:
-                return null;
+    private Pose2d waypoint(WaypointHeading heading, boolean left) {
+        final boolean blue = Alliance.isBlue();
+        Pose2d waypoint;
+        if (WaypointHeading.NORTH == heading) {
+            waypoint = blue ? Field.WAYPOINT_NEAR.getBlue(left) : Field.WAYPOINT_NEAR.getRed(left);
+        } else {
+            waypoint = blue ? Field.WAYPOINT_FAR.getBlue(left) : Field.WAYPOINT_FAR.getRed(left);
         }
+        SmartDashboard.putString(
+            "Waypoint",
+            "X: " + waypoint.getX() + ", Y: " + waypoint.getY() + ", rot: " + waypoint.getRotation()
+        );
+        return waypoint;
     }
 
-    private Command endpoint(WaypointHeading heading) {
-        switch (heading) {
-            case NORTH:
-                return swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), waypointDecel::get, waypointTol::get);
-            case SOUTH:
-                return swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), waypointDecel::get, waypointTol::get);
-            default:
-                return null;
+    private Command driveWaypoint(WaypointHeading heading, boolean left) {
+        final Pose2d waypoint = waypoint(heading, left);
+        return swerve.apfDrive(() -> waypoint, waypointDecel::get);
+    }
+
+    private WaypointHeading findHeading() {
+        WaypointHeading heading = WaypointHeading.NORTH;
+        final boolean blue = Alliance.isBlue();
+        double currentX = swerve.getPose().getX();
+        SmartDashboard.putString("Heading", "NORTH");
+        if (
+            (blue && currentX > Field.BARRIER_FAR_RIGHT_CORNER.getBlue().getX())
+            || (!blue && currentX < Field.BARRIER_FAR_RIGHT_CORNER.getRed().getX())
+        ) {
+            heading = WaypointHeading.SOUTH;
+            SmartDashboard.putString("Heading", "SOUTH");
         }
+
+        return heading;
+    }
+
+    private Pose2d endpoint(WaypointHeading heading) {
+        final boolean blue = Alliance.isBlue();
+        Pose2d endpoint;
+        if (WaypointHeading.NORTH == heading) {
+            endpoint = blue ? Field.WAYPOINT_GOAL_FAR.getBlue() : Field.WAYPOINT_GOAL_FAR.getRed();
+        } else {
+            endpoint = blue ? Field.WAYPOINT_GOAL_NEAR.getBlue() : Field.WAYPOINT_GOAL_NEAR.getRed();
+        }
+        SmartDashboard.putBoolean("Blue", blue);
+        SmartDashboard.putString(
+            "Endpoint",
+            "X: " + endpoint.getX() + ", Y: " + endpoint.getY() + ", rot: " + endpoint.getRotation()
+        );
+        return endpoint;
+    }
+
+    private Command driveEndpoint(WaypointHeading heading) {
+        Pose2d endpoint = endpoint(heading);
+        return swerve.apfDrive(() -> endpoint, waypointDecel::get);
     }
 
     public Command trench(BooleanSupplier left) {
-        // compound command that will
-        // 1. determine where the robot is on the field
-        // 2. determine the intermediate waypoint based on where we are and which trench we want to go through
-        // 3. go to the waypoint
-        // 4. go to the goal point
+        final WaypointHeading heading = findHeading();
         return sequence(
-            waypoint(WaypointHeading.NORTH, left.getAsBoolean()),
-            endpoint(WaypointHeading.NORTH),
-            swerve.stop(true)
+            driveWaypoint(heading, left.getAsBoolean()).onlyWhile(
+                () ->
+                    swerve
+                        .getPose()
+                        .getTranslation()
+                        .getDistance(waypoint(heading, left.getAsBoolean()).getTranslation())
+                    > 0.1
+            ),
+            driveEndpoint(heading)
         );
     }
 
@@ -117,8 +156,8 @@ public final class Routines {
         return swerve.apfDrive(
             () -> {
                 return new Pose2d(
-                    Field.X_CENTER - Units.inchesToMeters(35.95),
-                    Field.Y_CENTER - Units.inchesToMeters(35.95),
+                    Field.CENTER_X - Units.inchesToMeters(35.95),
+                    Field.CENTER_Y - Units.inchesToMeters(35.95),
                     Rotation2d.fromDegrees(0)
                 );
             },

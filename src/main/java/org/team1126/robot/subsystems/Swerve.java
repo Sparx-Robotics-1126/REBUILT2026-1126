@@ -13,8 +13,10 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.photonvision.PhotonCamera;
@@ -23,6 +25,7 @@ import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.Math2;
 import org.team1126.lib.math.PAPFController;
+import org.team1126.lib.math.PAPFController.Obstacle;
 import org.team1126.lib.swerve.Perspective;
 import org.team1126.lib.swerve.SwerveAPI;
 import org.team1126.lib.swerve.SwerveState;
@@ -378,6 +381,35 @@ public final class Swerve extends GRRSubsystem {
             });
     }
 
+    public Command attractiveTrench(BooleanSupplier right, DoubleSupplier deceleration) {
+        return commandBuilder("Swerve.attractiveTrench()")
+            .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
+            .onExecute(() -> {
+                Pose2d goal = Field.WAYPOINT_GOAL_FAR.get();
+                Obstacle attractiveTrench = new PAPFController.CircleObstacle(
+                    Field.WAYPOINT_NEAR.get(right.getAsBoolean()).getTranslation(),
+                    2.0,
+                    -25.0,
+                    8.0
+                );
+                Obstacle[] tmpObstacles = Arrays.copyOf(Field.OBSTACLES, Field.OBSTACLES.length + 1);
+                tmpObstacles[tmpObstacles.length - 1] = attractiveTrench;
+                var speeds = apf.calculate(
+                    state.pose,
+                    goal.getTranslation(),
+                    apfVel.get(),
+                    deceleration.getAsDouble(),
+                    tmpObstacles
+                );
+                speeds.omegaRadiansPerSecond = angularPID.calculate(
+                    state.rotation.getRadians(),
+                    goal.getRotation().getRadians()
+                );
+
+                api.applySpeeds(speeds, Perspective.BLUE, true, true);
+            });
+    }
+
     /**
      * Drives the modules to stop the robot from moving.
      * @param lock If the wheels should be driven to an X formation to stop the robot from being pushed.
@@ -449,14 +481,5 @@ public final class Swerve extends GRRSubsystem {
             fuelTargetLost = true;
             return null;
         }
-    }
-
-    @Logged
-    public final class ReefAssistData {
-
-        private Pose2d targetPipe = Pose2d.kZero;
-        private boolean running = false;
-        private double error = 0.0;
-        private double output = 0.0;
     }
 }
