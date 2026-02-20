@@ -12,7 +12,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -21,7 +20,7 @@ import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.Math2;
 import org.team1126.lib.math.PAPFController;
-import org.team1126.lib.math.PAPFController.Obstacle;
+import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.swerve.Perspective;
 import org.team1126.lib.swerve.SwerveAPI;
 import org.team1126.lib.swerve.SwerveState;
@@ -43,6 +42,7 @@ import org.team1126.robot.util.Field;
 // import org.team1126.robot.util.Vision;
 
 import org.team1126.robot.util.Vision;
+import org.team1126.robot.util.WaypointNavigator;
 
 /**
  * The robot's swerve drivetrain.
@@ -80,6 +80,9 @@ public final class Swerve extends GRRSubsystem {
     private static final TunableDouble reefAssistX = reefAssistTunables.value("x", 0.681);
     private static final TunableDouble reefAssistKp = reefAssistTunables.value("kP", 20.0);
     private static final TunableDouble reefAssistTolerance = reefAssistTunables.value("tolerance", 1.75);
+
+    private static final TunableTable trenchTunables = tunables.getNested("trench");
+    private static final TunableDouble trenchDecel = trenchTunables.value("deceleration", 0.3);
 
     // private static final TunableDouble climbFudge = tunables.value("climbFudge", Math.toRadians(5.0));
 
@@ -149,6 +152,9 @@ public final class Swerve extends GRRSubsystem {
     private boolean seesAprilTag = false;
     private boolean changedReference = false;
 
+    private ExtPose[] waypoints;
+    private int currentWaypoint;
+
     // private PhotonCamera fuelCamera;
     private boolean fuelTargetLost;
 
@@ -158,7 +164,7 @@ public final class Swerve extends GRRSubsystem {
         api = new SwerveAPI(config);
         vision = new Vision(Constants.AT_CAMERAS);
 
-        apf = new PAPFController(6.0, 0.02, 0.01, true, Field.OBSTACLES);
+        apf = new PAPFController(9.0, 0.5, 0.01, true, Field.OBSTACLES);
         angularPID = new ProfiledPIDController(8.0, 0.0, 0.0, new Constraints(10.0, 26.0));
         angularPID.enableContinuousInput(-Math.PI, Math.PI);
 
@@ -204,6 +210,19 @@ public final class Swerve extends GRRSubsystem {
         hubReference = new Pose2d(hubCenter, hubAngle);
 
         facingHub = Math2.isNear(hubAngle, state.rotation, facingHubTol.get());
+
+        if (waypoints != null && currentWaypoint < waypoints.length) {
+            if (state.pose.getTranslation().getDistance(waypoints[currentWaypoint].get().getTranslation()) < 0.1) {
+                if (currentWaypoint < waypoints.length) {
+                    currentWaypoint++;
+                    driveTrench(waypoints[currentWaypoint].get(), trenchDecel.get());
+                } else {
+                    waypoints = null;
+                    currentWaypoint = -1;
+                    stop(true);
+                }
+            }
+        }
     }
 
     /**
@@ -377,33 +396,24 @@ public final class Swerve extends GRRSubsystem {
             });
     }
 
-    public Command attractiveTrench(BooleanSupplier right, DoubleSupplier deceleration) {
-        return commandBuilder("Swerve.attractiveTrench()")
+    public Command navTrench(BooleanSupplier right) {
+        return commandBuilder("Swerve.navTrench()")
             .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
             .onExecute(() -> {
-                Pose2d goal = Field.WAYPOINT_GOAL_FAR.get();
-                Obstacle attractiveTrench = new PAPFController.CircleObstacle(
-                    Field.WAYPOINT_NEAR.get(right.getAsBoolean()).getTranslation(),
-                    2.0,
-                    -25.0,
-                    8.0
-                );
-                Obstacle[] tmpObstacles = Arrays.copyOf(Field.OBSTACLES, Field.OBSTACLES.length + 1);
-                tmpObstacles[tmpObstacles.length - 1] = attractiveTrench;
-                var speeds = apf.calculate(
-                    state.pose,
-                    goal.getTranslation(),
-                    apfVel.get(),
-                    deceleration.getAsDouble(),
-                    tmpObstacles
-                );
-                speeds.omegaRadiansPerSecond = angularPID.calculate(
-                    state.rotation.getRadians(),
-                    goal.getRotation().getRadians()
-                );
-
-                api.applySpeeds(speeds, Perspective.BLUE, true, true);
+                waypoints = WaypointNavigator.trenching(state.pose, right.getAsBoolean());
+                currentWaypoint = 0;
+                driveTrench(waypoints[currentWaypoint].get(), trenchDecel.get());
             });
+    }
+
+    private void driveTrench(Pose2d goal, double deceleration) {
+        var speeds = apf.calculate(state.pose, goal.getTranslation(), apfVel.get(), deceleration);
+        speeds.omegaRadiansPerSecond = angularPID.calculate(
+            state.rotation.getRadians(),
+            goal.getRotation().getRadians()
+        );
+
+        api.applySpeeds(speeds, Perspective.BLUE, true, true);
     }
 
     /**

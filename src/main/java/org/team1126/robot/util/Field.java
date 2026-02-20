@@ -36,11 +36,6 @@ public final class Field {
     // );
     public static final ExtPose WAYPOINT_GOAL_NEAR = new ExtPose(new Pose2d(1.0, CENTER_Y, Rotation2d.kZero));
 
-    public static enum WaypointHeading {
-        NORTH,
-        SOUTH
-    }
-
     // Temporary
     // DEPOT Drive Coordinates
     public static final double DEPOT_X = Units.inchesToMeters(27.0);

@@ -20,7 +20,7 @@ import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.Field;
-import org.team1126.robot.util.Field.WaypointHeading;
+import org.team1126.robot.util.WaypointNavigator.WaypointHeading;
 
 /**
  * The Routines class contains command compositions, such as sequences

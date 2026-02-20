@@ -21,6 +21,7 @@ import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
+import org.team1126.robot.util.Field;
 import org.team1126.robot.util.MatchData;
 import org.team1126.robot.util.ReefSelection;
 
@@ -84,12 +85,13 @@ public final class Robot extends LoggedRobot {
         driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
 
         // driver.b().whileTrue(swerve.apfDrive(() -> new Pose2d(6.844, 0.693, Rotation2d.fromDegrees(180)), () -> 0.3));
-        driver.a().whileTrue(routines.refuelFromDepot());
+        // driver.a().whileTrue(routines.refuelFromDepot());
         driver.b().whileTrue(routines.refuelFromNeutral());
+        driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
         // driver.povLeft().whileTrue(swerve.attractiveTrench(() -> false, () -> 0.5));
         // driver.povRight().whileTrue(swerve.attractiveTrench(() -> true, () -> 0.5));
-        driver.povLeft().whileTrue(routines.trench(() -> true));
-        driver.povRight().whileTrue(routines.trench(() -> false));
+        driver.povLeft().whileTrue(swerve.navTrench(() -> false));
+        driver.povRight().whileTrue(swerve.navTrench(() -> true));
         driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
 
         // driver
@@ -157,8 +159,8 @@ public final class Robot extends LoggedRobot {
 
     @NotLogged
     public double driverAngular() {
-        return -driver.getRightX();
-        // return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
+        // return -driver.getRightX();
+        return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
     }
 
     @Override
