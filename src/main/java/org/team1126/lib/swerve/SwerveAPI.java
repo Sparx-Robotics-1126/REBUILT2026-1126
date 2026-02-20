@@ -3,6 +3,7 @@ package org.team1126.lib.swerve;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.Orchestra;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.PoseEstimator;
@@ -443,6 +444,13 @@ public SwerveModule[] getSwerveModules(){
     public void applyVoltage(double voltage, Rotation2d angle) {
         for (var module : modules) {
             module.applyVoltage(voltage, angle);
+        }
+    }
+
+    public void applyOrchestra(Orchestra orchestra) {
+        for (SwerveModule module : modules) {
+            module.moveMotor.applyOrchestra(orchestra);
+            module.turnMotor.applyOrchestra(orchestra);
         }
     }
 

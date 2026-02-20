@@ -1,6 +1,7 @@
 package org.team1126.robot.subsystems;
 
-import static org.team1126.robot.Constants.STORAGE_MOTOR;
+import static org.team1126.robot.Constants.INTAKE_MOTOR;
+import static org.team1126.robot.Constants.MOVE_STORAGE_MOTOR;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -17,10 +18,17 @@ import org.team1126.lib.util.command.GRRSubsystem;
 public final class Intake extends GRRSubsystem {
 
     private final SparkMax intakeMotor;
+
     private SparkMaxConfig config;
     private final RelativeEncoder intakeEncoder;
     private SparkClosedLoopController intakeController;
     private static final TunableTable tunables = Tunables.getNested("intake");
+
+    private final SparkMax moveStorage;
+    private SparkMaxConfig moveStorageConfig;
+    private final RelativeEncoder moveStorageEncoder;
+    private SparkClosedLoopController moveStorageController;
+    private static final TunableTable moveStorageTunables = Tunables.getNested("moveStorage");
 
     //    private boolean isOn;
     private final Tunables.TunableDouble voltage;
@@ -28,9 +36,14 @@ public final class Intake extends GRRSubsystem {
     public Intake() {
         this.voltage = tunables.value("Voltage", .5);
 
-        intakeMotor = new SparkMax(STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
+        intakeMotor = new SparkMax(INTAKE_MOTOR, SparkLowLevel.MotorType.kBrushless);
         intakeEncoder = intakeMotor.getEncoder();
         config = new SparkMaxConfig();
+
+        moveStorage = new SparkMax(MOVE_STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
+        moveStorageEncoder = moveStorage.getEncoder();
+        moveStorageConfig = new SparkMaxConfig();
+        moveStorageController = moveStorage.getClosedLoopController();
 
         //        isOn = false;
 
@@ -76,13 +89,13 @@ public final class Intake extends GRRSubsystem {
         tunables.add("Intake Motor", intakeMotor);
     }
 
-    public Command moveMotorCommand(boolean reverse) {
+    public Command moveIntakeMotorCommand(boolean reverse) {
         return commandBuilder()
-            .onExecute(() -> moveMotor(reverse))
+            .onExecute(() -> moveIntakeMotor(reverse))
             .onEnd(() -> intakeMotor.set(0));
     }
 
-    public void moveMotor(boolean reverse) {
+    public void moveIntakeMotor(boolean reverse) {
         if (reverse) {
             intakeMotor.set(-this.voltage.get());
         } else {
@@ -93,18 +106,18 @@ public final class Intake extends GRRSubsystem {
     public Command spill() {
         //toggle(true);
         return commandBuilder()
-            .onExecute(() -> moveMotor(true))
-            .onEnd(this::stop);
+            .onExecute(() -> moveIntakeMotor(true))
+            .onEnd(this::stopIntake);
     }
 
-    public Command take() {
+    public Command intake() {
         //toggle(true);
         return commandBuilder()
-            .onExecute(() -> moveMotor(false))
+            .onExecute(() -> moveIntakeMotor(false))
             .onEnd(() -> intakeMotor.set(0));
     }
 
-    private void stop() {
+    private void stopIntake() {
         intakeMotor.setVoltage(0);
     }
 
@@ -117,7 +130,29 @@ public final class Intake extends GRRSubsystem {
         //        }
     }
 
-    public void toggle(boolean mode) {
-        //        isOn = mode;
+    public void moveStorageMotor(boolean reverse) {
+        if (reverse) {
+            moveStorage.set(-this.voltage.get());
+        } else {
+            moveStorage.set(this.voltage.get());
+        }
+    }
+
+    public Command moveStorageMotorCommand(boolean reverse) {
+        return commandBuilder()
+            .onExecute(() -> moveStorageMotor(reverse))
+            .onEnd(() -> moveStorage.set(0));
+    }
+
+    public Command moveStorageSpill() {
+        return commandBuilder()
+            .onExecute(() -> moveStorageMotor(true))
+            .onEnd(() -> moveStorage.set(0));
+    }
+
+    public Command moveStorageIntake() {
+        return commandBuilder()
+            .onExecute(() -> moveStorageMotor(false))
+            .onEnd(() -> moveStorage.set(0));
     }
 }

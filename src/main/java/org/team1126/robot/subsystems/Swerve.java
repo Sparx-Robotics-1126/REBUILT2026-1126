@@ -42,8 +42,6 @@ import org.team1126.robot.Robot;
 import org.team1126.robot.util.Field;
 import com.ctre.phoenix6.Orchestra;
 // import org.team1126.robot.util.Vision;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.swerve.SwerveModule;
 
 import org.team1126.robot.util.Vision;
 
@@ -164,7 +162,6 @@ public final class Swerve extends GRRSubsystem {
        
 
         api = new SwerveAPI(config);
-    
 // // Get all swerve modules
 //         var modules = api.getSwerveModules();
    
@@ -463,6 +460,10 @@ public final class Swerve extends GRRSubsystem {
                 .plus(new Translation2d(-xOffset, Field.HUB.get().getY() * (left ? 1.0 : -1.0)).rotateBy(side)),
             side
         );
+    }
+
+    public void applyOrchestra(Orchestra orchestra) {
+        this.api.applyOrchestra(orchestra);
     }
 
     // private PhotonTrackedTarget getBestestTarget() {

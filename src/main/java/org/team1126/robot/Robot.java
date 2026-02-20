@@ -1,7 +1,9 @@
 package org.team1126.robot;
 
 import static edu.wpi.first.wpilibj.XboxController.Axis.*;
+import static edu.wpi.first.wpilibj2.command.Commands.run;
 
+import com.ctre.phoenix6.Orchestra;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -43,13 +45,15 @@ public final class Robot extends LoggedRobot {
 
     private final CommandXboxController driver;
     private final CommandXboxController coDriver;
-
+    private final Orchestra orchestra;
     public Robot() {
         PhoenixUtil.disableDaemons();
+        orchestra = new Orchestra();
 
         // Initialize subsystems
         lights = new Lights();
         swerve = new Swerve();
+        swerve.applyOrchestra(orchestra);
         storage = new Storage();
         shooter = new Shooter();
 
@@ -117,7 +121,7 @@ public final class Robot extends LoggedRobot {
         coDriver.b().whileTrue(routines.releaseAll());
         coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
         coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
-
+coDriver.rightBumper().whileTrue(run(() -> playSong("enemy")));
         //
 
         // Setup lights
@@ -170,5 +174,10 @@ public final class Robot extends LoggedRobot {
         // try {
         //     SmartDashboard.putString("fuelPose", Objects.requireNonNull(swerve.getFuelPose()).toString());
         // } catch (Exception ignored) {}
+    }
+    
+    private void playSong(String filename) {
+        orchestra.loadMusic(filename);
+        orchestra.play();
     }
 }
