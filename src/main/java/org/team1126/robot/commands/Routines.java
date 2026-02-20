@@ -1,7 +1,6 @@
 package org.team1126.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
-import static edu.wpi.first.wpilibj2.command.Commands.deadline;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -55,12 +54,7 @@ public final class Routines {
     }
 
     public Command shootFuel() {
-        return sequence(
-            //this readies shooter
-            deadline(shooter.readyShooter(), waitUntil(shooter::isReady)),
-            //this shoots fuel
-            parallel(storage.feedShooter(), shooter.feedShooter())
-        ).withName("Routines.score()");
+        return parallel(storage.feedShooter(), shooter.feedShooter()).withName("Routines.score()");
     }
 
     public Command releaseAll() {

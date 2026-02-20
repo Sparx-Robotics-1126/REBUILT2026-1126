@@ -24,14 +24,15 @@ public final class Shooter extends GRRSubsystem {
     private final SparkMaxConfig feederConfig;
     private final RelativeEncoder feederEncoder;
     private final SparkAbsoluteEncoder feederAbsoluteEncoder;
-    private final Tunables.TunableDouble feederSpeed;
+    private final Tunables.TunableInteger feederSpeed;
+    private final SparkClosedLoopController feederController;
 
     private final SparkFlex shooterMotor;
     private final SparkFlexConfig shooterConfig;
     private final RelativeEncoder shooterEncoder;
     private final SparkAbsoluteEncoder shooterAbsoluteEncoder;
     private final SparkClosedLoopController shooterController;
-    private final Tunables.TunableDouble shooterShootSpeed;
+    private final Tunables.TunableInteger shooterShootSpeed;
     private final Tunables.TunableDouble shooterIdleSpeed;
 
     private ShooterStates state = ShooterStates.kIdle;
@@ -57,10 +58,38 @@ public final class Shooter extends GRRSubsystem {
 
         feederAbsoluteEncoder = feederMotor.getAbsoluteEncoder();
 
-        feederSpeed = tunables.value("Feeder Speed", .8);
+        feederController = feederMotor.getClosedLoopController();
+
+        feederSpeed = tunables.value("Feeder Speed", 800);
+        feederConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            // Set PID values for position control. We don't need to pass a closed
+            // loop slot, as it will default to slot 0.
+            .p(0.0001)
+            .i(0.00001)
+            .d(0)
+            .outputRange(-1, 1)
+            // Set PID values for velocity control in slot 1
+
+            // .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
+            .feedForward
+            // kV is now in Volts, so we multiply by the nominal voltage (12V)
+            .kV(0.005);
+        // .kV(12.0 / 5767);
+
+        feederConfig.closedLoop.maxMotion
+            // Set MAXMotion parameters for position control. We don't need to pass
+            // a closed loop slot, as it will default to slot 0.
+            // .cruiseVelocity(1000)
+            .maxAcceleration(600)
+            .allowedProfileError(1)
+            // Set MAXMotion parameters for velocity control in slot 1
+            .cruiseVelocity(2000)
+            .allowedProfileError(1);
         feederMotor.configure(feederConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
         tunables.add("Feeder Motor", feederMotor);
+        tunables.add("Shooter", feederAbsoluteEncoder);
 
         shooterMotor = new SparkFlex(SHOOTER_MOTOR, SparkLowLevel.MotorType.kBrushless);
 
@@ -72,10 +101,10 @@ public final class Shooter extends GRRSubsystem {
             .openLoopRampRate(0.25)
             .closedLoopRampRate(0.25)
             .encoder.positionConversionFactor(1)
-            .velocityConversionFactor(1);
+            .velocityConversionFactor(1 / 1.4);
 
-        shooterShootSpeed = tunables.value("Shoot Speed", 0.8);
-        shooterIdleSpeed = tunables.value("Idle Speed", 0.2);
+        shooterShootSpeed = tunables.value("Shoot Speed", 1000);
+        shooterIdleSpeed = tunables.value("Idle Speed", 0.0);
 
         shooterEncoder = shooterMotor.getEncoder();
 
@@ -86,29 +115,28 @@ public final class Shooter extends GRRSubsystem {
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             // Set PID values for position control. We don't need to pass a closed
             // loop slot, as it will default to slot 0.
-            .p(0.4)
-            .i(0)
-            .d(0)
+            .p(0.0001)
+            .i(0.0)
+            .d(0.0)
             .outputRange(-1, 1)
             // Set PID values for velocity control in slot 1
-            .p(0.0001, ClosedLoopSlot.kSlot1)
-            .i(0, ClosedLoopSlot.kSlot1)
-            .d(0, ClosedLoopSlot.kSlot1)
-            .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
+
+            // .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
             .feedForward
             // kV is now in Volts, so we multiply by the nominal voltage (12V)
-            .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
+            .kV(0.00005) // INCREASE this significantly - was 0.005
+            .kS(0.00);
+        // .kV(12.0 / 5767);
 
-        // shooterConfig.closedLoop.maxMotion
-        //     // Set MAXMotion parameters for position control. We don't need to pass
-        //     // a closed loop slot, as it will default to slot 0.
-        //     // .cruiseVelocity(1000)
-        //     .maxAcceleration(1000)
-        //     .allowedProfileError(1)
-        //     // Set MAXMotion parameters for velocity control in slot 1
-        //     .maxAcceleration(500, ClosedLoopSlot.kSlot1)
-        //     .cruiseVelocity(6000, ClosedLoopSlot.kSlot1)
-        //     .allowedProfileError(1, ClosedLoopSlot.kSlot1);
+        shooterConfig.closedLoop.maxMotion
+            // Set MAXMotion parameters for position control. We don't need to pass
+            // a closed loop slot, as it will default to slot 0.
+            // .cruiseVelocity(1000)
+            .maxAcceleration(200)
+            .allowedProfileError(100)
+            // Set MAXMotion parameters for velocity control in slot 1
+            .cruiseVelocity(800)
+            .allowedProfileError(100);
 
         shooterMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
@@ -126,13 +154,19 @@ public final class Shooter extends GRRSubsystem {
         //         SparkBase.ControlType.kMAXMotionVelocityControl
         //     );
         // }
-
         SmartDashboard.putNumber("Velocity", shooterEncoder.getVelocity());
+        // SmartDashboard.putNumber("Velocity", shooterEncoder.getVelocity());
+        SmartDashboard.putNumber("Shooter Setpoint", shooterShootSpeed.get());
+        SmartDashboard.putNumber("Feeder Velocity", feederEncoder.getVelocity());
+        SmartDashboard.putNumber("Feeder Setpoint", feederSpeed.get());
         SmartDashboard.putBoolean("Is at speed?", shooterController.isAtSetpoint());
     }
 
     private void idleShooter() {
-        this.shooterMotor.set(shooterIdleSpeed.get());
+        this.shooterController.setSetpoint(
+            this.shooterIdleSpeed.get(),
+            SparkBase.ControlType.kMAXMotionVelocityControl
+        );
     }
 
     private void stopShooter() {
@@ -142,9 +176,17 @@ public final class Shooter extends GRRSubsystem {
     private void setState(ShooterStates state) {
         this.state = state;
         if (state == ShooterStates.kShooting) {
-            this.shooterShootSpeed.set(this.shooterShootSpeed.get());
+            this.shooterController.setSetpoint(
+                this.shooterShootSpeed.get(),
+                SparkBase.ControlType.kMAXMotionVelocityControl
+            );
+            // this.shooterShootSpeed.set(this.shooterShootSpeed.get());
         } else {
-            this.shooterShootSpeed.set(this.shooterIdleSpeed.get());
+            this.shooterController.setSetpoint(
+                this.shooterIdleSpeed.get(),
+                SparkBase.ControlType.kMAXMotionVelocityControl
+            );
+            // this.shooterShootSpeed.set(this.shooterIdleSpeed.get());
         }
     }
 
@@ -164,8 +206,13 @@ public final class Shooter extends GRRSubsystem {
 
     public Command readyShooter() {
         return commandBuilder()
-            .onExecute(() -> this.shooterShootSpeed.set(this.shooterShootSpeed.get()))
-            .onEnd(() -> idleShooter());
+            .onExecute(() ->
+                this.shooterController.setSetpoint(
+                    this.shooterShootSpeed.get(),
+                    SparkBase.ControlType.kMAXMotionVelocityControl
+                )
+            )
+            .onEnd(() -> this.shooterController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl));
         //        setState(ShooterStates.kShooting);
         //        this.shooterShootSpeed.set(this.shooterShootSpeed.get());
     }
@@ -179,7 +226,8 @@ public final class Shooter extends GRRSubsystem {
     }
 
     private void setFeederSpeed() {
-        feederMotor.setVoltage(feederSpeed.get());
+        shooterController.setSetpoint(this.shooterShootSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
     }
 
     private void stopFeeder() {

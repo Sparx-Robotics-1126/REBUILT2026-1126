@@ -1,7 +1,6 @@
 package org.team1126.robot;
 
 import static edu.wpi.first.wpilibj.XboxController.Axis.*;
-import static edu.wpi.first.wpilibj2.command.Commands.run;
 
 import com.ctre.phoenix6.Orchestra;
 import edu.wpi.first.epilogue.Logged;
@@ -56,6 +55,7 @@ public final class Robot extends LoggedRobot {
         lights = new Lights();
         swerve = new Swerve();
         swerve.applyOrchestra(orchestra);
+
         storage = new Storage();
         shooter = new Shooter();
 
@@ -114,8 +114,9 @@ public final class Robot extends LoggedRobot {
         //        coDriver.b().onTrue(storage.moveMotorCommand(false));
 
         // shooter.setDefaultCommand(shooter.idleShooterCommand());
-        coDriver.rightTrigger().whileTrue(shooter.readyShooter());
-        coDriver.leftTrigger().whileTrue(shooter.feedShooter());
+        coDriver.rightTrigger().onTrue(shooter.readyShooter());
+        coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
+        coDriver.leftTrigger().whileTrue(routines.shootFuel());
 
         coDriver.a().whileTrue(storage.spill());
         coDriver.y().whileTrue(storage.feedShooter());
@@ -124,7 +125,7 @@ public final class Robot extends LoggedRobot {
         coDriver.b().whileTrue(routines.releaseAll());
         coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
         coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
-        coDriver.rightBumper().whileTrue(run(() -> playSong("enemy")));
+        // coDriver.rightBumper().onTrue(swerve.playMusic("enemy"));
         //
 
         // Setup lights

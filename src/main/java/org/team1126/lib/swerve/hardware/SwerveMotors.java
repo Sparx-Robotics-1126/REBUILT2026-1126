@@ -349,6 +349,14 @@ public final class SwerveMotors {
         };
     }
 
+    public static SwerveMotor.Ctor talonFX(int id, boolean inverted, Orchestra orchestra) {
+        return (config, isMoveMotor) -> {
+            SwerveMotor motor = talonFX(id, inverted).apply(config, isMoveMotor);
+            motor.applyOrchestra(orchestra);
+            return motor;
+        };
+    }
+
     /**
      * Configures a {@link TalonFX}.
      * @param id CAN ID of the device, as configured in Phoenix Tuner.

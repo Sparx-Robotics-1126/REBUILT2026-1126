@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.List;
@@ -85,34 +86,35 @@ public final class Swerve extends GRRSubsystem {
     private static final TunableTable trenchTunables = tunables.getNested("trench");
     private static final TunableDouble trenchDecel = trenchTunables.value("deceleration", 0.3);
 
+    private static final Orchestra orchestra = new Orchestra();
     // private static final TunableDouble climbFudge = tunables.value("climbFudge", Math.toRadians(5.0));
 
     private final SwerveModuleConfig frontLeft = new SwerveModuleConfig()
         .setName("frontLeft")
         .setLocation(OFFSET, OFFSET)
-        .setMoveMotor(SwerveMotors.talonFX(LowerCAN.FL_MOVE, true))
-        .setTurnMotor(SwerveMotors.talonFX(LowerCAN.FL_TURN, false))
+        .setMoveMotor(SwerveMotors.talonFX(LowerCAN.FL_MOVE, true, orchestra))
+        .setTurnMotor(SwerveMotors.talonFX(LowerCAN.FL_TURN, false, orchestra))
         .setEncoder(SwerveEncoders.cancoder(LowerCAN.FL_ENCODER, .164, false));
 
     private final SwerveModuleConfig frontRight = new SwerveModuleConfig()
         .setName("frontRight")
         .setLocation(OFFSET, -OFFSET)
-        .setMoveMotor(SwerveMotors.talonFX(LowerCAN.FR_MOVE, true))
-        .setTurnMotor(SwerveMotors.talonFX(LowerCAN.FR_TURN, false))
+        .setMoveMotor(SwerveMotors.talonFX(LowerCAN.FR_MOVE, true, orchestra))
+        .setTurnMotor(SwerveMotors.talonFX(LowerCAN.FR_TURN, false, orchestra))
         .setEncoder(SwerveEncoders.cancoder(LowerCAN.FR_ENCODER, 0.498, false));
 
     private final SwerveModuleConfig backLeft = new SwerveModuleConfig()
         .setName("backLeft")
         .setLocation(-OFFSET, OFFSET)
-        .setMoveMotor(SwerveMotors.talonFX(LowerCAN.BL_MOVE, true))
-        .setTurnMotor(SwerveMotors.talonFX(LowerCAN.BL_TURN, false))
+        .setMoveMotor(SwerveMotors.talonFX(LowerCAN.BL_MOVE, true, orchestra))
+        .setTurnMotor(SwerveMotors.talonFX(LowerCAN.BL_TURN, false, orchestra))
         .setEncoder(SwerveEncoders.cancoder(LowerCAN.BL_ENCODER, -.510, false));
 
     private final SwerveModuleConfig backRight = new SwerveModuleConfig()
         .setName("backRight")
         .setLocation(-OFFSET, -OFFSET)
-        .setMoveMotor(SwerveMotors.talonFX(LowerCAN.BR_MOVE, true))
-        .setTurnMotor(SwerveMotors.talonFX(LowerCAN.BR_TURN, false))
+        .setMoveMotor(SwerveMotors.talonFX(LowerCAN.BR_MOVE, true, orchestra))
+        .setTurnMotor(SwerveMotors.talonFX(LowerCAN.BR_TURN, false, orchestra))
         .setEncoder(SwerveEncoders.cancoder(LowerCAN.BR_ENCODER, 0.347, false));
 
     private final SwerveConfig config = new SwerveConfig()
@@ -216,7 +218,7 @@ public final class Swerve extends GRRSubsystem {
     public void periodic() {
         // Refresh the swerve API.
         api.refresh();
-
+        SmartDashboard.putBoolean("Is Playing Music", orchestra.isPlaying());
         // Apply vision estimates to the pose estimator.
         if (Robot.isReal()) {
             var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
@@ -388,6 +390,27 @@ public final class Swerve extends GRRSubsystem {
                 api.config.driverAngularVel = turboSpin.get();
             })
             .finallyDo(() -> api.config.driverAngularVel = configured.value);
+    }
+
+    public Command playMusic(String song) {
+        return runEnd(
+            () -> {
+                if (!orchestra.isPlaying()) {
+                    sing(song);
+                }
+            },
+            orchestra::stop
+        )
+            .until(DriverStation::isEnabled)
+            .ignoringDisable(true);
+        // orchestra.loadMusic(song);
+        // return run(() -> orchestra.play()).withName("Swerve.playMusic(" + song + ")");
+    }
+
+    public void sing(String song) {
+        orchestra.loadMusic(song + ".chrp");
+        System.out.println("Playing " + song);
+        orchestra.play();
     }
 
     /**
