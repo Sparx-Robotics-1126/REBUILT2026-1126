@@ -20,7 +20,7 @@ import org.team1126.lib.swerve.hardware.SwerveMotors.SwerveMotor;
 /**
  * An encapsulation of all hardware for a swerve module.
  */
-class SwerveModule implements AutoCloseable {
+public class SwerveModule implements AutoCloseable {
 
     public final SwerveMotor moveMotor;
     public final SwerveMotor turnMotor;

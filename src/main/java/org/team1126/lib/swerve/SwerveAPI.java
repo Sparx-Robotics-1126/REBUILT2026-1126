@@ -2,6 +2,7 @@ package org.team1126.lib.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.StatusCode;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
@@ -47,7 +48,7 @@ public class SwerveAPI implements Tunable, AutoCloseable {
     public final SwerveState state;
     public final SwerveConfig config;
 
-    final SwerveModule[] modules;
+    public final SwerveModule[] modules;
     final SwerveIMU imu;
 
     private final int moduleCount;
@@ -106,6 +107,10 @@ public class SwerveAPI implements Tunable, AutoCloseable {
 
         odometryThread = new SwerveOdometryThread();
         configExecutors = Executors.newFixedThreadPool(moduleCount);
+    }
+
+    public SwerveModule[] getSwerveModules() {
+        return modules;
     }
 
     /**
@@ -441,6 +446,13 @@ public class SwerveAPI implements Tunable, AutoCloseable {
     public void applyVoltage(double voltage, Rotation2d angle) {
         for (var module : modules) {
             module.applyVoltage(voltage, angle);
+        }
+    }
+
+    public void applyOrchestra(Orchestra orchestra) {
+        for (SwerveModule module : modules) {
+            module.moveMotor.applyOrchestra(orchestra);
+            module.turnMotor.applyOrchestra(orchestra);
         }
     }
 

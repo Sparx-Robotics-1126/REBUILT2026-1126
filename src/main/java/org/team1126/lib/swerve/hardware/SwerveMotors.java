@@ -1,6 +1,7 @@
 package org.team1126.lib.swerve.hardware;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -44,6 +45,8 @@ public final class SwerveMotors {
      * All units are in rotations.
      */
     public abstract static class SwerveMotor implements SwerveBaseHardware {
+
+        public void applyOrchestra(Orchestra orchestra) {}
 
         /**
          * {@code (config, isMoveMotor) -> SwerveMotor}
@@ -470,6 +473,11 @@ public final class SwerveMotors {
                 @Override
                 public void close() {
                     talonFX.close();
+                }
+
+                @Override
+                public void applyOrchestra(Orchestra orchestra) {
+                    orchestra.addInstrument(talonFX);
                 }
             };
         };
