@@ -46,8 +46,7 @@ public final class SwerveMotors {
      */
     public abstract static class SwerveMotor implements SwerveBaseHardware {
 
-        public void applyOrchestra(Orchestra orchestra) {
-        }
+        public void applyOrchestra(Orchestra orchestra) {}
 
         /**
          * {@code (config, isMoveMotor) -> SwerveMotor}
@@ -475,6 +474,7 @@ public final class SwerveMotors {
                 public void close() {
                     talonFX.close();
                 }
+
                 @Override
                 public void applyOrchestra(Orchestra orchestra) {
                     orchestra.addInstrument(talonFX);
@@ -557,7 +557,6 @@ public final class SwerveMotors {
                     motor.close();
                 } catch (Exception e) {}
             }
-
         };
     }
 }

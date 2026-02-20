@@ -2,8 +2,8 @@ package org.team1126.lib.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.Orchestra;
+import com.ctre.phoenix6.StatusCode;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.PoseEstimator;
@@ -108,9 +108,11 @@ public class SwerveAPI implements Tunable, AutoCloseable {
         odometryThread = new SwerveOdometryThread();
         configExecutors = Executors.newFixedThreadPool(moduleCount);
     }
-public SwerveModule[] getSwerveModules(){
-    return modules;
-}
+
+    public SwerveModule[] getSwerveModules() {
+        return modules;
+    }
+
     /**
      * Refreshes inputs from all swerve hardware. This must be called periodically
      * in order for the API to function. Typically, this method is called at the

@@ -46,6 +46,7 @@ public final class Robot extends LoggedRobot {
     private final CommandXboxController driver;
     private final CommandXboxController coDriver;
     private final Orchestra orchestra;
+
     public Robot() {
         PhoenixUtil.disableDaemons();
         orchestra = new Orchestra();
@@ -121,7 +122,7 @@ public final class Robot extends LoggedRobot {
         coDriver.b().whileTrue(routines.releaseAll());
         coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
         coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
-coDriver.rightBumper().whileTrue(run(() -> playSong("enemy")));
+        coDriver.rightBumper().whileTrue(run(() -> playSong("enemy")));
         //
 
         // Setup lights
@@ -175,7 +176,7 @@ coDriver.rightBumper().whileTrue(run(() -> playSong("enemy")));
         //     SmartDashboard.putString("fuelPose", Objects.requireNonNull(swerve.getFuelPose()).toString());
         // } catch (Exception ignored) {}
     }
-    
+
     private void playSong(String filename) {
         orchestra.loadMusic(filename);
         orchestra.play();
