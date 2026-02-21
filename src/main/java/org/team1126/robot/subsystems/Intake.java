@@ -1,7 +1,7 @@
 package org.team1126.robot.subsystems;
 
 import static org.team1126.robot.Constants.INTAKE_MOTOR;
-import static org.team1126.robot.Constants.MOVE_STORAGE_MOTOR;
+import static org.team1126.robot.Constants.PIVOT_MOTOR;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -18,17 +18,23 @@ import org.team1126.lib.util.command.GRRSubsystem;
 public final class Intake extends GRRSubsystem {
 
     private final SparkMax intakeMotor;
+    private final SparkMax pivotMotor;
 
     private SparkMaxConfig config;
     private final RelativeEncoder intakeEncoder;
     private SparkClosedLoopController intakeController;
     private static final TunableTable tunables = Tunables.getNested("intake");
 
-    private final SparkMax moveStorage;
-    private SparkMaxConfig moveStorageConfig;
-    private final RelativeEncoder moveStorageEncoder;
-    private SparkClosedLoopController moveStorageController;
-    private static final TunableTable moveStorageTunables = Tunables.getNested("moveStorage");
+    private SparkMaxConfig pivotConfig;
+    private final RelativeEncoder pivotEncoder;
+    private SparkClosedLoopController pivotController;
+    private static final TunableTable pivotTunables = Tunables.getNested("pivot");
+
+    // private final SparkMax moveStorage;
+    // private SparkMaxConfig moveStorageConfig;
+    // private final RelativeEncoder moveStorageEncoder;
+    // private SparkClosedLoopController moveStorageController;
+    // private static final TunableTable moveStorageTunables = Tunables.getNested("moveStorage");
 
     //    private boolean isOn;
     private final Tunables.TunableDouble voltage;
@@ -40,10 +46,18 @@ public final class Intake extends GRRSubsystem {
         intakeEncoder = intakeMotor.getEncoder();
         config = new SparkMaxConfig();
 
-        moveStorage = new SparkMax(MOVE_STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
-        moveStorageEncoder = moveStorage.getEncoder();
-        moveStorageConfig = new SparkMaxConfig();
-        moveStorageController = moveStorage.getClosedLoopController();
+        pivotMotor = new SparkMax(PIVOT_MOTOR, SparkLowLevel.MotorType.kBrushless);
+        pivotEncoder = pivotMotor.getEncoder();
+        pivotConfig = new SparkMaxConfig();
+        pivotController = pivotMotor.getClosedLoopController();
+
+        pivotConfig.closedLoop.p(.4).i(0).d(0).feedbackSensor(FeedbackSensor.kPrimaryEncoder);
+        pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+        // moveStorage = new SparkMax(MOVE_STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
+        // moveStorageEncoder = moveStorage.getEncoder();
+        // moveStorageConfig = new SparkMaxConfig();
+        // moveStorageController = moveStorage.getClosedLoopController();
 
         //        isOn = false;
 
@@ -87,6 +101,7 @@ public final class Intake extends GRRSubsystem {
 
         //        shooterController.setSetpoint(this.shooterShootSpeed, SparkBase.ControlType.kMAXMotionVelocityControl);
         tunables.add("Intake Motor", intakeMotor);
+        tunables.add("Pivot Motor", pivotMotor);
     }
 
     public Command moveIntakeMotorCommand(boolean reverse) {
@@ -125,34 +140,55 @@ public final class Intake extends GRRSubsystem {
     public void periodic() {
         SmartDashboard.putBoolean("Intake at set point?", intakeController.isAtSetpoint());
         SmartDashboard.putNumber("Velocity", this.intakeEncoder.getVelocity());
+        SmartDashboard.putNumber("Position", this.pivotEncoder.getPosition());
         //        if (isOn) {
         //            intakeController.setSetpoint(voltage.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         //        }
     }
 
-    public void moveStorageMotor(boolean reverse) {
-        if (reverse) {
-            moveStorage.set(-this.voltage.get());
-        } else {
-            moveStorage.set(this.voltage.get());
-        }
+    // public void moveStorageMotor(boolean reverse) {
+    //     if (reverse) {
+    //         moveStorage.set(-this.voltage.get());
+    //     } else {
+    //         moveStorage.set(this.voltage.get());
+    //     }
+    // }
+
+    // public Command moveStorageMotorCommand(boolean reverse) {
+    //     return commandBuilder()
+    //         .onExecute(() -> moveStorageMotor(reverse))
+    //         .onEnd(() -> moveStorage.set(0));
+    // }
+
+    // public Command moveStorageSpill() {
+    //     return commandBuilder()
+    //         .onExecute(() -> moveStorageMotor(true))
+    //         .onEnd(() -> moveStorage.set(0));
+    // }
+
+    // public Command moveStorageIntake() {
+    //     return commandBuilder()
+    //         .onExecute(() -> moveStorageMotor(false))
+    //         .onEnd(() -> moveStorage.set(0));
+    // }
+
+    public void moveMotorPos() {
+        this.pivotController.setSetpoint(-.28, SparkBase.ControlType.kPosition);
     }
 
-    public Command moveStorageMotorCommand(boolean reverse) {
+    public Command moveMotorPosCommand() {
         return commandBuilder()
-            .onExecute(() -> moveStorageMotor(reverse))
-            .onEnd(() -> moveStorage.set(0));
+            .onExecute(() -> moveMotorPos())
+            .onEnd(() -> pivotMotor.set(0));
     }
 
-    public Command moveStorageSpill() {
-        return commandBuilder()
-            .onExecute(() -> moveStorageMotor(true))
-            .onEnd(() -> moveStorage.set(0));
+    public void moveMotorPosHome() {
+        this.pivotController.setSetpoint(0, SparkBase.ControlType.kPosition);
     }
 
-    public Command moveStorageIntake() {
+    public Command moveMotorPosHomeCommand() {
         return commandBuilder()
-            .onExecute(() -> moveStorageMotor(false))
-            .onEnd(() -> moveStorage.set(0));
+            .onExecute(() -> moveMotorPosHome())
+            .onEnd(() -> pivotMotor.set(0));
     }
 }

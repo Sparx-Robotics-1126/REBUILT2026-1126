@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import org.team1126.lib.logging.LoggedRobot;
@@ -18,6 +19,7 @@ import org.team1126.lib.util.DisableWatchdog;
 import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
+import org.team1126.robot.subsystems.Intake;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
@@ -35,6 +37,7 @@ public final class Robot extends LoggedRobot {
     public final Swerve swerve;
     public final Storage storage;
     public final Shooter shooter;
+    public final Intake intake;
 
     public final MatchData matchData;
 
@@ -58,6 +61,7 @@ public final class Robot extends LoggedRobot {
 
         storage = new Storage();
         shooter = new Shooter();
+        intake = new Intake();
 
         matchData = new MatchData();
 
@@ -118,9 +122,11 @@ public final class Robot extends LoggedRobot {
         coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         coDriver.leftTrigger().whileTrue(routines.shootFuel());
 
-        coDriver.a().whileTrue(storage.spill());
-        coDriver.y().whileTrue(storage.feedShooter());
-
+        // coDriver.a().whileTrue(storage.spill());
+        // coDriver.y().whileTrue(storage.feedShooter());
+        coDriver.a().whileTrue(intake.moveMotorPosCommand());
+        coDriver.y().whileTrue(intake.moveMotorPosHomeCommand());
+        coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
         coDriver.x().whileTrue(routines.shootFuel());
         coDriver.b().whileTrue(routines.releaseAll());
         coDriver.povRight().whileTrue(storage.moveMotorCommand(false));

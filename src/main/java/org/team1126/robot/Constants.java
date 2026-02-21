@@ -44,7 +44,7 @@ public final class Constants {
     public static final int STORAGE_MOTOR = 20;
 
     public static final int INTAKE_MOTOR = 23;
-    public static final int MOVE_STORAGE_MOTOR = 24;
+    public static final int PIVOT_MOTOR = 24;
     public static final int FEEDER_MOTOR = 25;
     public static final int SHOOTER_MOTOR = 26;
 
