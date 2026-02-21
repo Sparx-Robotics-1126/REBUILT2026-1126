@@ -24,10 +24,10 @@ public final class Field {
     public static final double CENTER_Y = FieldInfo.width() / 2.0;
 
     public static final ExtPose WAYPOINT_FAR = new ExtPose(
-        new Pose2d((getTag(17).getX() + Swerve.OFFSET), getTag(17).getY(), Rotation2d.k180deg)
+        new Pose2d((getTag(17).getX() + Swerve.OFFSET), getTag(17).getY(), Rotation2d.kZero)
     );
     public static final ExtPose WAYPOINT_NEAR = new ExtPose(
-        new Pose2d((getTag(28).getX() - Swerve.OFFSET), getTag(28).getY(), Rotation2d.kZero)
+        new Pose2d((getTag(28).getX() - Swerve.OFFSET), getTag(28).getY(), Rotation2d.k180deg)
     );
 
     public static final ExtPose WAYPOINT_GOAL_FAR = new ExtPose(new Pose2d(CENTER_X, CENTER_Y, Rotation2d.kZero));
@@ -58,6 +58,8 @@ public final class Field {
 
     /** Center X of the hub is half way between AT26 and AT20. */
     public static final double HUB_CENTER_X = getTag(26).getX() + (getTag(20).getX() - getTag(26).getX());
+    public static final double HUB_SHOOTING_X = HUB_CENTER_X - 2.0;
+    public static final ExtPose HUB_SHOOTING_LOCATION = new ExtPose(HUB_SHOOTING_X, HUB_CENTER_Y, Rotation2d.kZero);
 
     /** Picking the center of the hub as the hub's location, for the purpose of aiming. */
     public static final ExtTranslation HUB = new ExtTranslation(HUB_CENTER_X, HUB_CENTER_Y);
@@ -161,6 +163,9 @@ public final class Field {
         new LineObstacle(TOWER_DEPOT_NEAR_CORNER.getRed(), TOWER_DEPOT_FAR_CORNER.getRed(), 10.0, 0.5),
         new LineObstacle(TOWER_DEPOT_FAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5), 
         new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5),
+        
+        // new CircleObstacle(HUB.get(), 3.0, 8.0, 1.0),
+        
     };
 
     // spotless:on

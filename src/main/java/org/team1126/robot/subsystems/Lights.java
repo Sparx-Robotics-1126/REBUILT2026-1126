@@ -28,7 +28,6 @@ import org.team1126.lib.util.Alliance;
 import org.team1126.lib.util.Mutable;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.robot.Constants.RioIO;
-import org.team1126.robot.util.ReefSelection;
 
 @Logged
 public final class Lights {
@@ -256,32 +255,6 @@ public final class Lights {
                             boolean blink = true; // selection.isScoring() && (selection.isLeft() ? 0 : 1) == j;
 
                             if ((blink ? RobotController.getRSLState() : true) && i < ((28 / 4) * 1)) {
-                                setSingle(j == 0, i, Color.LEVEL);
-                            } else {
-                                setSingle(j == 0, i, Color.OFF);
-                            }
-                        }
-                    }
-                })
-                .onEnd(() -> setBoth(Color.OFF))
-                .ignoringDisable(true)
-                .withName("Lights.Sides.levelSelection()");
-        }
-
-        /**
-         * Displays the currently selected reef level.
-         * @param selection The reef selection.
-         */
-        public Command levelSelection(ReefSelection selection) {
-            return commandBuilder()
-                .onExecute(() -> {
-                    for (int i = 0; i < LENGTH; i++) {
-                        for (int j = 0; j <= 1; j++) {
-                            boolean blink = selection.isScoring() && (selection.isLeft() ? 0 : 1) == j;
-
-                            if (
-                                (blink ? RobotController.getRSLState() : true) && i < ((28 / 4) * selection.getLevel())
-                            ) {
                                 setSingle(j == 0, i, Color.LEVEL);
                             } else {
                                 setSingle(j == 0, i, Color.OFF);
@@ -759,12 +732,7 @@ public final class Lights {
         /**
          * Displays the coral state.
          */
-        public Command coralDisplay(
-            BooleanSupplier hasCoral,
-            BooleanSupplier goosing,
-            DoubleSupplier goosePosition,
-            ReefSelection selection
-        ) {
+        public Command coralDisplay(BooleanSupplier hasCoral, BooleanSupplier goosing, DoubleSupplier goosePosition) {
             final double GOOSE_RANGE = 0.15;
             final double HALF_RANGE = GOOSE_RANGE / 2.0;
 

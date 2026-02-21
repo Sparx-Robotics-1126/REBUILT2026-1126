@@ -5,8 +5,6 @@ import static edu.wpi.first.wpilibj.XboxController.Axis.*;
 import com.ctre.phoenix6.Orchestra;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -26,7 +24,6 @@ import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.Field;
 import org.team1126.robot.util.MatchData;
-import org.team1126.robot.util.ReefSelection;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -40,8 +37,6 @@ public final class Robot extends LoggedRobot {
     public final Intake intake;
 
     public final MatchData matchData;
-
-    public final ReefSelection selection;
 
     public final Routines routines;
     public final Autos autos;
@@ -65,9 +60,6 @@ public final class Robot extends LoggedRobot {
 
         matchData = new MatchData();
 
-        // Initialize helpers
-        selection = new ReefSelection();
-
         // Initialize compositions
         routines = new Routines(this);
         autos = new Autos(this);
@@ -82,25 +74,24 @@ public final class Robot extends LoggedRobot {
         // Create triggers
         // Trigger allowGoosing = coDriver.a().negate();
         // Trigger changedReference = RobotModeTriggers.teleop().and(swerve::changedReference);
-        // Trigger poo = (driver.leftBumper().or(driver.rightBumper()).negate()).and(selection::isL1);
 
         // Driver bindings
-        driver.axisLessThan(kRightY.value, -0.5).onTrue(selection.incrementLevel());
-        driver.axisGreaterThan(kRightY.value, 0.5).onTrue(selection.decrementLevel());
         driver.leftTrigger().onTrue(swerve.tareRotation());
 
         // driver.povLeft().onTrue(swerve.tareRotation());
-        driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
-        driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
+        // driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
+        // driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
 
-        // driver.b().whileTrue(swerve.apfDrive(() -> new Pose2d(6.844, 0.693, Rotation2d.fromDegrees(180)), () -> 0.3));
+        driver.povUp().and(driver.leftBumper()).whileTrue(routines.trenchNorthWest());
+        driver.povUp().and(driver.rightBumper()).whileTrue(routines.trenchNorthEast());
+        driver.povDown().and(driver.leftBumper()).whileTrue(routines.trenchSouthWest());
+        driver.povDown().and(driver.rightBumper()).whileTrue(routines.trenchSouthEast());
+        driver.a().whileTrue(swerve.apfDrive(Field.HUB_SHOOTING_LOCATION, () -> 0.8, () -> 0.1));
         // driver.a().whileTrue(routines.refuelFromDepot());
-        driver.b().whileTrue(routines.refuelFromNeutral());
-        driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
-        // driver.povLeft().whileTrue(swerve.attractiveTrench(() -> false, () -> 0.5));
-        // driver.povRight().whileTrue(swerve.attractiveTrench(() -> true, () -> 0.5));
-        driver.povLeft().whileTrue(swerve.navTrench(() -> false));
-        driver.povRight().whileTrue(swerve.navTrench(() -> true));
+        // driver.b().whileTrue(routines.refuelFromNeutral());
+        // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
+        // driver.povLeft().whileTrue(swerve.driveTrench(() -> false));
+        // driver.povRight().whileTrue(swerve.driveTrench(() -> true));
         driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
 
         // driver
@@ -108,7 +99,7 @@ public final class Robot extends LoggedRobot {
         //     .whileTrue(
         //         (swerve.apfDrive(() -> swerve.getFuelPose(), () -> 0.25)).until(() -> swerve.getFuelPose() == null)
         //     );
-        driver.rightBumper().whileTrue(swerve.resetOdometry());
+        // driver.rightBumper().whileTrue(swerve.resetOdometry());
 
         // changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
 
@@ -138,8 +129,6 @@ public final class Robot extends LoggedRobot {
         scheduler.schedule(routines.lightsPreMatch(autos::defaultSelected));
 
         RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
-
-        lights.sides.setDefaultCommand(lights.sides.levelSelection(selection));
 
         // Disable loop overrun warnings from the command
         // scheduler, since we already log loop timings
