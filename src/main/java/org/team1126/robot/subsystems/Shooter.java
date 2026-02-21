@@ -103,7 +103,7 @@ public final class Shooter extends GRRSubsystem {
             .encoder.positionConversionFactor(1)
             .velocityConversionFactor(1 / 1.4);
 
-        shooterShootSpeed = tunables.value("Shoot Speed", 1000);
+        shooterShootSpeed = tunables.value("Shoot Speed", 2000);
         shooterIdleSpeed = tunables.value("Idle Speed", 0.0);
 
         shooterEncoder = shooterMotor.getEncoder();
@@ -115,7 +115,7 @@ public final class Shooter extends GRRSubsystem {
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             // Set PID values for position control. We don't need to pass a closed
             // loop slot, as it will default to slot 0.
-            .p(0.0001)
+            .p(0.0002)
             .i(0.0)
             .d(0.0)
             .outputRange(-1, 1)
@@ -124,19 +124,19 @@ public final class Shooter extends GRRSubsystem {
             // .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
             .feedForward
             // kV is now in Volts, so we multiply by the nominal voltage (12V)
-            .kV(0.00005) // INCREASE this significantly - was 0.005
-            .kS(0.00);
+            .kV(0.0020) // INCREASE this significantly - was 0.005
+            .kS(0.20);
         // .kV(12.0 / 5767);
 
         shooterConfig.closedLoop.maxMotion
             // Set MAXMotion parameters for position control. We don't need to pass
             // a closed loop slot, as it will default to slot 0.
             // .cruiseVelocity(1000)
-            .maxAcceleration(200)
-            .allowedProfileError(100)
+            .maxAcceleration(2000)
+            .allowedProfileError(25)
             // Set MAXMotion parameters for velocity control in slot 1
-            .cruiseVelocity(800)
-            .allowedProfileError(100);
+            .cruiseVelocity(2500)
+            .allowedProfileError(25);
 
         shooterMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
