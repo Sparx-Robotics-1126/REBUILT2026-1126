@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import org.team1126.lib.math.FieldInfo;
-import org.team1126.lib.math.PAPFController.CircleObstacle;
 import org.team1126.lib.math.PAPFController.LateralObstacle;
 import org.team1126.lib.math.PAPFController.LineObstacle;
 import org.team1126.lib.math.PAPFController.LongitudinalObstacle;
@@ -59,6 +58,8 @@ public final class Field {
 
     /** Center X of the hub is half way between AT26 and AT20. */
     public static final double HUB_CENTER_X = getTag(26).getX() + (getTag(20).getX() - getTag(26).getX());
+    public static final double HUB_SHOOTING_X = HUB_CENTER_X - 2.0;
+    public static final ExtPose HUB_SHOOTING_LOCATION = new ExtPose(HUB_SHOOTING_X, HUB_CENTER_Y, Rotation2d.kZero);
 
     /** Picking the center of the hub as the hub's location, for the purpose of aiming. */
     public static final ExtTranslation HUB = new ExtTranslation(HUB_CENTER_X, HUB_CENTER_Y);
@@ -163,7 +164,7 @@ public final class Field {
         new LineObstacle(TOWER_DEPOT_FAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5), 
         new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5),
         
-        new CircleObstacle(HUB.get(), 2.0, 10.0, 1.0),
+        // new CircleObstacle(HUB.get(), 3.0, 8.0, 1.0),
         
     };
 

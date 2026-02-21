@@ -5,8 +5,6 @@ import static edu.wpi.first.wpilibj.XboxController.Axis.*;
 import com.ctre.phoenix6.Orchestra;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -77,16 +75,17 @@ public final class Robot extends LoggedRobot {
         driver.leftTrigger().onTrue(swerve.tareRotation());
 
         // driver.povLeft().onTrue(swerve.tareRotation());
-        driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
-        driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
+        // driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
+        // driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
 
-        driver.povRight().whileTrue(routines.trench(() -> false, () -> true));
-        driver.povLeft().whileTrue(routines.trench(() -> true, () -> true));
-        driver.povUp().whileTrue(routines.trench(() -> true, () -> false));
-        driver.povDown().whileTrue(routines.trench(() -> false, () -> false));
+        driver.povUp().and(driver.x()).whileTrue(routines.trenchNorthWest());
+        driver.povUp().and(driver.b()).whileTrue(routines.trenchNorthEast());
+        driver.povDown().and(driver.x()).whileTrue(routines.trenchSouthWest());
+        driver.povDown().and(driver.b()).whileTrue(routines.trenchSouthEast());
+        driver.a().whileTrue(swerve.apfDrive(Field.HUB_SHOOTING_LOCATION, () -> 0.8, () -> 0.1));
         // driver.a().whileTrue(routines.refuelFromDepot());
-        driver.b().whileTrue(routines.refuelFromNeutral());
-        driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
+        // driver.b().whileTrue(routines.refuelFromNeutral());
+        // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
         // driver.povLeft().whileTrue(swerve.driveTrench(() -> false));
         // driver.povRight().whileTrue(swerve.driveTrench(() -> true));
         driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
@@ -96,7 +95,7 @@ public final class Robot extends LoggedRobot {
         //     .whileTrue(
         //         (swerve.apfDrive(() -> swerve.getFuelPose(), () -> 0.25)).until(() -> swerve.getFuelPose() == null)
         //     );
-        driver.rightBumper().whileTrue(swerve.resetOdometry());
+        // driver.rightBumper().whileTrue(swerve.resetOdometry());
 
         // changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
 

@@ -279,7 +279,7 @@ public final class Swerve extends GRRSubsystem {
     /**
      * Remove @NotLogged for debugging
      */
-    // @NotLogged
+    @NotLogged
     public List<Pose2d> apfVisualization() {
         return apf.visualizeField(40, 1.0, FieldInfo.length(), FieldInfo.width());
     }

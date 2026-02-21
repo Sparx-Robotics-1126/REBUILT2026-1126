@@ -113,9 +113,20 @@ public final class Routines {
         return swerve.apfDrive(endpoint, waypointDecel, waypointTol);
     }
 
-    public Command trench(BooleanSupplier left, BooleanSupplier north) {
-        final WaypointHeading heading = north.getAsBoolean() ? WaypointHeading.NORTH : WaypointHeading.SOUTH;
-        return driveWaypoint(heading, left.getAsBoolean()).andThen(driveEndpoint(heading));
+    public Command trenchNorthWest() {
+        return driveWaypoint(WaypointHeading.NORTH, true).andThen(driveEndpoint(WaypointHeading.NORTH));
+    }
+
+    public Command trenchNorthEast() {
+        return driveWaypoint(WaypointHeading.NORTH, false).andThen(driveEndpoint(WaypointHeading.NORTH));
+    }
+
+    public Command trenchSouthWest() {
+        return driveWaypoint(WaypointHeading.SOUTH, true).andThen(driveEndpoint(WaypointHeading.SOUTH));
+    }
+
+    public Command trenchSouthEast() {
+        return driveWaypoint(WaypointHeading.SOUTH, false).andThen(driveEndpoint(WaypointHeading.SOUTH));
     }
 
     /**
