@@ -113,7 +113,7 @@ public final class Robot extends LoggedRobot {
         //        coDriver.b().onTrue(storage.moveMotorCommand(false));
 
         // shooter.setDefaultCommand(shooter.idleShooterCommand());
-        coDriver.rightTrigger().onTrue(shooter.readyShooter());
+        coDriver.rightTrigger().whileTrue(shooter.readyShooter());
         coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         coDriver.leftTrigger().whileTrue(routines.shootFuel());
 
@@ -124,13 +124,13 @@ public final class Robot extends LoggedRobot {
         coDriver.b().whileTrue(routines.releaseAll());
         coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
         coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
-        // coDriver.rightBumper().onTrue(swerve.playMusic("enemy"));
+        coDriver.rightBumper().onTrue(swerve.playMusic("enemy"));
         //
 
         // Setup lights
         scheduler.schedule(routines.lightsPreMatch(autos::defaultSelected));
 
-        RobotModeTriggers.autonomous().whileTrue(lights.sides.flames(false));
+        RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
 
         // Disable loop overrun warnings from the command
         // scheduler, since we already log loop timings
