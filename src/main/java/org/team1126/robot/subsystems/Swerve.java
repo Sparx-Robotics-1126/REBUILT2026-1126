@@ -14,6 +14,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -22,7 +24,6 @@ import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.Math2;
 import org.team1126.lib.math.PAPFController;
-import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.swerve.Perspective;
 import org.team1126.lib.swerve.SwerveAPI;
 import org.team1126.lib.swerve.SwerveState;
@@ -155,8 +156,7 @@ public final class Swerve extends GRRSubsystem {
     private boolean seesAprilTag = false;
     private boolean changedReference = false;
 
-    private ExtPose[] waypoints;
-    private int currentWaypoint;
+    // private List<ExtPose> waypoints;
 
     // private PhotonCamera fuelCamera;
     private boolean fuelTargetLost;
@@ -246,18 +246,18 @@ public final class Swerve extends GRRSubsystem {
 
         facingHub = Math2.isNear(hubAngle, state.rotation, facingHubTol.get());
 
-        if (waypoints != null && currentWaypoint < waypoints.length) {
-            if (state.pose.getTranslation().getDistance(waypoints[currentWaypoint].get().getTranslation()) < 0.1) {
-                if (currentWaypoint < waypoints.length) {
-                    currentWaypoint++;
-                    driveTrench(waypoints[currentWaypoint].get(), trenchDecel.get());
-                } else {
-                    waypoints = null;
-                    currentWaypoint = -1;
-                    stop(true);
-                }
-            }
-        }
+        // if (waypoints != null && waypoints.size() > 0) {
+        //     var curr = waypoints.get(0);
+        //     if (state.pose.getTranslation().getDistance(curr.get().getTranslation()) < 0.1) {
+        //         waypoints.remove(0);
+        //         if (waypoints.size() > 0) {
+        //             driveWaypoint(waypoints.get(0).get(), trenchDecel.get());
+        //         } else {
+        //             // TODO: stop the robot...
+        //             api.applyStop(true);
+        //         }
+        //     }
+        // }
     }
 
     /**
@@ -279,7 +279,7 @@ public final class Swerve extends GRRSubsystem {
     /**
      * Remove @NotLogged for debugging
      */
-    @NotLogged
+    // @NotLogged
     public List<Pose2d> apfVisualization() {
         return apf.visualizeField(40, 1.0, FieldInfo.length(), FieldInfo.width());
     }
@@ -452,24 +452,27 @@ public final class Swerve extends GRRSubsystem {
             });
     }
 
-    public Command navTrench(BooleanSupplier right) {
-        return commandBuilder("Swerve.navTrench()")
-            .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
-            .onExecute(() -> {
-                waypoints = WaypointNavigator.trenching(state.pose, right.getAsBoolean());
-                currentWaypoint = 0;
-                driveTrench(waypoints[currentWaypoint].get(), trenchDecel.get());
-            });
+    public Command driveTrench(BooleanSupplier right) {
+        var waypoints = WaypointNavigator.trenching(state.pose, right.getAsBoolean());
+        var waypointCommands = new ArrayList<Command>();
+        if (waypoints != null && waypoints.size() > 0) {
+            for (var waypoint : waypoints) {
+                waypointCommands.add(driveWaypoint(waypoint.get(), trenchDecel.get()));
+            }
+        }
+        return Commands.sequence(waypointCommands.toArray(new Command[0]));
+        // CommandScheduler.getInstance().schedule(Commands.sequence(waypointCommands.toArray(new Command[0])));
     }
 
-    private void driveTrench(Pose2d goal, double deceleration) {
-        var speeds = apf.calculate(state.pose, goal.getTranslation(), apfVel.get(), deceleration);
-        speeds.omegaRadiansPerSecond = angularPID.calculate(
-            state.rotation.getRadians(),
-            goal.getRotation().getRadians()
-        );
-
-        api.applySpeeds(speeds, Perspective.BLUE, true, true);
+    private Command driveWaypoint(Pose2d goal, double deceleration) {
+        return commandBuilder("Swerve.driveWaypoint()").onExecute(() -> {
+            var speeds = apf.calculate(state.pose, goal.getTranslation(), apfVel.get(), deceleration);
+            speeds.omegaRadiansPerSecond = angularPID.calculate(
+                state.rotation.getRadians(),
+                goal.getRotation().getRadians()
+            );
+            api.applySpeeds(speeds, Perspective.BLUE, true, true);
+        });
     }
 
     /**

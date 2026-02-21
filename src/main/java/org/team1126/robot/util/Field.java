@@ -5,10 +5,12 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import org.team1126.lib.math.FieldInfo;
+import org.team1126.lib.math.PAPFController.CircleObstacle;
 import org.team1126.lib.math.PAPFController.LateralObstacle;
 import org.team1126.lib.math.PAPFController.LineObstacle;
 import org.team1126.lib.math.PAPFController.LongitudinalObstacle;
 import org.team1126.lib.math.PAPFController.Obstacle;
+import org.team1126.lib.math.PAPFController.PointObstacle;
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.math.geometry.ExtTranslation;
 import org.team1126.robot.subsystems.Swerve;
@@ -87,6 +89,12 @@ public final class Field {
     /** The far right corner of the HUB, from the perspective of the DRIVER STATION. */
     public static final ExtTranslation BARRIER_FAR_RIGHT_CORNER = new ExtTranslation(BARRIER_FAR_X, BARRIER_RIGHT_Y);
 
+    public static final ExtTranslation B_LINE_1 = new ExtTranslation(4.6, 2.0);
+    public static final ExtTranslation B_LINE_2 = new ExtTranslation(4.6, 3.0);
+    public static final ExtTranslation B_LINE_3 = new ExtTranslation(4.6, 4.0);
+    public static final ExtTranslation B_LINE_4 = new ExtTranslation(4.6, 5.0);
+    public static final ExtTranslation B_LINE_5 = new ExtTranslation(4.6, 6.0);
+
     ////////////////////////
     // TOWER DEFINITION //
     ////////////////////////
@@ -161,6 +169,7 @@ public final class Field {
         new LineObstacle(TOWER_DEPOT_NEAR_CORNER.getRed(), TOWER_DEPOT_FAR_CORNER.getRed(), 10.0, 0.5),
         new LineObstacle(TOWER_DEPOT_FAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5), 
         new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5),
+        
     };
 
     // spotless:on

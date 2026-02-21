@@ -174,5 +174,6 @@
     "WPILibJ",
     "WPIMath",
     "Writables"
-  ]
+  ],
+  "wpilib.skipSelectSimulateExtension": true
 }
