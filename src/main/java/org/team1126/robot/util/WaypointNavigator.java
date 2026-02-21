@@ -98,8 +98,7 @@ public class WaypointNavigator {
         ExtPose abstractPose = new ExtPose(currentPose);
         // 1. determine if I am north or south of the equator
         // Remember that the heading is the opposite of where we actually are.
-        WaypointHeading heading =
-            abstractPose.getBlue().getX() < EQUATOR ? WaypointHeading.NORTH : WaypointHeading.SOUTH;
+        WaypointHeading heading = currentWaypointHeading(currentPose);
         WaypointHeading currentSide = heading == WaypointHeading.NORTH ? WaypointHeading.SOUTH : WaypointHeading.NORTH;
 
         int startZone = (int) Math.round(abstractPose.getBlue().getY() * WAYPOINT_COEFFICIENT);
@@ -120,8 +119,8 @@ public class WaypointNavigator {
                 path.add(
                     new ExtPose(
                         new Pose2d(
-                            WAYPOINTS[currentSide.getVal()][i].get(Alliance.isBlue(), false),
-                            ROTATIONS[currentSide.getVal()][0][i].get(Alliance.isBlue(), false)
+                            WAYPOINTS[heading.getVal()][i].get(Alliance.isBlue(), false),
+                            ROTATIONS[heading.getVal()][0][i].get(Alliance.isBlue(), false)
                         )
                     )
                 );
@@ -131,8 +130,8 @@ public class WaypointNavigator {
                 path.add(
                     new ExtPose(
                         new Pose2d(
-                            WAYPOINTS[currentSide.getVal()][i].get(Alliance.isBlue(), false),
-                            ROTATIONS[currentSide.getVal()][0][i].get(Alliance.isBlue(), false)
+                            WAYPOINTS[heading.getVal()][i].get(Alliance.isBlue(), false),
+                            ROTATIONS[heading.getVal()][0][i].get(Alliance.isBlue(), false)
                         )
                     )
                 );
@@ -150,6 +149,17 @@ public class WaypointNavigator {
         }
 
         return path;
+    }
+
+    /**
+     * Returns which hemisphere the supplied current pose is in assuming a lateral line across the center X of the hub as the equator.
+     *
+     * @param currentPose intended to be the current position of the robot, theoretically could be any given position on the field.
+     * @return WaypointHeading of the current hemisphere.
+     */
+    public static WaypointHeading currentWaypointHeading(Pose2d currentPose) {
+        ExtPose abstractPose = new ExtPose(currentPose);
+        return abstractPose.getBlue().getX() < EQUATOR ? WaypointHeading.NORTH : WaypointHeading.SOUTH;
     }
 
     private WaypointNavigator() {

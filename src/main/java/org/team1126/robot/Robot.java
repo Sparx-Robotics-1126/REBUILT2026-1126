@@ -80,17 +80,10 @@ public final class Robot extends LoggedRobot {
         driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
         driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
 
-        driver
-            .povUp()
-            .whileTrue(
-                swerve.apfDrive(() -> new Pose2d(Field.CENTER_X, Field.CENTER_Y, Rotation2d.fromDegrees(0)), () -> 20.0)
-            );
-        driver
-            .povRight()
-            .whileTrue(swerve.apfDrive(() -> new Pose2d(6.844, 0.693, Rotation2d.fromDegrees(0)), () -> 20.0));
-        driver
-            .povLeft()
-            .whileTrue(swerve.apfDrive(() -> new Pose2d(6.844, 7.343, Rotation2d.fromDegrees(0)), () -> 20.0));
+        driver.povRight().whileTrue(routines.trench(() -> false, () -> true));
+        driver.povLeft().whileTrue(routines.trench(() -> true, () -> true));
+        driver.povUp().whileTrue(routines.trench(() -> true, () -> false));
+        driver.povDown().whileTrue(routines.trench(() -> false, () -> false));
         // driver.a().whileTrue(routines.refuelFromDepot());
         driver.b().whileTrue(routines.refuelFromNeutral());
         driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));

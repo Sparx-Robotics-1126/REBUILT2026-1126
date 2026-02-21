@@ -8,6 +8,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
+import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableBoolean;
@@ -75,9 +76,9 @@ public final class Routines {
         final boolean blue = Alliance.isBlue();
         Pose2d waypoint;
         if (WaypointHeading.NORTH == heading) {
-            waypoint = blue ? Field.WAYPOINT_NEAR.getBlue(left) : Field.WAYPOINT_NEAR.getRed(left);
-        } else {
             waypoint = blue ? Field.WAYPOINT_FAR.getBlue(left) : Field.WAYPOINT_FAR.getRed(left);
+        } else {
+            waypoint = blue ? Field.WAYPOINT_NEAR.getBlue(left) : Field.WAYPOINT_NEAR.getRed(left);
         }
         SmartDashboard.putString(
             "Waypoint",
@@ -88,26 +89,10 @@ public final class Routines {
 
     private Command driveWaypoint(WaypointHeading heading, boolean left) {
         final Pose2d waypoint = waypoint(heading, left);
-        return swerve.apfDrive(() -> waypoint, waypointDecel::get);
+        return swerve.apfDrive(() -> waypoint, waypointDecel, waypointTol);
     }
 
-    private WaypointHeading findHeading() {
-        WaypointHeading heading = WaypointHeading.NORTH;
-        final boolean blue = Alliance.isBlue();
-        double currentX = swerve.getPose().getX();
-        SmartDashboard.putString("Heading", "NORTH");
-        if (
-            (blue && currentX > Field.BARRIER_FAR_RIGHT_CORNER.getBlue().getX())
-            || (!blue && currentX < Field.BARRIER_FAR_RIGHT_CORNER.getRed().getX())
-        ) {
-            heading = WaypointHeading.SOUTH;
-            SmartDashboard.putString("Heading", "SOUTH");
-        }
-
-        return heading;
-    }
-
-    private Pose2d endpoint(WaypointHeading heading) {
+    private ExtPose endpoint(WaypointHeading heading) {
         final boolean blue = Alliance.isBlue();
         Pose2d endpoint;
         if (WaypointHeading.NORTH == heading) {
@@ -120,35 +105,17 @@ public final class Routines {
             "Endpoint",
             "X: " + endpoint.getX() + ", Y: " + endpoint.getY() + ", rot: " + endpoint.getRotation()
         );
-        return endpoint;
+        return new ExtPose(endpoint);
     }
 
     private Command driveEndpoint(WaypointHeading heading) {
-        Pose2d endpoint = endpoint(heading);
-        return swerve.apfDrive(() -> endpoint, waypointDecel::get);
+        ExtPose endpoint = endpoint(heading);
+        return swerve.apfDrive(endpoint, waypointDecel, waypointTol);
     }
 
-    public Command trench(BooleanSupplier left) {
-        final WaypointHeading heading = findHeading();
-        return sequence(
-            driveWaypoint(heading, left.getAsBoolean()).onlyWhile(
-                () ->
-                    swerve
-                        .getPose()
-                        .getTranslation()
-                        .getDistance(waypoint(heading, left.getAsBoolean()).getTranslation())
-                    > 0.1
-            ),
-            // driveWaypoint(WaypointHeading.SOUTH, left.getAsBoolean()).onlyWhile(
-            //     () ->
-            //         swerve
-            //             .getPose()
-            //             .getTranslation()
-            //             .getDistance(waypoint(WaypointHeading.SOUTH, left.getAsBoolean()).getTranslation())
-            //         > 0.1
-            // ),
-            driveEndpoint(heading)
-        );
+    public Command trench(BooleanSupplier left, BooleanSupplier north) {
+        final WaypointHeading heading = north.getAsBoolean() ? WaypointHeading.NORTH : WaypointHeading.SOUTH;
+        return driveWaypoint(heading, left.getAsBoolean()).andThen(driveEndpoint(heading));
     }
 
     /**

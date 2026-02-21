@@ -10,7 +10,6 @@ import org.team1126.lib.math.PAPFController.LateralObstacle;
 import org.team1126.lib.math.PAPFController.LineObstacle;
 import org.team1126.lib.math.PAPFController.LongitudinalObstacle;
 import org.team1126.lib.math.PAPFController.Obstacle;
-import org.team1126.lib.math.PAPFController.PointObstacle;
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.math.geometry.ExtTranslation;
 import org.team1126.robot.subsystems.Swerve;
@@ -26,10 +25,10 @@ public final class Field {
     public static final double CENTER_Y = FieldInfo.width() / 2.0;
 
     public static final ExtPose WAYPOINT_FAR = new ExtPose(
-        new Pose2d((getTag(17).getX() + Swerve.OFFSET), getTag(17).getY(), Rotation2d.k180deg)
+        new Pose2d((getTag(17).getX() + Swerve.OFFSET), getTag(17).getY(), Rotation2d.kZero)
     );
     public static final ExtPose WAYPOINT_NEAR = new ExtPose(
-        new Pose2d((getTag(28).getX() - Swerve.OFFSET), getTag(28).getY(), Rotation2d.kZero)
+        new Pose2d((getTag(28).getX() - Swerve.OFFSET), getTag(28).getY(), Rotation2d.k180deg)
     );
 
     public static final ExtPose WAYPOINT_GOAL_FAR = new ExtPose(new Pose2d(CENTER_X, CENTER_Y, Rotation2d.kZero));
@@ -88,12 +87,6 @@ public final class Field {
     public static final ExtTranslation BARRIER_FAR_LEFT_CORNER = new ExtTranslation(BARRIER_FAR_X, BARRIER_LEFT_Y);
     /** The far right corner of the HUB, from the perspective of the DRIVER STATION. */
     public static final ExtTranslation BARRIER_FAR_RIGHT_CORNER = new ExtTranslation(BARRIER_FAR_X, BARRIER_RIGHT_Y);
-
-    public static final ExtTranslation B_LINE_1 = new ExtTranslation(4.6, 2.0);
-    public static final ExtTranslation B_LINE_2 = new ExtTranslation(4.6, 3.0);
-    public static final ExtTranslation B_LINE_3 = new ExtTranslation(4.6, 4.0);
-    public static final ExtTranslation B_LINE_4 = new ExtTranslation(4.6, 5.0);
-    public static final ExtTranslation B_LINE_5 = new ExtTranslation(4.6, 6.0);
 
     ////////////////////////
     // TOWER DEFINITION //
@@ -169,6 +162,8 @@ public final class Field {
         new LineObstacle(TOWER_DEPOT_NEAR_CORNER.getRed(), TOWER_DEPOT_FAR_CORNER.getRed(), 10.0, 0.5),
         new LineObstacle(TOWER_DEPOT_FAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5), 
         new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5),
+        
+        new CircleObstacle(HUB.get(), 2.0, 10.0, 1.0),
         
     };
 
