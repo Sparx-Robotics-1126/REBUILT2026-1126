@@ -78,10 +78,10 @@ public final class Robot extends LoggedRobot {
         // driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
         // driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
 
-        driver.povUp().and(driver.x()).whileTrue(routines.trenchNorthWest());
-        driver.povUp().and(driver.b()).whileTrue(routines.trenchNorthEast());
-        driver.povDown().and(driver.x()).whileTrue(routines.trenchSouthWest());
-        driver.povDown().and(driver.b()).whileTrue(routines.trenchSouthEast());
+        driver.povUp().and(driver.leftBumper()).whileTrue(routines.trenchNorthWest());
+        driver.povUp().and(driver.rightBumper()).whileTrue(routines.trenchNorthEast());
+        driver.povDown().and(driver.leftBumper()).whileTrue(routines.trenchSouthWest());
+        driver.povDown().and(driver.rightBumper()).whileTrue(routines.trenchSouthEast());
         driver.a().whileTrue(swerve.apfDrive(Field.HUB_SHOOTING_LOCATION, () -> 0.8, () -> 0.1));
         // driver.a().whileTrue(routines.refuelFromDepot());
         // driver.b().whileTrue(routines.refuelFromNeutral());
