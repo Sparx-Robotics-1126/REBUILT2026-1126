@@ -163,6 +163,9 @@ public final class Swerve extends GRRSubsystem {
 
     private boolean facingHub = false;
 
+    private double distanceToHub = 0.0;
+    private double angleToHub = 0.0;
+
     // private final Orchestra orchestra;
 
     public Swerve() {
@@ -245,6 +248,12 @@ public final class Swerve extends GRRSubsystem {
         hubReference = new Pose2d(hubCenter, hubAngle);
 
         facingHub = Math2.isNear(hubAngle, state.rotation, facingHubTol.get());
+
+        final double deltaX = state.pose.getX() - Field.HUB.get().getX();
+        final double deltaY = state.pose.getY() - Field.HUB.get().getY();
+
+        distanceToHub = Math.hypot(deltaX, deltaY);
+        angleToHub = Math.atan2(deltaY, deltaX);
 
         // if (waypoints != null && waypoints.size() > 0) {
         //     var curr = waypoints.get(0);
@@ -390,6 +399,24 @@ public final class Swerve extends GRRSubsystem {
                 api.config.driverAngularVel = turboSpin.get();
             })
             .finallyDo(() -> api.config.driverAngularVel = configured.value);
+    }
+
+    public Command aimAtHub(final DoubleSupplier maxDeceleration) {
+        return commandBuilder("Swerve.aimAtHub()")
+            .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
+            .onExecute(() -> {
+                Pose2d goal = new Pose2d(state.pose.getX(), state.pose.getY(), new Rotation2d(angleToHub));
+                var speeds = apf.calculate(
+                    state.pose,
+                    goal.getTranslation(),
+                    config.velocity,
+                    maxDeceleration.getAsDouble()
+                );
+
+                speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
+
+                api.applySpeeds(speeds, Perspective.BLUE, true, true);
+            });
     }
 
     public Command playMusic(String song) {

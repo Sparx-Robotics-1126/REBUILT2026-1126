@@ -20,7 +20,6 @@ import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
-import org.team1126.robot.util.Field;
 import org.team1126.robot.util.MatchData;
 
 @Logged
@@ -82,7 +81,7 @@ public final class Robot extends LoggedRobot {
         driver.povUp().and(driver.rightBumper()).whileTrue(routines.trenchNorthEast());
         driver.povDown().and(driver.leftBumper()).whileTrue(routines.trenchSouthWest());
         driver.povDown().and(driver.rightBumper()).whileTrue(routines.trenchSouthEast());
-        driver.a().whileTrue(swerve.apfDrive(Field.HUB_SHOOTING_LOCATION, () -> 0.8, () -> 0.1));
+        driver.a().whileTrue(swerve.aimAtHub(() -> 0.2));
         // driver.a().whileTrue(routines.refuelFromDepot());
         // driver.b().whileTrue(routines.refuelFromNeutral());
         // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
