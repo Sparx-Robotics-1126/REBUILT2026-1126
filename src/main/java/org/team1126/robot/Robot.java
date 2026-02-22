@@ -23,6 +23,7 @@ import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.MatchData;
+import org.team1126.robot.util.WaypointNavigator.WaypointHeading;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -81,11 +82,12 @@ public final class Robot extends LoggedRobot {
         // driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
         // driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
 
-        driver.povUp().and(driver.leftBumper()).whileTrue(routines.trenchNorthWest());
-        driver.povUp().and(driver.rightBumper()).whileTrue(routines.trenchNorthEast());
-        driver.povDown().and(driver.leftBumper()).whileTrue(routines.trenchSouthWest());
-        driver.povDown().and(driver.rightBumper()).whileTrue(routines.trenchSouthEast());
+        driver.povUp().and(driver.leftBumper()).whileTrue(routines.driveTrench(() -> WaypointHeading.NORTH, () -> true));
+        driver.povUp().and(driver.rightBumper()).whileTrue(routines.driveTrench(() -> WaypointHeading.NORTH, () -> false));
+        driver.povDown().and(driver.leftBumper()).whileTrue(routines.driveTrench(() -> WaypointHeading.SOUTH, () -> true));
+        driver.povDown().and(driver.rightBumper()).whileTrue(routines.driveTrench(() -> WaypointHeading.SOUTH, () -> false));
         driver.a().whileTrue(routines.aimAtHub(() -> 0.2));
+        driver.rightStick().whileTrue(swerve.drive(this::driverX, this::driverY, () -> swerve.getHubAngular()));
         // driver.a().whileTrue(routines.refuelFromDepot());
         // driver.b().whileTrue(routines.refuelFromNeutral());
         // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
@@ -120,6 +122,7 @@ public final class Robot extends LoggedRobot {
         coDriver.x().whileTrue(intake.moveIntakeMotorCommand(false));
         coDriver.y().whileTrue(intake.moveMotorPosHomeCommand());
         coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
+        //        coDriver.x().whileTrue(routines.shootFuel());
         //        coDriver.x().whileTrue(routines.shootFuel());
         coDriver.b().whileTrue(routines.releaseAll());
         //        coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
@@ -162,6 +165,8 @@ public final class Robot extends LoggedRobot {
 
     @NotLogged
     public double driverAngular() {
+        return -driver.getRightX();
+        // return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
         return -driver.getRightX();
         // return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
     }

@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
@@ -164,31 +166,10 @@ public final class Routines {
         return parallel(selfDriveLights(), swerve.aimAtHub(maxDeceleration));
     }
 
-    public Command trenchNorthWest() {
+    public Command driveTrench(Supplier<WaypointHeading> headingSupplier, BooleanSupplier left) {
         return parallel(
             selfDriveLights(),
-            driveWaypoint(WaypointHeading.NORTH, true).andThen(driveEndpoint(WaypointHeading.NORTH))
-        );
-    }
-
-    public Command trenchNorthEast() {
-        return parallel(
-            selfDriveLights(),
-            driveWaypoint(WaypointHeading.NORTH, false).andThen(driveEndpoint(WaypointHeading.NORTH))
-        );
-    }
-
-    public Command trenchSouthWest() {
-        return parallel(
-            selfDriveLights(),
-            driveWaypoint(WaypointHeading.SOUTH, true).andThen(driveEndpoint(WaypointHeading.SOUTH))
-        );
-    }
-
-    public Command trenchSouthEast() {
-        return parallel(
-            selfDriveLights(),
-            driveWaypoint(WaypointHeading.SOUTH, false).andThen(driveEndpoint(WaypointHeading.SOUTH))
+            driveWaypoint(headingSupplier.get(), left.getAsBoolean()).andThen(driveEndpoint(headingSupplier.get()))
         );
     }
 
