@@ -175,5 +175,4 @@
     "WPIMath",
     "Writables"
   ],
-  "wpilib.skipSelectSimulateExtension": true
 }
