@@ -85,7 +85,7 @@ public final class Robot extends LoggedRobot {
         driver.povUp().and(driver.rightBumper()).whileTrue(routines.trenchNorthEast());
         driver.povDown().and(driver.leftBumper()).whileTrue(routines.trenchSouthWest());
         driver.povDown().and(driver.rightBumper()).whileTrue(routines.trenchSouthEast());
-        driver.a().whileTrue(swerve.aimAtHub(() -> 0.2));
+        driver.a().whileTrue(routines.aimAtHub(() -> 0.2));
         // driver.a().whileTrue(routines.refuelFromDepot());
         // driver.b().whileTrue(routines.refuelFromNeutral());
         // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));

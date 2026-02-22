@@ -8,6 +8,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
@@ -139,7 +141,9 @@ public final class Routines {
         ExtPose endpoint = endpoint(heading);
         return swerve.apfDrive(endpoint, waypointDecel, waypointTol);
     }
-
+    public Command aimAtHub(final DoubleSupplier maxDeceleration) {
+        return parallel(selfDriveLights(),swerve.aimAtHub(maxDeceleration));
+    }
     public Command trenchNorthWest() {
         return parallel(selfDriveLights(),
                 driveWaypoint(WaypointHeading.NORTH, true).andThen(driveEndpoint(WaypointHeading.NORTH)));
