@@ -16,6 +16,8 @@ import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.command.GRRSubsystem;
 
+import java.util.function.BooleanSupplier;
+
 @Logged
 public final class Storage extends GRRSubsystem {
 
@@ -57,10 +59,16 @@ public final class Storage extends GRRSubsystem {
             rollerMotor.set(this.voltage.get());
         }
     }
+    public void feed(BooleanSupplier isReady) {
+        if (isReady.getAsBoolean()) {
+            moveMotor(false);
+        }
+    }
 
-    public Command feedShooter() {
+    public Command feedShooter(BooleanSupplier isReady) {
         return commandBuilder()
-            .onExecute(() -> moveMotor(false))
+            .onExecute(
+                    () -> feed(isReady))
             .onEnd(() -> rollerMotor.set(0));
     }
 

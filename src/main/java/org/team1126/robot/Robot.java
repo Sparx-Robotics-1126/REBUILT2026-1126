@@ -92,7 +92,7 @@ public final class Robot extends LoggedRobot {
         // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
         // driver.povLeft().whileTrue(swerve.driveTrench(() -> false));
         // driver.povRight().whileTrue(swerve.driveTrench(() -> true));
-        driver.leftStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
+        driver.rightStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
 
         // driver
         //     .povRight()
@@ -108,20 +108,21 @@ public final class Robot extends LoggedRobot {
         //        coDriver.x().onTrue(storage.moveMotorCommand(true));
         //        coDriver.b().onTrue(storage.moveMotorCommand(false));
 
-        // shooter.setDefaultCommand(shooter.idleShooterCommand());
-        coDriver.rightTrigger().whileTrue(shooter.readyShooter());
-        coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
-        coDriver.leftTrigger().whileTrue(routines.shootFuel());
+         shooter.setDefaultCommand(shooter.idleShooterCommand());
+        coDriver.leftTrigger().whileTrue(shooter.readyShooter());
+        coDriver.rightTrigger().whileTrue(routines.shootFuel());
 
+        coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
-        // coDriver.y().whileTrue(storage.feedShooter());
+        // coDriver.y().whileTrue(storage.shoot());
         coDriver.a().whileTrue(intake.moveMotorPosCommand());
+        coDriver.x().whileTrue(intake.moveIntakeMotorCommand(false));
         coDriver.y().whileTrue(intake.moveMotorPosHomeCommand());
         coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
-        coDriver.x().whileTrue(routines.shootFuel());
+//        coDriver.x().whileTrue(routines.shootFuel());
         coDriver.b().whileTrue(routines.releaseAll());
-        coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
-        coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
+//        coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
+//        coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
         coDriver.rightBumper().onTrue(swerve.playMusic("enemy"));
         //
 

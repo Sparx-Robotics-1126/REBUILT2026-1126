@@ -54,8 +54,16 @@ public final class Routines {
         //        selection = robot.selection;
     }
 
+    public Command prepareForShooting(){
+        return parallel(
+                shooter.getReadyCommand()
+                ).withName("Routines.prepareForShooting()");
+    }
     public Command shootFuel() {
-        return parallel(storage.feedShooter(), shooter.feedShooter()).withName("Routines.score()");
+        return parallel(
+                shootingLights(),
+                storage.feedShooter(shooter::shooterIsReady),
+                shooter.shoot(shooter::feederIsReady)).withName("Routines.score()");
     }
 
     public Command releaseAll() {
@@ -133,26 +141,28 @@ public final class Routines {
     }
 
     public Command trenchNorthWest() {
-        return driveWaypoint(WaypointHeading.NORTH, true).andThen(driveEndpoint(WaypointHeading.NORTH));
+        return parallel(selfDriveLights(),
+                driveWaypoint(WaypointHeading.NORTH, true).andThen(driveEndpoint(WaypointHeading.NORTH)));
     }
 
     public Command trenchNorthEast() {
-        return driveWaypoint(WaypointHeading.NORTH, false).andThen(driveEndpoint(WaypointHeading.NORTH));
+        return parallel(selfDriveLights(),driveWaypoint(WaypointHeading.NORTH, false).andThen(driveEndpoint(WaypointHeading.NORTH)));
     }
 
     public Command trenchSouthWest() {
-        return driveWaypoint(WaypointHeading.SOUTH, true).andThen(driveEndpoint(WaypointHeading.SOUTH));
+        return parallel(selfDriveLights(),driveWaypoint(WaypointHeading.SOUTH, true).andThen(driveEndpoint(WaypointHeading.SOUTH)));
     }
 
     public Command trenchSouthEast() {
-        return driveWaypoint(WaypointHeading.SOUTH, false).andThen(driveEndpoint(WaypointHeading.SOUTH));
+        return parallel(selfDriveLights(),driveWaypoint(WaypointHeading.SOUTH, false).andThen(driveEndpoint(WaypointHeading.SOUTH)));
     }
 
     /**
      * Method that allows us to go where we would expect to find fuel in the neutral zone.
      */
     public Command refuelFromNeutral() {
-        return swerve.apfDrive(
+        return parallel(selfDriveLights(),
+                swerve.apfDrive(
             () -> {
                 return new Pose2d(
                     Field.CENTER_X - Units.inchesToMeters(35.95),
@@ -161,10 +171,11 @@ public final class Routines {
                 );
             },
             () -> 0.3
-        );
+        ));
     }
 
     public Command refuelFromDepot() {
-        return swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.2);
+        return parallel(selfDriveLights(),
+                    swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.2));
     }
 }

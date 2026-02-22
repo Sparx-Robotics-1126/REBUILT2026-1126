@@ -7,7 +7,9 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,18 +19,19 @@ import org.team1126.lib.util.command.GRRSubsystem;
 
 public final class Intake extends GRRSubsystem {
 
-    private final SparkMax intakeMotor;
-    private final SparkMax pivotMotor;
+    private final SparkFlex intakeMotor;
+    private final SparkFlex pivotMotor;
 
-    private SparkMaxConfig config;
+    private SparkFlexConfig config;
     private final RelativeEncoder intakeEncoder;
     private SparkClosedLoopController intakeController;
+    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 125);
     private static final TunableTable tunables = Tunables.getNested("intake");
 
-    private SparkMaxConfig pivotConfig;
+    private SparkFlexConfig pivotConfig;
     private final RelativeEncoder pivotEncoder;
     private SparkClosedLoopController pivotController;
-    private static final TunableTable pivotTunables = Tunables.getNested("pivot");
+    private final Tunables.TunableDouble pivotPositions = tunables.value("Pivot Positions", -.28);
 
     // private final SparkMax moveStorage;
     // private SparkMaxConfig moveStorageConfig;
@@ -37,18 +40,17 @@ public final class Intake extends GRRSubsystem {
     // private static final TunableTable moveStorageTunables = Tunables.getNested("moveStorage");
 
     //    private boolean isOn;
-    private final Tunables.TunableDouble voltage;
+//    private final Tunables.TunableDouble voltage;
 
     public Intake() {
-        this.voltage = tunables.value("Voltage", .5);
 
-        intakeMotor = new SparkMax(INTAKE_MOTOR, SparkLowLevel.MotorType.kBrushless);
+        intakeMotor = new SparkFlex(INTAKE_MOTOR, SparkLowLevel.MotorType.kBrushless);
         intakeEncoder = intakeMotor.getEncoder();
-        config = new SparkMaxConfig();
+        config = new SparkFlexConfig();
 
-        pivotMotor = new SparkMax(PIVOT_MOTOR, SparkLowLevel.MotorType.kBrushless);
+        pivotMotor = new SparkFlex(PIVOT_MOTOR, SparkLowLevel.MotorType.kBrushless);
         pivotEncoder = pivotMotor.getEncoder();
-        pivotConfig = new SparkMaxConfig();
+        pivotConfig = new SparkFlexConfig();
         pivotController = pivotMotor.getClosedLoopController();
 
         pivotConfig.closedLoop.p(.4).i(0).d(0).feedbackSensor(FeedbackSensor.kPrimaryEncoder);
@@ -78,10 +80,6 @@ public final class Intake extends GRRSubsystem {
             .d(0)
             .outputRange(-1, 1)
             // Set PID values for velocity control in slot 1
-            .p(0.0001, ClosedLoopSlot.kSlot1)
-            .i(0, ClosedLoopSlot.kSlot1)
-            .d(0, ClosedLoopSlot.kSlot1)
-            .outputRange(-1, 1, ClosedLoopSlot.kSlot1)
             .feedForward
             // kV is now in Volts, so we multiply by the nominal voltage (12V)
             .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
@@ -89,13 +87,9 @@ public final class Intake extends GRRSubsystem {
         config.closedLoop.maxMotion
             // Set MAXMotion parameters for position control. We don't need to pass
             // a closed loop slot, as it will default to slot 0.
-            .cruiseVelocity(1000)
-            .maxAcceleration(1000)
-            .allowedProfileError(1)
-            // Set MAXMotion parameters for velocity control in slot 1
-            .maxAcceleration(500, ClosedLoopSlot.kSlot1)
-            .cruiseVelocity(6000, ClosedLoopSlot.kSlot1)
-            .allowedProfileError(1, ClosedLoopSlot.kSlot1);
+            .cruiseVelocity(85)
+            .maxAcceleration(85)
+            .allowedProfileError(1);
 
         intakeMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
@@ -107,14 +101,14 @@ public final class Intake extends GRRSubsystem {
     public Command moveIntakeMotorCommand(boolean reverse) {
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(reverse))
-            .onEnd(() -> intakeMotor.set(0));
+            .onEnd(() -> intakeController.setSetpoint(0, SparkBase.ControlType.kVelocity));
     }
 
     public void moveIntakeMotor(boolean reverse) {
         if (reverse) {
-            intakeMotor.set(-this.voltage.get());
+            intakeController.setSetpoint(-this.intakeSpeed.get(), SparkBase.ControlType.kVelocity);
         } else {
-            intakeMotor.set(this.voltage.get());
+            intakeController.setSetpoint(this.intakeSpeed.get(), SparkBase.ControlType.kVelocity);
         }
     }
 
@@ -172,23 +166,37 @@ public final class Intake extends GRRSubsystem {
     //         .onEnd(() -> moveStorage.set(0));
     // }
 
-    public void moveMotorPos() {
-        this.pivotController.setSetpoint(-.28, SparkBase.ControlType.kPosition);
+    public void moveMotorPos(double position) {
+        this.pivotController.setSetpoint(position, SparkBase.ControlType.kPosition);
     }
 
     public Command moveMotorPosCommand() {
         return commandBuilder()
-            .onExecute(() -> moveMotorPos())
-            .onEnd(() -> pivotMotor.set(0));
-    }
+            .onExecute(() ->this.moveMotorPos(pivotPositions.get()))
+            .onEnd(interrupted -> {
+                // Stop driving and let it relax wherever it ended up
+                pivotMotor.setVoltage(0.0);
 
-    public void moveMotorPosHome() {
-        this.pivotController.setSetpoint(0, SparkBase.ControlType.kPosition);
+                // Put the pivot motor into Coast
+                var coastCfg = new SparkFlexConfig()
+                    .idleMode(SparkBaseConfig.IdleMode.kCoast);
+
+                pivotMotor.configure(coastCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+            });
     }
 
     public Command moveMotorPosHomeCommand() {
         return commandBuilder()
-            .onExecute(() -> moveMotorPosHome())
-            .onEnd(() -> pivotMotor.set(0));
+            .onExecute(() ->this.moveMotorPos(0))
+            .onEnd(interrupted -> {
+                // Keep actively holding home when the command ends
+                pivotController.setSetpoint(0, SparkBase.ControlType.kPosition);
+
+                // Use Brake to resist drifting away from home
+                var brakeCfg = new SparkFlexConfig()
+                    .idleMode(SparkBaseConfig.IdleMode.kBrake);
+
+                pivotMotor.configure(brakeCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+            });
     }
 }
