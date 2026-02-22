@@ -20,13 +20,13 @@ import org.team1126.lib.util.command.GRRSubsystem;
 public final class Shooter extends GRRSubsystem {
 
     private static final TunableTable tunables = Tunables.getNested("shooter");
-    private static final Tunables.TunableDouble shooterKV = tunables.value("Shooter kV", 0.00001);
+    // private static final Tunables.TunableDouble shooterKV = tunables.value("Shooter kV", 0.00001);
 
     private final SparkMax feederMotor;
     private final SparkMaxConfig feederConfig;
     private final RelativeEncoder feederEncoder;
     // private final SparkAbsoluteEncoder feederAbsoluteEncoder;
-    private final Tunables.TunableInteger feederSpeed = tunables.value("Feeder Speed", 125);
+    private final Tunables.TunableInteger feederSpeed = tunables.value("Feeder Speed", 175);
     private final SparkClosedLoopController feederController;
 
     private final SparkFlex shooterMotor;
@@ -34,8 +34,8 @@ public final class Shooter extends GRRSubsystem {
     private final RelativeEncoder shooterEncoder;
     private final SparkAbsoluteEncoder shooterAbsoluteEncoder;
     private final SparkClosedLoopController shooterController;
-    private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 275);
-    private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 175);
+    private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 450);
+    private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 200);
 
     private ShooterStates state = ShooterStates.kIdle;
 
@@ -52,7 +52,7 @@ public final class Shooter extends GRRSubsystem {
         shooterConfig = new SparkFlexConfig();
         shooterConfig
             .inverted(true)
-            .closedLoop.p(0)
+            .closedLoop.p(.00015)
             .i(0)
             .d(0)
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -60,9 +60,9 @@ public final class Shooter extends GRRSubsystem {
 
         shooterConfig.closedLoop.maxMotion
             .maxAcceleration(75)
-            .allowedProfileError(10)
+            .allowedProfileError(5)
             .cruiseVelocity(275)
-            .allowedProfileError(10);
+            .allowedProfileError(5);
 
         shooterMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
@@ -179,9 +179,9 @@ public final class Shooter extends GRRSubsystem {
 
     private void shooting(BooleanSupplier isReady) {
         shooterController.setSetpoint(this.shooterShootSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-        if (isReady.getAsBoolean()) {
-            feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-        }
+        // if (isReady.getAsBoolean()) {
+        feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        // }
     }
 
     private void stopFeeder() {

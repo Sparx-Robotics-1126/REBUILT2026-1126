@@ -60,9 +60,9 @@ public final class Storage extends GRRSubsystem {
     }
 
     public void feed(BooleanSupplier isReady) {
-        if (isReady.getAsBoolean()) {
-            moveMotor(false);
-        }
+        // if (isReady.getAsBoolean()) {
+        moveMotor(false);
+        // }
     }
 
     public Command feedShooter(BooleanSupplier isReady) {

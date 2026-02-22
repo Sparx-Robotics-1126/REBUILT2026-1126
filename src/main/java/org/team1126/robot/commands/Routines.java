@@ -57,6 +57,18 @@ public final class Routines {
         //        selection = robot.selection;
     }
 
+    public Command lightsDisabledMode() {
+        if (Alliance.isBlue()) {
+            return parallel(lights.top.setSolidBlue(), lights.sides.setSolidRed()).withName(
+                "Routines.lightsDisabledMode()"
+            );
+        } else {
+            return parallel(lights.top.setSolidRed(), lights.sides.setSolidBlue()).withName(
+                "Routines.lightsDisabledMode()"
+            );
+        }
+    }
+
     public Command prepareForShooting() {
         return parallel(shooter.getReadyCommand()).withName("Routines.prepareForShooting()");
     }
@@ -71,6 +83,13 @@ public final class Routines {
 
     public Command releaseAll() {
         return parallel(storage.spill()).withName("Spill Fuel");
+    }
+
+    public Command readyFeederShooter() {
+        return parallel(
+            shooter.getReadyCommand()
+            //  storage.feedShooter(shooter::shooterIsReady)
+        ).withName("Routines.readyFeederShooter()");
     }
 
     /**
