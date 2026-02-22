@@ -256,20 +256,7 @@ public final class Swerve extends GRRSubsystem {
 
         distanceToHub = Math.hypot(deltaX, deltaY);
         angleToHub = Math.atan2(deltaY, deltaX);
-        hubAngular = angularPID.calculate(state.rotation.getRadians(), angleToHub);
-
-        // if (waypoints != null && waypoints.size() > 0) {
-        //     var curr = waypoints.get(0);
-        //     if (state.pose.getTranslation().getDistance(curr.get().getTranslation()) < 0.1) {
-        //         waypoints.remove(0);
-        //         if (waypoints.size() > 0) {
-        //             driveWaypoint(waypoints.get(0).get(), trenchDecel.get());
-        //         } else {
-        //             // TODO: stop the robot...
-        //             api.applyStop(true);
-        //         }
-        //     }
-        // }
+        hubAngular = -angularPID.calculate(state.rotation.getRadians(), angleToHub);
     }
 
     /**

@@ -24,13 +24,13 @@ public final class Field {
     public static final double CENTER_Y = FieldInfo.width() / 2.0;
 
     public static final ExtPose WAYPOINT_FAR = new ExtPose(
-        new Pose2d((getTag(17).getX() + Swerve.OFFSET), getTag(17).getY(), Rotation2d.kZero)
+        new Pose2d((getTag(17).getX() + Swerve.OFFSET), getTag(17).getY(), Rotation2d.k180deg)
     );
     public static final ExtPose WAYPOINT_NEAR = new ExtPose(
-        new Pose2d((getTag(28).getX() - Swerve.OFFSET), getTag(28).getY(), Rotation2d.k180deg)
+        new Pose2d((getTag(28).getX() - Swerve.OFFSET), getTag(28).getY(), Rotation2d.kZero)
     );
 
-    public static final ExtPose WAYPOINT_GOAL_FAR = new ExtPose(new Pose2d(CENTER_X, CENTER_Y, Rotation2d.kZero));
+    public static final ExtPose WAYPOINT_GOAL_FAR = new ExtPose(new Pose2d(CENTER_X, CENTER_Y, Rotation2d.k180deg));
     // public static final ExtPose WAYPOINT_GOAL_NEAR = new ExtPose(
     // new Pose2d((getTag(26).getX() - (Swerve.OFFSET * 2.0)), CENTER_Y, Rotation2d.kZero)
     // );

@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
@@ -34,7 +33,7 @@ public final class Routines {
 
     private static final TunableTable tunables = Tunables.getNested("routines");
 
-    private static final TunableDouble waypointDecel = tunables.value("waypointDecel", 12.0);
+    private static final TunableDouble waypointDecel = tunables.value("waypointDecel", 0.3);
     private static final TunableDouble waypointTol = tunables.value("waypointTol", 0.25);
 
     private static final TunableBoolean autoDrive = tunables.value("autoDrive", true);
