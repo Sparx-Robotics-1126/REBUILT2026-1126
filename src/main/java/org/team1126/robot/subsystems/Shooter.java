@@ -34,8 +34,8 @@ public final class Shooter extends GRRSubsystem {
     private final RelativeEncoder shooterEncoder;
     private final SparkAbsoluteEncoder shooterAbsoluteEncoder;
     private final SparkClosedLoopController shooterController;
-    private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 450);
-    private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 200);
+    private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 185);
+    private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 150);
 
     private ShooterStates state = ShooterStates.kIdle;
 
