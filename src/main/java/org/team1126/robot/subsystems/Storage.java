@@ -11,12 +11,11 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.function.BooleanSupplier;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.command.GRRSubsystem;
-
-import java.util.function.BooleanSupplier;
 
 @Logged
 public final class Storage extends GRRSubsystem {
@@ -59,6 +58,7 @@ public final class Storage extends GRRSubsystem {
             rollerMotor.set(this.voltage.get());
         }
     }
+
     public void feed(BooleanSupplier isReady) {
         if (isReady.getAsBoolean()) {
             moveMotor(false);
@@ -67,8 +67,7 @@ public final class Storage extends GRRSubsystem {
 
     public Command feedShooter(BooleanSupplier isReady) {
         return commandBuilder()
-            .onExecute(
-                    () -> feed(isReady))
+            .onExecute(() -> feed(isReady))
             .onEnd(() -> rollerMotor.set(0));
     }
 

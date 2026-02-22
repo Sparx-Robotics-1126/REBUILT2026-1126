@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.tunable.TunableTable;
@@ -56,16 +57,16 @@ public final class Routines {
         //        selection = robot.selection;
     }
 
-    public Command prepareForShooting(){
-        return parallel(
-                shooter.getReadyCommand()
-                ).withName("Routines.prepareForShooting()");
+    public Command prepareForShooting() {
+        return parallel(shooter.getReadyCommand()).withName("Routines.prepareForShooting()");
     }
+
     public Command shootFuel() {
         return parallel(
-                shootingLights(),
-                storage.feedShooter(shooter::shooterIsReady),
-                shooter.shoot(shooter::feederIsReady)).withName("Routines.score()");
+            shootingLights(),
+            storage.feedShooter(shooter::shooterIsReady),
+            shooter.shoot(shooter::feederIsReady)
+        ).withName("Routines.score()");
     }
 
     public Command releaseAll() {
@@ -141,45 +142,41 @@ public final class Routines {
         ExtPose endpoint = endpoint(heading);
         return swerve.apfDrive(endpoint, waypointDecel, waypointTol);
     }
+
     public Command aimAtHub(final DoubleSupplier maxDeceleration) {
-        return parallel(selfDriveLights(),swerve.aimAtHub(maxDeceleration));
-    }
-    public Command trenchNorthWest() {
-        return parallel(selfDriveLights(),
-                driveWaypoint(WaypointHeading.NORTH, true).andThen(driveEndpoint(WaypointHeading.NORTH)));
+        return parallel(selfDriveLights(), swerve.aimAtHub(maxDeceleration));
     }
 
-    public Command trenchNorthEast() {
-        return parallel(selfDriveLights(),driveWaypoint(WaypointHeading.NORTH, false).andThen(driveEndpoint(WaypointHeading.NORTH)));
-    }
-
-    public Command trenchSouthWest() {
-        return parallel(selfDriveLights(),driveWaypoint(WaypointHeading.SOUTH, true).andThen(driveEndpoint(WaypointHeading.SOUTH)));
-    }
-
-    public Command trenchSouthEast() {
-        return parallel(selfDriveLights(),driveWaypoint(WaypointHeading.SOUTH, false).andThen(driveEndpoint(WaypointHeading.SOUTH)));
+    public Command driveTrench(Supplier<WaypointHeading> headingSupplier, BooleanSupplier left) {
+        return parallel(
+            selfDriveLights(),
+            driveWaypoint(headingSupplier.get(), left.getAsBoolean()).andThen(driveEndpoint(headingSupplier.get()))
+        );
     }
 
     /**
      * Method that allows us to go where we would expect to find fuel in the neutral zone.
      */
     public Command refuelFromNeutral() {
-        return parallel(selfDriveLights(),
-                swerve.apfDrive(
-            () -> {
-                return new Pose2d(
-                    Field.CENTER_X - Units.inchesToMeters(35.95),
-                    Field.CENTER_Y - Units.inchesToMeters(35.95),
-                    Rotation2d.fromDegrees(0)
-                );
-            },
-            () -> 0.3
-        ));
+        return parallel(
+            selfDriveLights(),
+            swerve.apfDrive(
+                () -> {
+                    return new Pose2d(
+                        Field.CENTER_X - Units.inchesToMeters(35.95),
+                        Field.CENTER_Y - Units.inchesToMeters(35.95),
+                        Rotation2d.fromDegrees(0)
+                    );
+                },
+                () -> 0.3
+            )
+        );
     }
 
     public Command refuelFromDepot() {
-        return parallel(selfDriveLights(),
-                    swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.2));
+        return parallel(
+            selfDriveLights(),
+            swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.2)
+        );
     }
 }

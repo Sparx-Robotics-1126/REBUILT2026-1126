@@ -155,6 +155,8 @@ public final class Swerve extends GRRSubsystem {
     private Pose2d hubReference = Pose2d.kZero;
     private boolean seesAprilTag = false;
     private boolean changedReference = false;
+    private double hubAngular = 0.0;
+    private boolean shouldFaceHub = false;
 
     // private List<ExtPose> waypoints;
 
@@ -254,6 +256,7 @@ public final class Swerve extends GRRSubsystem {
 
         distanceToHub = Math.hypot(deltaX, deltaY);
         angleToHub = Math.atan2(deltaY, deltaX);
+        hubAngular = angularPID.calculate(state.rotation.getRadians(), angleToHub);
 
         // if (waypoints != null && waypoints.size() > 0) {
         //     var curr = waypoints.get(0);
@@ -510,13 +513,8 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.stop(" + lock + ")").onExecute(() -> api.applyStop(lock));
     }
 
-    private Pose2d generateHubLocation(double xOffset, Rotation2d side, boolean left) {
-        return new Pose2d(
-            hubReference
-                .getTranslation()
-                .plus(new Translation2d(-xOffset, Field.HUB.get().getY() * (left ? 1.0 : -1.0)).rotateBy(side)),
-            side
-        );
+    public double getHubAngular() {
+        return angularPID.calculate(state.rotation.getRadians(), angleToHub);
     }
 
     public void applyOrchestra(Orchestra orchestra) {
