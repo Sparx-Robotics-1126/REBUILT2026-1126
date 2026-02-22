@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
@@ -56,20 +55,39 @@ public final class Routines {
         //        selection = robot.selection;
     }
 
-    public Command prepareForShooting(){
-        return parallel(
-                shooter.getReadyCommand()
-                ).withName("Routines.prepareForShooting()");
+    public Command lightsDisabledMode() {
+        if (Alliance.isBlue()) {
+            return parallel(lights.top.setSolidBlue(), lights.sides.setSolidRed()).withName(
+                "Routines.lightsDisabledMode()"
+            );
+        } else {
+            return parallel(lights.top.setSolidRed(), lights.sides.setSolidBlue()).withName(
+                "Routines.lightsDisabledMode()"
+            );
+        }
     }
+
+    public Command prepareForShooting() {
+        return parallel(shooter.getReadyCommand()).withName("Routines.prepareForShooting()");
+    }
+
     public Command shootFuel() {
         return parallel(
-                shootingLights(),
-                storage.feedShooter(shooter::shooterIsReady),
-                shooter.shoot(shooter::feederIsReady)).withName("Routines.score()");
+            shootingLights(),
+            storage.feedShooter(shooter::shooterIsReady),
+            shooter.shoot(shooter::feederIsReady)
+        ).withName("Routines.score()");
     }
 
     public Command releaseAll() {
         return parallel(storage.spill()).withName("Spill Fuel");
+    }
+
+    public Command readyFeederShooter() {
+        return parallel(
+            shooter.getReadyCommand()
+            //  storage.feedShooter(shooter::shooterIsReady)
+        ).withName("Routines.readyFeederShooter()");
     }
 
     /**
@@ -141,45 +159,62 @@ public final class Routines {
         ExtPose endpoint = endpoint(heading);
         return swerve.apfDrive(endpoint, waypointDecel, waypointTol);
     }
+
     public Command aimAtHub(final DoubleSupplier maxDeceleration) {
-        return parallel(selfDriveLights(),swerve.aimAtHub(maxDeceleration));
+        return parallel(selfDriveLights(), swerve.aimAtHub(maxDeceleration));
     }
+
     public Command trenchNorthWest() {
-        return parallel(selfDriveLights(),
-                driveWaypoint(WaypointHeading.NORTH, true).andThen(driveEndpoint(WaypointHeading.NORTH)));
+        return parallel(
+            selfDriveLights(),
+            driveWaypoint(WaypointHeading.NORTH, true).andThen(driveEndpoint(WaypointHeading.NORTH))
+        );
     }
 
     public Command trenchNorthEast() {
-        return parallel(selfDriveLights(),driveWaypoint(WaypointHeading.NORTH, false).andThen(driveEndpoint(WaypointHeading.NORTH)));
+        return parallel(
+            selfDriveLights(),
+            driveWaypoint(WaypointHeading.NORTH, false).andThen(driveEndpoint(WaypointHeading.NORTH))
+        );
     }
 
     public Command trenchSouthWest() {
-        return parallel(selfDriveLights(),driveWaypoint(WaypointHeading.SOUTH, true).andThen(driveEndpoint(WaypointHeading.SOUTH)));
+        return parallel(
+            selfDriveLights(),
+            driveWaypoint(WaypointHeading.SOUTH, true).andThen(driveEndpoint(WaypointHeading.SOUTH))
+        );
     }
 
     public Command trenchSouthEast() {
-        return parallel(selfDriveLights(),driveWaypoint(WaypointHeading.SOUTH, false).andThen(driveEndpoint(WaypointHeading.SOUTH)));
+        return parallel(
+            selfDriveLights(),
+            driveWaypoint(WaypointHeading.SOUTH, false).andThen(driveEndpoint(WaypointHeading.SOUTH))
+        );
     }
 
     /**
      * Method that allows us to go where we would expect to find fuel in the neutral zone.
      */
     public Command refuelFromNeutral() {
-        return parallel(selfDriveLights(),
-                swerve.apfDrive(
-            () -> {
-                return new Pose2d(
-                    Field.CENTER_X - Units.inchesToMeters(35.95),
-                    Field.CENTER_Y - Units.inchesToMeters(35.95),
-                    Rotation2d.fromDegrees(0)
-                );
-            },
-            () -> 0.3
-        ));
+        return parallel(
+            selfDriveLights(),
+            swerve.apfDrive(
+                () -> {
+                    return new Pose2d(
+                        Field.CENTER_X - Units.inchesToMeters(35.95),
+                        Field.CENTER_Y - Units.inchesToMeters(35.95),
+                        Rotation2d.fromDegrees(0)
+                    );
+                },
+                () -> 0.3
+            )
+        );
     }
 
     public Command refuelFromDepot() {
-        return parallel(selfDriveLights(),
-                    swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.2));
+        return parallel(
+            selfDriveLights(),
+            swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.2)
+        );
     }
 }

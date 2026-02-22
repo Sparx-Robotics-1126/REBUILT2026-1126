@@ -107,29 +107,31 @@ public final class Robot extends LoggedRobot {
         //        coDriver.x().onTrue(storage.moveMotorCommand(true));
         //        coDriver.b().onTrue(storage.moveMotorCommand(false));
 
-         shooter.setDefaultCommand(shooter.idleShooterCommand());
-        coDriver.leftTrigger().whileTrue(shooter.readyShooter());
-        coDriver.rightTrigger().whileTrue(routines.shootFuel());
+        shooter.setDefaultCommand(shooter.idleShooterCommand());
+        coDriver.leftTrigger().whileTrue(routines.readyFeederShooter());
 
-        coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
+        coDriver.rightTrigger().whileTrue(shooter.readyShooter());
+        coDriver.rightTrigger().and(coDriver.povRight()).whileTrue(routines.shootFuel());
+
+        // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
         coDriver.a().whileTrue(intake.moveMotorPosCommand());
         coDriver.x().whileTrue(intake.moveIntakeMotorCommand(false));
         coDriver.y().whileTrue(intake.moveMotorPosHomeCommand());
         coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
-//        coDriver.x().whileTrue(routines.shootFuel());
+        //        coDriver.x().whileTrue(routines.shootFuel());
         coDriver.b().whileTrue(routines.releaseAll());
-//        coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
-//        coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
-        coDriver.rightBumper().onTrue(swerve.playMusic("enemy"));
+        //        coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
+        //        coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
+        coDriver.rightBumper().onTrue(swerve.playMusic("starspangledbanner").ignoringDisable(true));
         //
 
         // Setup lights
         scheduler.schedule(routines.lightsPreMatch(autos::defaultSelected));
 
         RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
-
+        RobotModeTriggers.disabled().whileTrue(routines.lightsDisabledMode());
         // Disable loop overrun warnings from the command
         // scheduler, since we already log loop timings
         DisableWatchdog.in(scheduler, "m_watchdog");
@@ -160,8 +162,8 @@ public final class Robot extends LoggedRobot {
 
     @NotLogged
     public double driverAngular() {
-        // return -driver.getRightX();
-        return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
+        return -driver.getRightX();
+        // return driver.getLeftTriggerAxis() - driver.getRightTriggerAxis();
     }
 
     @Override

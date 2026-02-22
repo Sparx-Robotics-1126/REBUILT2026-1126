@@ -10,7 +10,6 @@ import com.revrobotics.spark.*;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.team1126.lib.tunable.TunableTable;
@@ -40,10 +39,9 @@ public final class Intake extends GRRSubsystem {
     // private static final TunableTable moveStorageTunables = Tunables.getNested("moveStorage");
 
     //    private boolean isOn;
-//    private final Tunables.TunableDouble voltage;
+    //    private final Tunables.TunableDouble voltage;
 
     public Intake() {
-
         intakeMotor = new SparkFlex(INTAKE_MOTOR, SparkLowLevel.MotorType.kBrushless);
         intakeEncoder = intakeMotor.getEncoder();
         config = new SparkFlexConfig();
@@ -172,14 +170,13 @@ public final class Intake extends GRRSubsystem {
 
     public Command moveMotorPosCommand() {
         return commandBuilder()
-            .onExecute(() ->this.moveMotorPos(pivotPositions.get()))
+            .onExecute(() -> this.moveMotorPos(pivotPositions.get()))
             .onEnd(interrupted -> {
                 // Stop driving and let it relax wherever it ended up
                 pivotMotor.setVoltage(0.0);
 
                 // Put the pivot motor into Coast
-                var coastCfg = new SparkFlexConfig()
-                    .idleMode(SparkBaseConfig.IdleMode.kCoast);
+                var coastCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kCoast);
 
                 pivotMotor.configure(coastCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
             });
@@ -187,14 +184,13 @@ public final class Intake extends GRRSubsystem {
 
     public Command moveMotorPosHomeCommand() {
         return commandBuilder()
-            .onExecute(() ->this.moveMotorPos(0))
+            .onExecute(() -> this.moveMotorPos(0))
             .onEnd(interrupted -> {
                 // Keep actively holding home when the command ends
                 pivotController.setSetpoint(0, SparkBase.ControlType.kPosition);
 
                 // Use Brake to resist drifting away from home
-                var brakeCfg = new SparkFlexConfig()
-                    .idleMode(SparkBaseConfig.IdleMode.kBrake);
+                var brakeCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kBrake);
 
                 pivotMotor.configure(brakeCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
             });

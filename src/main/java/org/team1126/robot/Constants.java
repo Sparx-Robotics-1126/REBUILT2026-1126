@@ -16,20 +16,23 @@ public final class Constants {
     public static final int DRIVER = 0;
     public static final int CO_DRIVER = 1;
 
+    /** The height from the floor to the robot's reference point. Measured in meters. */
+    private static final double Z_HEIGHT_FLOOR_TO_ROBOT = 0.03;
+
     public static final CameraConfig[] AT_CAMERAS = {
         new CameraConfig(
             "center",
-            new Translation3d(.195, .0, 0.535),
+            new Translation3d(.195, .0, Z_HEIGHT_FLOOR_TO_ROBOT + 0.49),
             new Rotation3d(0.0, Math.toRadians(5), Math.toRadians(0.0))
         ),
         new CameraConfig(
             "left",
-            new Translation3d(.175, 0.005, 0.535),
+            new Translation3d(.175, 0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.49),
             new Rotation3d(0.0, Math.toRadians(10), Math.toRadians(45.0))
         ),
         new CameraConfig(
             "right",
-            new Translation3d(.175, -0.005, 0.535),
+            new Translation3d(.175, -0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.49),
             new Rotation3d(0.0, Math.toRadians(5), Math.toRadians(-45.0))
         )
     };

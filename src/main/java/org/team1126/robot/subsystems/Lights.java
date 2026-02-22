@@ -247,6 +247,14 @@ public final class Lights {
                 .withName("Lights.Sides.setSolidRed()");
         }
 
+        public Command setSolidBlue() {
+            return commandBuilder()
+                .onInitialize(() -> setBoth(Color.BLUE))
+                .onEnd(() -> setBoth(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Sides.setSolidBlue()");
+        }
+
         public Command shooting() {
             return commandBuilder()
                 .onExecute(() -> {
@@ -358,18 +366,19 @@ public final class Lights {
 
             return commandBuilder()
                 .onExecute(() -> {
-                    if (defaultAuto.getAsBoolean()) {
-                        timer.stop();
-                        timer.reset();
-                    } else {
-                        timer.start();
-                    }
+                    setBoth(Alliance.isBlue() ? Color.BLUE : Color.RED);
+                    // if (defaultAuto.getAsBoolean()) {
+                    //     timer.stop();
+                    //     timer.reset();
+                    // } else {
+                    //     timer.start();
+                    // }
 
-                    if (timer.get() % 0.12 > 0.06 || timer.hasElapsed(1.0)) {
-                        setBoth(Alliance.isBlue() ? Color.BLUE : Color.RED);
-                    } else {
-                        setBoth(Color.OFF);
-                    }
+                    // if (timer.get() % 0.12 > 0.06 || timer.hasElapsed(1.0)) {
+                    //     setBoth(Alliance.isBlue() ? Color.BLUE : Color.RED);
+                    // } else {
+                    //     setBoth(Color.OFF);
+                    // }
                 })
                 .onEnd(() -> setBoth(Color.OFF))
                 .ignoringDisable(true)
@@ -727,6 +736,14 @@ public final class Lights {
                 .onEnd(() -> set(Color.OFF))
                 .ignoringDisable(true)
                 .withName("Lights.Top.setSolidRed()");
+        }
+
+        public Command setSolidBlue() {
+            return commandBuilder()
+                .onInitialize(() -> set(Color.BLUE))
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.setSolidBlue()");
         }
 
         /**
