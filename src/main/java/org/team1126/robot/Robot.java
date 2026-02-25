@@ -130,16 +130,18 @@ public final class Robot extends LoggedRobot {
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-        coDriver.a().whileTrue(intake.moveMotorPosCommand());
+        coDriver.a().whileTrue(intake.extendIndake());
+        coDriver.y().whileTrue(intake.intakeHome());
+
         coDriver.x().whileTrue(intake.moveIntakeMotorCommand(false));
-        coDriver.y().whileTrue(intake.moveMotorPosHomeCommand());
+        coDriver.b().whileTrue(intake.moveIntakeMotorCommand(true));
         coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
         //        coDriver.x().whileTrue(routines.shootFuel());
         //        coDriver.x().whileTrue(routines.shootFuel());
-        coDriver.b().whileTrue(routines.releaseAll());
+        // coDriver.b().whileTrue(routines.releaseAll());
         //        coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
         //        coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
-        coDriver.rightBumper().onTrue(swerve.playMusic("starspangledbanner").ignoringDisable(true));
+        coDriver.rightBumper().onTrue(swerve.playMusic("enemy").ignoringDisable(true));
         //
 
         // Setup lights

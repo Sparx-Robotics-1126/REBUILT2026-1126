@@ -168,7 +168,7 @@ public final class Intake extends GRRSubsystem {
         this.pivotController.setSetpoint(position, SparkBase.ControlType.kPosition);
     }
 
-    public Command moveMotorPosCommand() {
+    public Command extendIndake() {
         return commandBuilder()
             .onExecute(() -> this.moveMotorPos(pivotPositions.get()))
             .onEnd(interrupted -> {
@@ -182,7 +182,7 @@ public final class Intake extends GRRSubsystem {
             });
     }
 
-    public Command moveMotorPosHomeCommand() {
+    public Command intakeHome() {
         return commandBuilder()
             .onExecute(() -> this.moveMotorPos(0))
             .onEnd(interrupted -> {
