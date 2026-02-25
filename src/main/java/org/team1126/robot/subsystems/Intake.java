@@ -21,16 +21,16 @@ public final class Intake extends GRRSubsystem {
     private final SparkFlex intakeMotor;
     private final SparkFlex pivotMotor;
 
-    private SparkFlexConfig config;
+    private SparkFlexConfig intakeConfig;
     private final RelativeEncoder intakeEncoder;
     private SparkClosedLoopController intakeController;
     private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 125);
     private static final TunableTable tunables = Tunables.getNested("intake");
 
     private SparkFlexConfig pivotConfig;
-    private final RelativeEncoder pivotEncoder;
+    private final SparkAbsoluteEncoder pivotEncoder;
     private SparkClosedLoopController pivotController;
-    private final Tunables.TunableDouble pivotPositions = tunables.value("Pivot Positions", -.28);
+    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -.28);
 
     // private final SparkMax moveStorage;
     // private SparkMaxConfig moveStorageConfig;
@@ -44,14 +44,28 @@ public final class Intake extends GRRSubsystem {
     public Intake() {
         intakeMotor = new SparkFlex(INTAKE_MOTOR, SparkLowLevel.MotorType.kBrushless);
         intakeEncoder = intakeMotor.getEncoder();
-        config = new SparkFlexConfig();
+        intakeConfig = new SparkFlexConfig();
 
         pivotMotor = new SparkFlex(PIVOT_MOTOR, SparkLowLevel.MotorType.kBrushless);
-        pivotEncoder = pivotMotor.getEncoder();
+        pivotEncoder = pivotMotor.getAbsoluteEncoder();
         pivotConfig = new SparkFlexConfig();
         pivotController = pivotMotor.getClosedLoopController();
 
-        pivotConfig.closedLoop.p(.4).i(0).d(0).feedbackSensor(FeedbackSensor.kPrimaryEncoder);
+        pivotConfig.closedLoop
+                .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+                .p(.4, ClosedLoopSlot.kSlot0)
+                .i(0, ClosedLoopSlot.kSlot0)
+                .d(0, ClosedLoopSlot.kSlot0)
+                .feedForward.kG(.05, ClosedLoopSlot.kSlot0);
+
+        pivotConfig.closedLoop
+                .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+                .p(.4, ClosedLoopSlot.kSlot1)
+                .i(0, ClosedLoopSlot.kSlot1)
+                .d(0, ClosedLoopSlot.kSlot1)
+                .feedForward.kG(.05, ClosedLoopSlot.kSlot1);
+//                .maxMotion.maxAcceleration(100).cruiseVelocity(100).allowedProfileError(1)
+
         pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
         // moveStorage = new SparkMax(MOVE_STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
@@ -62,14 +76,14 @@ public final class Intake extends GRRSubsystem {
         //        isOn = false;
 
         intakeController = intakeMotor.getClosedLoopController();
-        config
+        intakeConfig
             .smartCurrentLimit(40)
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
             .inverted(false)
             .openLoopRampRate(0.25)
             .closedLoopRampRate(0.25);
 
-        config.closedLoop
+        intakeConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             // Set PID values for position control. We don't need to pass a closed
             // loop slot, as it will default to slot 0.
@@ -80,33 +94,39 @@ public final class Intake extends GRRSubsystem {
             // Set PID values for velocity control in slot 1
             .feedForward
             // kV is now in Volts, so we multiply by the nominal voltage (12V)
-            .kV(12.0 / 5767, ClosedLoopSlot.kSlot1);
+            .kV(.05);
 
-        config.closedLoop.maxMotion
+        intakeConfig.closedLoop.maxMotion
             // Set MAXMotion parameters for position control. We don't need to pass
             // a closed loop slot, as it will default to slot 0.
             .cruiseVelocity(85)
             .maxAcceleration(85)
             .allowedProfileError(1);
 
-        intakeMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
         //        shooterController.setSetpoint(this.shooterShootSpeed, SparkBase.ControlType.kMAXMotionVelocityControl);
         tunables.add("Intake Motor", intakeMotor);
         tunables.add("Pivot Motor", pivotMotor);
     }
 
+    public Command moveIntakeTest(boolean reverse){
+        return commandBuilder()
+            .onExecute(() -> moveIntakeMotor(reverse))
+                .onEnd(this::stopIntake);
+    }
+
     public Command moveIntakeMotorCommand(boolean reverse) {
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(reverse))
-            .onEnd(() -> intakeController.setSetpoint(0, SparkBase.ControlType.kVelocity));
+            .onEnd(() -> intakeController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl));
     }
 
     public void moveIntakeMotor(boolean reverse) {
         if (reverse) {
-            intakeController.setSetpoint(-this.intakeSpeed.get(), SparkBase.ControlType.kVelocity);
+            intakeController.setSetpoint(-this.intakeSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         } else {
-            intakeController.setSetpoint(this.intakeSpeed.get(), SparkBase.ControlType.kVelocity);
+            intakeController.setSetpoint(this.intakeSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         }
     }
 
@@ -138,39 +158,18 @@ public final class Intake extends GRRSubsystem {
         //        }
     }
 
-    // public void moveStorageMotor(boolean reverse) {
-    //     if (reverse) {
-    //         moveStorage.set(-this.voltage.get());
-    //     } else {
-    //         moveStorage.set(this.voltage.get());
-    //     }
-    // }
-
-    // public Command moveStorageMotorCommand(boolean reverse) {
-    //     return commandBuilder()
-    //         .onExecute(() -> moveStorageMotor(reverse))
-    //         .onEnd(() -> moveStorage.set(0));
-    // }
-
-    // public Command moveStorageSpill() {
-    //     return commandBuilder()
-    //         .onExecute(() -> moveStorageMotor(true))
-    //         .onEnd(() -> moveStorage.set(0));
-    // }
-
-    // public Command moveStorageIntake() {
-    //     return commandBuilder()
-    //         .onExecute(() -> moveStorageMotor(false))
-    //         .onEnd(() -> moveStorage.set(0));
-    // }
 
     public void moveMotorPos(double position) {
         this.pivotController.setSetpoint(position, SparkBase.ControlType.kPosition);
     }
 
-    public Command extendIndake() {
+    public Command extendIntakeTest() {
         return commandBuilder()
-            .onExecute(() -> this.moveMotorPos(pivotPositions.get()))
+            .onExecute(() -> this.moveMotorPos(pivotPosition.get()));
+    }
+    public Command extendIntake() {
+        return commandBuilder()
+            .onExecute(() -> this.moveMotorPos(pivotPosition.get()))
             .onEnd(interrupted -> {
                 // Stop driving and let it relax wherever it ended up
                 pivotMotor.setVoltage(0.0);
@@ -182,7 +181,12 @@ public final class Intake extends GRRSubsystem {
             });
     }
 
-    public Command intakeHome() {
+    public Command retrackIntakeTest() {
+        return commandBuilder()
+            .onExecute(() -> this.moveMotorPos(0));
+    }
+
+    public Command retrackIntake() {
         return commandBuilder()
             .onExecute(() -> this.moveMotorPos(0))
             .onEnd(interrupted -> {

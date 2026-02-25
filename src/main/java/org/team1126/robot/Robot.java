@@ -1,7 +1,5 @@
 package org.team1126.robot;
 
-import static edu.wpi.first.wpilibj.XboxController.Axis.*;
-
 import com.ctre.phoenix6.Orchestra;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
@@ -130,11 +128,11 @@ public final class Robot extends LoggedRobot {
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-        coDriver.a().whileTrue(intake.extendIndake());
-        coDriver.y().whileTrue(intake.intakeHome());
+        coDriver.a().whileTrue(intake.extendIntakeTest());
+        coDriver.y().whileTrue(intake.retrackIntakeTest());
 
-        coDriver.x().whileTrue(intake.moveIntakeMotorCommand(false));
-        coDriver.b().whileTrue(intake.moveIntakeMotorCommand(true));
+        coDriver.x().whileTrue(intake.moveIntakeTest(false));
+        coDriver.b().whileTrue(intake.moveIntakeTest(true));
         coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
         //        coDriver.x().whileTrue(routines.shootFuel());
         //        coDriver.x().whileTrue(routines.shootFuel());
