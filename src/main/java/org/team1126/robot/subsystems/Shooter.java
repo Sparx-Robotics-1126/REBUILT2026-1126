@@ -151,7 +151,7 @@ public final class Shooter extends GRRSubsystem {
     }
 
     public void getReady() {
-        shooterController.setSetpoint(this.shooterIdleSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        // shooterController.setSetpoint(this.shooterIdleSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
     }
 
