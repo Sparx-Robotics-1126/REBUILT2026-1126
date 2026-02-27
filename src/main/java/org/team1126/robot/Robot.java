@@ -123,7 +123,7 @@ public final class Robot extends LoggedRobot {
 
         coDriver.rightTrigger().whileTrue(shooter.readyShooter());
         coDriver.rightTrigger().and(coDriver.povRight()).whileTrue(routines.shootFuel());
-
+        coDriver.rightTrigger().and(coDriver.povLeft()).whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());

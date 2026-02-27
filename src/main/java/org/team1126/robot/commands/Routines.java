@@ -80,6 +80,22 @@ public final class Routines {
         ).withName("Routines.score()");
     }
 
+    public Command shootFuelRev() {
+        return parallel(
+            shootingLights(),
+            storage.feedShooter(shooter::shooterIsReady),
+            shooter.shoot(shooter::feederIsReady)
+        ).withName("Routines.score()");
+    }
+
+    public Command shootFuelReverseStorage() {
+        return parallel(
+            shootingLights(),
+            storage.feedShooter(shooter::shooterIsReady),
+            shooter.shoot(shooter::feederIsReady)
+        ).withName("Routines.score()");
+    }
+
     public Command releaseAll() {
         return parallel(storage.spill()).withName("Spill Fuel");
     }

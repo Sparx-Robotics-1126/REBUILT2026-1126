@@ -65,9 +65,21 @@ public final class Storage extends GRRSubsystem {
         // }
     }
 
+    public void reverse() {
+        // if (isReady.getAsBoolean()) {
+        moveMotor(true);
+        // }
+    }
+
     public Command feedShooter(BooleanSupplier isReady) {
         return commandBuilder()
             .onExecute(() -> feed(isReady))
+            .onEnd(() -> rollerMotor.set(0));
+    }
+
+    public Command revStorage(BooleanSupplier isReady) {
+        return commandBuilder()
+            .onExecute(() -> reverse())
             .onEnd(() -> rollerMotor.set(0));
     }
 

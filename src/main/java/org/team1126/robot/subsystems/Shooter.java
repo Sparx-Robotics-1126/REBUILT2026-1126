@@ -34,8 +34,8 @@ public final class Shooter extends GRRSubsystem {
     private final RelativeEncoder shooterEncoder;
     private final SparkAbsoluteEncoder shooterAbsoluteEncoder;
     private final SparkClosedLoopController shooterController;
-    private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 185);
-    private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 150);
+    private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 198);
+    private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 198);
 
     private ShooterStates state = ShooterStates.kIdle;
 
@@ -59,7 +59,7 @@ public final class Shooter extends GRRSubsystem {
             .feedForward.kV(.05);
 
         shooterConfig.closedLoop.maxMotion
-            .maxAcceleration(75)
+            .maxAcceleration(1375)
             .allowedProfileError(5)
             .cruiseVelocity(275)
             .allowedProfileError(5);
@@ -74,9 +74,9 @@ public final class Shooter extends GRRSubsystem {
 
         feederConfig
             .inverted(true)
-            .closedLoop.maxMotion.maxAcceleration(125)
+            .closedLoop.maxMotion.maxAcceleration(875)
             .allowedProfileError(5)
-            .cruiseVelocity(125)
+            .cruiseVelocity(175)
             .allowedProfileError(5);
 
         feederMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -151,8 +151,8 @@ public final class Shooter extends GRRSubsystem {
     }
 
     public void getReady() {
-        // shooterController.setSetpoint(this.shooterIdleSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-        feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        shooterController.setSetpoint(this.shooterIdleSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        // feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
     }
 
     public Command getReadyCommand() {
@@ -186,6 +186,7 @@ public final class Shooter extends GRRSubsystem {
 
     private void stopFeeder() {
         feederController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl);
+        shooterController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl);
         // feederMotor.setVoltage(0);
     }
 
