@@ -33,7 +33,7 @@ public final class Routines {
 
     private static final TunableTable tunables = Tunables.getNested("routines");
 
-    private static final TunableDouble waypointDecel = tunables.value("waypointDecel", 0.3);
+    private static final TunableDouble waypointDecel = tunables.value("waypointDecel", 50.3);
     private static final TunableDouble waypointTol = tunables.value("waypointTol", 0.25);
 
     private static final TunableBoolean autoDrive = tunables.value("autoDrive", true);

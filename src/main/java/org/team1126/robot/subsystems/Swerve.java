@@ -14,16 +14,14 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.Math2;
 import org.team1126.lib.math.PAPFController;
+import org.team1126.lib.math.geometry.ExtTranslation;
 import org.team1126.lib.swerve.Perspective;
 import org.team1126.lib.swerve.SwerveAPI;
 import org.team1126.lib.swerve.SwerveState;
@@ -46,6 +44,7 @@ import org.team1126.robot.util.Field;
 
 import org.team1126.robot.util.Vision;
 import org.team1126.robot.util.WaypointNavigator;
+import org.team1126.robot.util.WaypointNavigator.Nudge;
 
 /**
  * The robot's swerve drivetrain.
@@ -79,10 +78,8 @@ public final class Swerve extends GRRSubsystem {
     private static final TunableDouble apfAttractStrength = apfTunables.value("attractStrength", -9.0);
     private static final TunableDouble apfAttractRange = apfTunables.value("attractRange", 2.5);
 
-    private static final TunableTable reefAssistTunables = tunables.getNested("reefAssist");
-    private static final TunableDouble reefAssistX = reefAssistTunables.value("x", 0.681);
-    private static final TunableDouble reefAssistKp = reefAssistTunables.value("kP", 20.0);
-    private static final TunableDouble reefAssistTolerance = reefAssistTunables.value("tolerance", 1.75);
+    private static final TunableDouble apfHubFacingDecel = apfTunables.value("apfHubFacingDecel", 0.3);
+    private static final TunableDouble apfHubFacingVel = apfTunables.value("apfHubFacingVel", 4.5);
 
     private static final TunableTable trenchTunables = tunables.getNested("trench");
     private static final TunableDouble trenchDecel = trenchTunables.value("deceleration", 0.3);
@@ -256,7 +253,7 @@ public final class Swerve extends GRRSubsystem {
 
         distanceToHub = Math.hypot(deltaX, deltaY);
         angleToHub = Math.atan2(deltaY, deltaX);
-        hubAngular = -angularPID.calculate(state.rotation.getRadians(), angleToHub);
+        // hubAngular = angularPID.calculate(state.rotation.getRadians(), angleToHub);
     }
 
     /**
@@ -292,7 +289,7 @@ public final class Swerve extends GRRSubsystem {
     }
 
     /**
-     * Returns true if the reef angle has changed.
+     * Returns true if the hub angle has changed.
      */
     @NotLogged
     public boolean changedReference() {
@@ -399,8 +396,8 @@ public final class Swerve extends GRRSubsystem {
                 var speeds = apf.calculate(
                     state.pose,
                     goal.getTranslation(),
-                    config.velocity,
-                    maxDeceleration.getAsDouble()
+                    apfHubFacingVel.get(),
+                    apfHubFacingDecel.get()
                 );
 
                 speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
@@ -469,27 +466,29 @@ public final class Swerve extends GRRSubsystem {
             });
     }
 
-    public Command driveTrench(BooleanSupplier right) {
-        var waypoints = WaypointNavigator.trenching(state.pose, right.getAsBoolean());
-        var waypointCommands = new ArrayList<Command>();
-        if (waypoints != null && waypoints.size() > 0) {
-            for (var waypoint : waypoints) {
-                waypointCommands.add(driveWaypoint(waypoint.get(), trenchDecel.get()));
-            }
-        }
-        return Commands.sequence(waypointCommands.toArray(new Command[0]));
-        // CommandScheduler.getInstance().schedule(Commands.sequence(waypointCommands.toArray(new Command[0])));
-    }
-
-    private Command driveWaypoint(Pose2d goal, double deceleration) {
-        return commandBuilder("Swerve.driveWaypoint()").onExecute(() -> {
-            var speeds = apf.calculate(state.pose, goal.getTranslation(), apfVel.get(), deceleration);
-            speeds.omegaRadiansPerSecond = angularPID.calculate(
-                state.rotation.getRadians(),
-                goal.getRotation().getRadians()
-            );
-            api.applySpeeds(speeds, Perspective.BLUE, true, true);
-        });
+    /**
+     * Drives to a precalculated shooting position.
+     *
+     * @param deceleration how fast we're going to drive there.
+     * @return the command that will drive us there.
+     */
+    public Command apfDriveShootingPosition(DoubleSupplier deceleration) {
+        return commandBuilder("Swerve.apfDriveShootingPosition()")
+            .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
+            .onExecute(() -> {
+                ExtTranslation goal = WaypointNavigator.waypointForShooting(state.pose, Nudge.CENTER);
+                if (goal != null) {
+                    var speeds = apf.calculate(
+                        state.pose,
+                        goal.get(),
+                        apfVel.get(),
+                        deceleration.getAsDouble(),
+                        Field.OBSTACLES
+                    );
+                    speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), hubAngular);
+                    api.applySpeeds(speeds, Perspective.BLUE, true, true);
+                }
+            });
     }
 
     /**
@@ -564,11 +563,3 @@ public final class Swerve extends GRRSubsystem {
     //     }
     // }
 }
-// @Logged
-// public final class ReefAssistData {
-
-//     private Pose2d targetPipe = Pose2d.kZero;
-//     private boolean running = false;
-//     private double error = 0.0;
-//     private double output = 0.0;
-// }

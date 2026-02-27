@@ -52,19 +52,19 @@ public final class Intake extends GRRSubsystem {
         pivotController = pivotMotor.getClosedLoopController();
 
         pivotConfig.closedLoop
-                .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-                .p(.4, ClosedLoopSlot.kSlot0)
-                .i(0, ClosedLoopSlot.kSlot0)
-                .d(0, ClosedLoopSlot.kSlot0)
-                .feedForward.kG(.05, ClosedLoopSlot.kSlot0);
+            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+            .p(.4, ClosedLoopSlot.kSlot0)
+            .i(0, ClosedLoopSlot.kSlot0)
+            .d(0, ClosedLoopSlot.kSlot0)
+            .feedForward.kG(.05, ClosedLoopSlot.kSlot0);
 
         pivotConfig.closedLoop
-                .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-                .p(.4, ClosedLoopSlot.kSlot1)
-                .i(0, ClosedLoopSlot.kSlot1)
-                .d(0, ClosedLoopSlot.kSlot1)
-                .feedForward.kG(.05, ClosedLoopSlot.kSlot1);
-//                .maxMotion.maxAcceleration(100).cruiseVelocity(100).allowedProfileError(1)
+            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+            .p(.4, ClosedLoopSlot.kSlot1)
+            .i(0, ClosedLoopSlot.kSlot1)
+            .d(0, ClosedLoopSlot.kSlot1)
+            .feedForward.kG(.05, ClosedLoopSlot.kSlot1);
+        //                .maxMotion.maxAcceleration(100).cruiseVelocity(100).allowedProfileError(1)
 
         pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
@@ -110,10 +110,10 @@ public final class Intake extends GRRSubsystem {
         tunables.add("Pivot Motor", pivotMotor);
     }
 
-    public Command moveIntakeTest(boolean reverse){
+    public Command moveIntakeTest(boolean reverse) {
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(reverse))
-                .onEnd(this::stopIntake);
+            .onEnd(this::stopIntake);
     }
 
     public Command moveIntakeMotorCommand(boolean reverse) {
@@ -158,15 +158,14 @@ public final class Intake extends GRRSubsystem {
         //        }
     }
 
-
     public void moveMotorPos(double position) {
         this.pivotController.setSetpoint(position, SparkBase.ControlType.kPosition);
     }
 
     public Command extendIntakeTest() {
-        return commandBuilder()
-            .onExecute(() -> this.moveMotorPos(pivotPosition.get()));
+        return commandBuilder().onExecute(() -> this.moveMotorPos(pivotPosition.get()));
     }
+
     public Command extendIntake() {
         return commandBuilder()
             .onExecute(() -> this.moveMotorPos(pivotPosition.get()))
@@ -182,8 +181,7 @@ public final class Intake extends GRRSubsystem {
     }
 
     public Command retrackIntakeTest() {
-        return commandBuilder()
-            .onExecute(() -> this.moveMotorPos(0));
+        return commandBuilder().onExecute(() -> this.moveMotorPos(0));
     }
 
     public Command retrackIntake() {
