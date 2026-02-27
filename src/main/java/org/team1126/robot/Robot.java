@@ -95,8 +95,10 @@ public final class Robot extends LoggedRobot {
             .povDown()
             .and(driver.rightBumper())
             .whileTrue(routines.driveTrench(() -> WaypointHeading.SOUTH, () -> false));
-        driver.a().whileTrue(routines.aimAtHub(() -> 0.2));
-        driver.b().whileTrue(swerve.drive(this::driverX, this::driverY, () -> swerve.getHubAngular()));
+        // driver.a().whileTrue(routines.aimAtHub(() -> 0.2));
+        driver.a().whileTrue(swerve.apfDriveShootingPosition(() -> 0.8));
+        // driver.b().whileTrue(swerve.drive(this::driverX, this::driverY, () -> swerve.getHubAngular()));
+        driver.b().whileTrue(swerve.driveFacingHub(this::driverX, this::driverY, this::driverAngular));
         // driver.a().whileTrue(routines.refuelFromDepot());
         // driver.b().whileTrue(routines.refuelFromNeutral());
         // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));

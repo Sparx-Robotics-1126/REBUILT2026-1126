@@ -1,12 +1,10 @@
 package org.team1126.robot.util;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import org.team1126.lib.math.geometry.ExtPose;
-import org.team1126.lib.math.geometry.ExtRotation;
 import org.team1126.lib.math.geometry.ExtTranslation;
-import org.team1126.lib.util.Alliance;
 
 /**
  * Defining pre-calculated field waypoints. All points in this utility class are relative to the blue alliance and can be
@@ -14,69 +12,20 @@ import org.team1126.lib.util.Alliance;
  */
 public class WaypointNavigator {
 
-    /**
-     * Waypoints have been pre-calculated for REBUILT's field.
-     *
-     * Breakout is intended to be ordered as: WaypointHeading.NORTH, WaypointHeading.SOUTH
-     */
-    private static final ExtTranslation[][] WAYPOINTS = {
-        {
-            new ExtTranslation(6.070, 0.667),
-            new ExtTranslation(5.684, 2.167),
-            new ExtTranslation(Field.CENTER_X, Field.CENTER_Y),
-            new ExtTranslation(5.684, 5.190),
-            new ExtTranslation(6.070, 7.502)
-        },
-        {
-            new ExtTranslation(3.026, 0.667),
-            new ExtTranslation(2.584, 2.167),
-            new ExtTranslation(2.305, Field.CENTER_Y),
-            new ExtTranslation(2.584, 5.190),
-            new ExtTranslation(3.026, 7.502)
-        }
-    };
-
-    /**
-     * Rotations are [N,S][E,W][Waypoint]
-     */
-    private static final ExtRotation[][][] ROTATIONS = {
-        {
-            {
-                new ExtRotation(0.0),
-                new ExtRotation(90.0),
-                new ExtRotation(90.0),
-                new ExtRotation(90.0),
-                new ExtRotation(90.0)
-            },
-            {
-                new ExtRotation(270.0),
-                new ExtRotation(270.0),
-                new ExtRotation(270.0),
-                new ExtRotation(270.0),
-                new ExtRotation(0.0)
-            }
-        },
-        {
-            {
-                new ExtRotation(180.0),
-                new ExtRotation(180.0),
-                new ExtRotation(180.0),
-                new ExtRotation(180.0),
-                new ExtRotation(180.0)
-            },
-            {
-                new ExtRotation(180.0),
-                new ExtRotation(180.0),
-                new ExtRotation(180.0),
-                new ExtRotation(180.0),
-                new ExtRotation(180.0)
-            }
-        }
-    };
-
     private static final double EQUATOR = 182.115;
     // 5 div 8, but actually 4 div 8 since idx operates from 0-4
     private static final double WAYPOINT_COEFFICIENT = 0.5;
+
+    private static final Map<Integer, ExtTranslation> waypointMap = new HashMap<Integer, ExtTranslation>();
+
+    // precalculated waypoints
+    static {
+        waypointMap.put(0, new ExtTranslation(3.026, 0.667));
+        waypointMap.put(1, new ExtTranslation(2.584, 2.167));
+        waypointMap.put(2, new ExtTranslation(2.261, 4.075)); // this one is done
+        waypointMap.put(3, new ExtTranslation(2.584, 5.190));
+        waypointMap.put(4, new ExtTranslation(3.026, 7.502));
+    }
 
     public static enum WaypointHeading {
         NORTH(0),
@@ -93,62 +42,57 @@ public class WaypointNavigator {
         }
     }
 
-    public static List<ExtPose> trenching(Pose2d currentPose, boolean right) {
-        // 0. Make incoming pose relative to blue.
+    public static enum Nudge {
+        LEFT(0),
+        RIGHT(1),
+        CENTER(2);
+
+        private final int val;
+
+        private Nudge(int val) {
+            this.val = val;
+        }
+
+        public int getVal() {
+            return val;
+        }
+    }
+
+    /**
+     * Returns the numbered zone of the field that the robot is in given the
+     * pose being passed in. In order for this function to return the correct
+     * zone, the current pose must be south of the equator.
+     *
+     * @param currentPose the current Pose2d of the robot.
+     * @return the numeric zone 0-4 that the robot is in or -1 if the robot is
+     *         north of the equator.
+     */
+    public static ExtTranslation waypointForShooting(Pose2d currentPose, Nudge nudge) {
         ExtPose abstractPose = new ExtPose(currentPose);
-        // 1. determine if I am north or south of the equator
-        // Remember that the heading is the opposite of where we actually are.
         WaypointHeading heading = currentWaypointHeading(currentPose);
         WaypointHeading currentSide = heading == WaypointHeading.NORTH ? WaypointHeading.SOUTH : WaypointHeading.NORTH;
 
-        int startZone = (int) Math.round(abstractPose.getBlue().getY() * WAYPOINT_COEFFICIENT);
-
-        List<ExtPose> path = new ArrayList<>();
-        if (right) {
-            for (int i = startZone; i >= 0; i--) {
-                path.add(
-                    new ExtPose(
-                        new Pose2d(
-                            WAYPOINTS[currentSide.getVal()][i].getBlue(),
-                            ROTATIONS[currentSide.getVal()][0][i].getBlue()
-                        )
-                    )
-                );
-            }
-            for (int i = 0; i < 3; i++) {
-                path.add(
-                    new ExtPose(
-                        new Pose2d(
-                            WAYPOINTS[heading.getVal()][i].get(Alliance.isBlue(), false),
-                            ROTATIONS[heading.getVal()][0][i].get(Alliance.isBlue(), false)
-                        )
-                    )
-                );
-            }
-        } else {
-            for (int i = startZone; i < WAYPOINTS[heading.getVal()].length; i++) {
-                path.add(
-                    new ExtPose(
-                        new Pose2d(
-                            WAYPOINTS[heading.getVal()][i].get(Alliance.isBlue(), false),
-                            ROTATIONS[heading.getVal()][0][i].get(Alliance.isBlue(), false)
-                        )
-                    )
-                );
-            }
-            for (int i = (WAYPOINTS.length - 1); i >= 2; i--) {
-                path.add(
-                    new ExtPose(
-                        new Pose2d(
-                            WAYPOINTS[currentSide.getVal()][i].get(Alliance.isBlue(), false),
-                            ROTATIONS[currentSide.getVal()][0][i].get(Alliance.isBlue(), false)
-                        )
-                    )
-                );
-            }
+        if (currentSide == WaypointHeading.NORTH) {
+            return null;
         }
 
-        return path;
+        int currentZone = (int) Math.round(abstractPose.getBlue().getY() * WAYPOINT_COEFFICIENT);
+        switch (nudge) {
+            case LEFT:
+                if (currentZone < 4) {
+                    currentZone++;
+                }
+                break;
+            case RIGHT:
+                if (currentZone > 0) {
+                    currentZone--;
+                }
+                break;
+            default:
+                break;
+        }
+
+        return waypointMap.get(currentZone);
     }
 
     /**
