@@ -504,7 +504,7 @@ public final class Swerve extends GRRSubsystem {
                         deceleration.getAsDouble(),
                         Field.OBSTACLES
                     );
-                    speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), hubAngular);
+                    speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
                     api.applySpeeds(speeds, Perspective.BLUE, true, true);
                 }
             });
