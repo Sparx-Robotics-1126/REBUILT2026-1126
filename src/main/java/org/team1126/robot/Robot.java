@@ -6,7 +6,6 @@ import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import org.team1126.lib.logging.LoggedRobot;
@@ -98,7 +97,7 @@ public final class Robot extends LoggedRobot {
             .whileTrue(routines.driveTrench(() -> WaypointHeading.SOUTH, () -> false));
         driver.a().whileTrue(routines.aimAtHub(() -> 0.2));
         // driver.b().whileTrue(swerve.drive(this::driverX, this::driverY, () -> swerve.getHubAngular()));
-        driver.b().whileTrue(swerve.apfDriveShootingPosition(() -> 35.0));
+        driver.b().whileTrue(swerve.driveFacingHub(this::driverX, this::driverY, this::driverAngular));
         // driver.a().whileTrue(routines.refuelFromDepot());
         // driver.b().whileTrue(routines.refuelFromNeutral());
         // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
@@ -134,12 +133,14 @@ public final class Robot extends LoggedRobot {
 
         coDriver.x().whileTrue(intake.moveIntakeTest(false));
         coDriver.b().whileTrue(intake.moveIntakeTest(true));
-        coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
+        // coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
         //        coDriver.x().whileTrue(routines.shootFuel());
         //        coDriver.x().whileTrue(routines.shootFuel());
         // coDriver.b().whileTrue(routines.releaseAll());
         //        coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
         //        coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
+        coDriver.povUp().whileTrue(storage.moveMotorCommand(true));
+        coDriver.povDown().whileTrue(storage.moveMotorCommand(false));
         coDriver.rightBumper().onTrue(swerve.playMusic("enemy").ignoringDisable(true));
         //
 

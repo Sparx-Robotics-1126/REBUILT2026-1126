@@ -252,8 +252,8 @@ public final class Swerve extends GRRSubsystem {
         final double deltaY = state.pose.getY() - Field.HUB.get().getY();
 
         distanceToHub = Math.hypot(deltaX, deltaY);
-        angleToHub = Math.atan2(deltaY, deltaX);
-        // hubAngular = angularPID.calculate(state.rotation.getRadians(), angleToHub);
+        angleToHub = Math.atan2(deltaY, deltaX) + Math.PI;
+        // hubAngular = -angularPID.calculate(state.rotation.getRadians(), angleToHub);
     }
 
     /**
@@ -365,6 +365,25 @@ public final class Swerve extends GRRSubsystem {
                 y.getAsDouble(),
                 angular.getAsDouble(),
                 antiBeach,
+                Perspective.OPERATOR,
+                true,
+                true
+            );
+        });
+    }
+
+    public Command driveFacingHub(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
+        return commandBuilder("Swerve.drive()").onExecute(() -> {
+            var faceHub = Perspective.OPERATOR.toPerspectiveSpeeds(
+                new ChassisSpeeds(0.0, 0.0, angularPID.calculate(state.rotation.getRadians(), angleToHub)),
+                state.rotation
+            );
+
+            api.applyAssistedDriverInput(
+                x.getAsDouble(),
+                y.getAsDouble(),
+                angular.getAsDouble(),
+                faceHub,
                 Perspective.OPERATOR,
                 true,
                 true
