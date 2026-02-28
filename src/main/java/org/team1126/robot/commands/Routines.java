@@ -88,20 +88,22 @@ public final class Routines {
         ).withName("Routines.score()");
     }
 
-    public Command shootFuelReverseStorage() {
-        return parallel(
-            shootingLights(),
-            storage.feedShooter(shooter::shooterIsReady),
-            shooter.shoot(shooter::feederIsReady), 
-            storage.revStorage()
-        ).withName("Routines.score()");
-    }
-public Command unJamFeederShooter() {
-        return parallel(
-            shooter.unJamFeeder(),
-            shooter.unJamShooter()  )
-        .withName("Routines.unJamFeederShooter()");
-    }
+    // public Command shootFuelReverseStorage() {
+    //     return parallel(
+    //         shootingLights(),
+    //         storage.feedShooter(shooter::shooterIsReady),
+    //         shooter.shoot(shooter::feederIsReady),
+    //         storage.revStorage()
+    //     ).withName("Routines.score()");
+    // }
+
+    // public Command unJamFeederShooter() {
+    //     return parallel(
+    //         shooter.unJamFeeder()
+    //         // shooter.unJamShooter()
+    //     ).withName("Routines.unJamFeederShooter()");
+    // }
+
     public Command releaseAll() {
         return parallel(storage.spill()).withName("Spill Fuel");
     }
@@ -219,5 +221,4 @@ public Command unJamFeederShooter() {
             swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.2)
         );
     }
-
 }
