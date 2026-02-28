@@ -1,5 +1,6 @@
 package org.team1126.robot.subsystems;
 
+import static edu.wpi.first.wpilibj2.command.Commands.parallel;
 import static org.team1126.robot.Constants.FEEDER_MOTOR;
 import static org.team1126.robot.Constants.SHOOTER_MOTOR;
 
@@ -13,6 +14,9 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
+
+import javax.naming.PartialResultException;
+
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.util.command.GRRSubsystem;
@@ -27,6 +31,7 @@ public final class Shooter extends GRRSubsystem {
     private final RelativeEncoder feederEncoder;
     // private final SparkAbsoluteEncoder feederAbsoluteEncoder;
     private final Tunables.TunableInteger feederSpeed = tunables.value("Feeder Speed", 175);
+        private final Tunables.TunableInteger feederUnJamSpeed = tunables.value("Feeder UnJam Speed", 85);
     private final SparkClosedLoopController feederController;
 
     private final SparkFlex shooterMotor;
@@ -35,6 +40,7 @@ public final class Shooter extends GRRSubsystem {
     private final SparkAbsoluteEncoder shooterAbsoluteEncoder;
     private final SparkClosedLoopController shooterController;
     private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 198);
+     private final Tunables.TunableInteger shooterUnJamSpeed = tunables.value("Shooter UnJam Speed", 100);
     private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 198);
 
     private ShooterStates state = ShooterStates.kIdle;
@@ -190,6 +196,20 @@ public final class Shooter extends GRRSubsystem {
         // feederMotor.setVoltage(0);
     }
 
+
+    public Command unJamFeeder(){
+        return commandBuilder().onExecute(this::feederUnJam).onEnd(this::stopFeeder);
+    }
+    public Command unJamShooter(){
+        return commandBuilder().onExecute(this::shooterUnJam).onEnd(this::stopShooter);
+    }
+    private void shooterUnJam() {
+        shooterController.setSetpoint(-this.shooterUnJamSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+    }
+    private void feederUnJam() {
+        feederController.setSetpoint(-this.feederUnJamSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+    }
+
     public Command feederStop() {
         return commandBuilder().onExecute(this::stopFeeder);
     }
@@ -201,4 +221,5 @@ public final class Shooter extends GRRSubsystem {
             })
             .onEnd(this::stopFeeder);
     }
+
 }

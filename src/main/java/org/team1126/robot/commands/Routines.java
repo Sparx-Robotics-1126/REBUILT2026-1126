@@ -92,10 +92,16 @@ public final class Routines {
         return parallel(
             shootingLights(),
             storage.feedShooter(shooter::shooterIsReady),
-            shooter.shoot(shooter::feederIsReady)
+            shooter.shoot(shooter::feederIsReady), 
+            storage.revStorage()
         ).withName("Routines.score()");
     }
-
+public Command unJamFeederShooter() {
+        return parallel(
+            shooter.unJamFeeder(),
+            shooter.unJamShooter()  )
+        .withName("Routines.unJamFeederShooter()");
+    }
     public Command releaseAll() {
         return parallel(storage.spill()).withName("Spill Fuel");
     }
@@ -213,4 +219,5 @@ public final class Routines {
             swerve.apfDrive(() -> new Pose2d(Field.DEPOT_X, Field.DEPOT_Y, Field.DEPOT_ROT), () -> 0.2)
         );
     }
+
 }

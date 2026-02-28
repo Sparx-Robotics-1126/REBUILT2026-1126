@@ -8,6 +8,9 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+
+import java.security.CodeSigner;
+
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.util.DisableWatchdog;
@@ -121,16 +124,18 @@ public final class Robot extends LoggedRobot {
         //        coDriver.b().onTrue(storage.moveMotorCommand(false));
 
         // shooter.setDefaultCommand(shooter.idleShooterCommand());
-        coDriver.leftTrigger().whileTrue(routines.readyFeederShooter());
+        // coDriver.leftTrigger().whileTrue(routines.readyFeederShooter());
 
+        coDriver.leftTrigger().whileTrue(routines.unJamFeederShooter());
         coDriver.rightTrigger().whileTrue(shooter.readyShooter());
+
         coDriver.rightTrigger().and(coDriver.povRight()).whileTrue(routines.shootFuel());
         coDriver.rightTrigger().and(coDriver.povLeft()).whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-        coDriver.a().whileTrue(intake.extendIntakeTest());
-        coDriver.y().whileTrue(intake.retrackIntakeTest());
+        coDriver.y().whileTrue(intake.extendIntakeTest());
+        coDriver.a().whileTrue(intake.retrackIntakeTest());
 
         coDriver.x().whileTrue(intake.moveIntakeTest(false));
         coDriver.b().whileTrue(intake.moveIntakeTest(true));
