@@ -32,7 +32,7 @@ import org.team1126.robot.Constants.RioIO;
 @Logged
 public final class Lights {
 
-    private static final int LENGTH = 28;
+    private static final int LENGTH = 21;
     private static final int COUNT = 3;
 
     private static final TunableTable tunables = Tunables.getNested("lights");

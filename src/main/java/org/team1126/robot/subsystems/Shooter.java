@@ -48,6 +48,7 @@ public final class Shooter extends GRRSubsystem {
 
     public Shooter() {
         shooterMotor = new SparkFlex(SHOOTER_MOTOR, SparkLowLevel.MotorType.kBrushless);
+
         shooterController = shooterMotor.getClosedLoopController();
         shooterEncoder = shooterMotor.getEncoder();
         shooterAbsoluteEncoder = shooterMotor.getAbsoluteEncoder();
@@ -59,6 +60,7 @@ public final class Shooter extends GRRSubsystem {
             .d(0)
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .feedForward.kV(.05);
+        // shooterConfig.encoder.velocityConversionFactor(.07);
 
         shooterConfig.closedLoop.maxMotion
             .maxAcceleration(1375)

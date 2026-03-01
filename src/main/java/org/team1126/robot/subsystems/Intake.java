@@ -23,13 +23,13 @@ public final class Intake extends GRRSubsystem {
     private SparkFlexConfig intakeConfig;
     private final RelativeEncoder intakeEncoder;
     private SparkClosedLoopController intakeController;
-    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 250);
+    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 235);
     private static final TunableTable tunables = Tunables.getNested("intake");
 
     private SparkFlexConfig pivotConfig;
-    private final SparkAbsoluteEncoder pivotEncoder;
+    // private final SparkAbsoluteEncoder pivotEncoder;
     private SparkClosedLoopController pivotController;
-    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -.1);
+    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -16.7);
 
     // private final SparkMax moveStorage;
     // private SparkMaxConfig moveStorageConfig;
@@ -46,24 +46,34 @@ public final class Intake extends GRRSubsystem {
         intakeConfig = new SparkFlexConfig();
 
         pivotMotor = new SparkFlex(PIVOT_MOTOR, SparkLowLevel.MotorType.kBrushless);
-        pivotEncoder = pivotMotor.getAbsoluteEncoder();
+        // pivotEncoder = pivotMotor.getAbsoluteEncoder();
         pivotConfig = new SparkFlexConfig();
         pivotController = pivotMotor.getClosedLoopController();
 
         pivotConfig.closedLoop
-            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-            .p(.8, ClosedLoopSlot.kSlot0)
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(.9, ClosedLoopSlot.kSlot0)
             .i(0, ClosedLoopSlot.kSlot0)
             .d(0, ClosedLoopSlot.kSlot0)
-            .feedForward.kG(.1, ClosedLoopSlot.kSlot0);
+            .feedForward.kCos(.0, ClosedLoopSlot.kSlot0);
+        pivotConfig.closedLoop.maxMotion
+            .maxAcceleration(1000, ClosedLoopSlot.kSlot0) // REDUCED from 200 — slower ramp
+            .allowedProfileError(1, ClosedLoopSlot.kSlot0)
+            .cruiseVelocity(650, ClosedLoopSlot.kSlot0) // Changed from 1000 to match test setpoint
+            .allowedProfileError(1, ClosedLoopSlot.kSlot0);
 
         pivotConfig.closedLoop
-            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(.9, ClosedLoopSlot.kSlot1)
             .i(0, ClosedLoopSlot.kSlot1)
             .d(0, ClosedLoopSlot.kSlot1)
-            .feedForward.kG(1, ClosedLoopSlot.kSlot1);
-        //                .maxMotion.maxAcceleration(100).cruiseVelocity(100).allowedProfileError(1)
+            .feedForward.kCos(.5, ClosedLoopSlot.kSlot1);
+        pivotConfig.closedLoop.maxMotion
+            .maxAcceleration(1000, ClosedLoopSlot.kSlot1) // REDUCED from 200 — slower ramp
+            .allowedProfileError(1, ClosedLoopSlot.kSlot1)
+            .cruiseVelocity(650, ClosedLoopSlot.kSlot1) // Changed from 1000 to match test setpoint
+            .allowedProfileError(1, ClosedLoopSlot.kSlot1);
+        //   pivotConfig.closedLoop.maxMotion.maxAcceleration(100).cruiseVelocity(100).allowedProfileError(1)
 
         pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
@@ -151,18 +161,26 @@ public final class Intake extends GRRSubsystem {
     public void periodic() {
         SmartDashboard.putBoolean("Intake at set point?", intakeController.isAtSetpoint());
         SmartDashboard.putNumber("Velocity", this.intakeEncoder.getVelocity());
-        SmartDashboard.putNumber("Position", this.pivotEncoder.getPosition());
+        SmartDashboard.putNumber("Position", this.pivotMotor.getEncoder().getPosition());
         //        if (isOn) {
         //            intakeController.setSetpoint(voltage.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         //        }
     }
 
     public void moveMotorPosOut(double position) {
-        this.pivotController.setSetpoint(position, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        this.pivotController.setSetpoint(
+            position,
+            SparkBase.ControlType.kMAXMotionPositionControl,
+            ClosedLoopSlot.kSlot0
+        );
     }
 
     public void moveMotorPosIn(double position) {
-        this.pivotController.setSetpoint(position, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot1);
+        this.pivotController.setSetpoint(
+            position,
+            SparkBase.ControlType.kMAXMotionPositionControl,
+            ClosedLoopSlot.kSlot1
+        );
     }
 
     public Command extendIntakeTest() {
@@ -192,7 +210,7 @@ public final class Intake extends GRRSubsystem {
             .onExecute(() -> this.moveMotorPosIn(0))
             .onEnd(interrupted -> {
                 // Keep actively holding home when the command ends
-                pivotController.setSetpoint(0, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot1);
+                pivotController.setSetpoint(0, SparkBase.ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot1);
 
                 // Use Brake to resist drifting away from home
                 var brakeCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kBrake);
