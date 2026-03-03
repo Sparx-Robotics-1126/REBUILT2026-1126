@@ -33,6 +33,7 @@ import org.team1126.lib.swerve.hardware.SwerveMotors;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
+import org.team1126.lib.util.Alliance;
 import org.team1126.lib.util.Mutable;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.robot.Constants;
@@ -62,6 +63,10 @@ public final class Swerve extends GRRSubsystem {
     private static final TunableTable beachTunables = tunables.getNested("beach");
     private static final TunableDouble beachSpeed = beachTunables.value("speed", 3.0);
     private static final TunableDouble beachTolerance = beachTunables.value("tolerance", 0.15);
+    private static final TunableDouble rampAngle = beachTunables.value(
+        "rampAngle",
+        Alliance.isBlue() ? Math2.THREE_QUARTERS_PI : Math2.THREE_QUARTERS_PI + Math.PI
+    );
 
     private static final TunableTable apfTunables = tunables.getNested("apf");
     private static final TunableDouble apfX = apfTunables.value("x", 1.14);
@@ -346,30 +351,45 @@ public final class Swerve extends GRRSubsystem {
      * @param y The Y value from the driver's joystick.
      * @param angular The CCW+ angular speed to apply, from {@code [-1.0, 1.0]}.
      */
-    public Command drive(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
-        return commandBuilder("Swerve.drive()").onExecute(() -> {
-            double pitch = state.pitch.getRadians();
-            double roll = state.roll.getRadians();
+    public Command drive(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular, boolean doBeaching) {
+        return commandBuilder("Swerve.drive()")
+            .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
+            .onExecute(() -> {
+                double pitch = state.pitch.getRadians();
+                double roll = state.roll.getRadians();
 
-            var antiBeach = Perspective.OPERATOR.toPerspectiveSpeeds(
-                new ChassisSpeeds(
-                    Math.abs(pitch) > beachTolerance.get() ? Math.copySign(beachSpeed.get(), pitch) : 0.0,
-                    Math.abs(roll) > beachTolerance.get() ? Math.copySign(beachSpeed.get(), -roll) : 0.0,
-                    0.0
-                ),
-                state.rotation
-            );
+                ChassisSpeeds driverAssistedSpeeds = null;
+                if (doBeaching) {
+                    driverAssistedSpeeds = Perspective.OPERATOR.toPerspectiveSpeeds(
+                        new ChassisSpeeds(
+                            Math.abs(pitch) > beachTolerance.get() ? Math.copySign(beachSpeed.get(), pitch) : 0.0,
+                            Math.abs(roll) > beachTolerance.get() ? Math.copySign(beachSpeed.get(), -roll) : 0.0,
+                            0.0
+                        ),
+                        state.rotation
+                    );
+                } else {
+                    driverAssistedSpeeds = Perspective.OPERATOR.toPerspectiveSpeeds(
+                        new ChassisSpeeds(
+                            0.0,
+                            0.0,
+                            angularPID.calculate(state.rotation.getRadians(), rampAngle.getAsDouble())
+                        ),
+                        state.rotation
+                    );
+                    angularPID.calculate(state.rotation.getRadians(), rampAngle.getAsDouble());
+                }
 
-            api.applyAssistedDriverInput(
-                x.getAsDouble(),
-                y.getAsDouble(),
-                angular.getAsDouble(),
-                antiBeach,
-                Perspective.OPERATOR,
-                true,
-                true
-            );
-        });
+                api.applyAssistedDriverInput(
+                    x.getAsDouble(),
+                    y.getAsDouble(),
+                    angular.getAsDouble(),
+                    driverAssistedSpeeds,
+                    Perspective.OPERATOR,
+                    true,
+                    true
+                );
+            });
     }
 
     public Command driveFacingHub(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
@@ -399,7 +419,7 @@ public final class Swerve extends GRRSubsystem {
      */
     public Command turboSpin(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
         Mutable<Double> configured = new Mutable<>(0.0);
-        return drive(x, y, angular)
+        return drive(x, y, angular, true)
             .beforeStarting(() -> {
                 configured.value = api.config.driverAngularVel;
                 api.config.driverAngularVel = turboSpin.get();
