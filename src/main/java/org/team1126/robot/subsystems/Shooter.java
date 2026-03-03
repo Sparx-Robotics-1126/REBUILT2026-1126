@@ -27,6 +27,7 @@ public final class Shooter extends GRRSubsystem {
     private final RelativeEncoder feederEncoder;
     // private final SparkAbsoluteEncoder feederAbsoluteEncoder;
     private final Tunables.TunableInteger feederSpeed = tunables.value("Feeder Speed", 175);
+    private final Tunables.TunableInteger feederUnJamSpeed = tunables.value("Feeder UnJam Speed", 85);
     private final SparkClosedLoopController feederController;
 
     private final SparkFlex shooterMotor;
@@ -35,6 +36,7 @@ public final class Shooter extends GRRSubsystem {
     private final SparkAbsoluteEncoder shooterAbsoluteEncoder;
     private final SparkClosedLoopController shooterController;
     private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 198);
+    private final Tunables.TunableInteger shooterUnJamSpeed = tunables.value("Shooter UnJam Speed", 100);
     private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 198);
 
     private ShooterStates state = ShooterStates.kIdle;
@@ -46,6 +48,7 @@ public final class Shooter extends GRRSubsystem {
 
     public Shooter() {
         shooterMotor = new SparkFlex(SHOOTER_MOTOR, SparkLowLevel.MotorType.kBrushless);
+
         shooterController = shooterMotor.getClosedLoopController();
         shooterEncoder = shooterMotor.getEncoder();
         shooterAbsoluteEncoder = shooterMotor.getAbsoluteEncoder();
@@ -57,6 +60,7 @@ public final class Shooter extends GRRSubsystem {
             .d(0)
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .feedForward.kV(.05);
+        // shooterConfig.encoder.velocityConversionFactor(.07);
 
         shooterConfig.closedLoop.maxMotion
             .maxAcceleration(1375)
@@ -188,6 +192,22 @@ public final class Shooter extends GRRSubsystem {
         feederController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl);
         shooterController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl);
         // feederMotor.setVoltage(0);
+    }
+
+    public Command unJamFeeder() {
+        return commandBuilder().onExecute(this::feederUnJam).onEnd(this::stopFeeder);
+    }
+
+    public Command unJamShooter() {
+        return commandBuilder().onExecute(this::shooterUnJam).onEnd(this::stopShooter);
+    }
+
+    private void shooterUnJam() {
+        shooterController.setSetpoint(-this.shooterUnJamSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+    }
+
+    private void feederUnJam() {
+        feederController.setSetpoint(-this.feederUnJamSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
     }
 
     public Command feederStop() {
