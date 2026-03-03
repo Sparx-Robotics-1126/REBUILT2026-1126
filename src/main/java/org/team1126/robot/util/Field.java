@@ -63,6 +63,8 @@ public final class Field {
 
     /** Picking the center of the hub as the hub's location, for the purpose of aiming. */
     public static final ExtTranslation HUB = new ExtTranslation(HUB_CENTER_X, HUB_CENTER_Y);
+    public static final ExtTranslation SHOOTING_POSITION = new ExtTranslation(2.261, 4.075);
+    public static final double SHOOTING_RANGE_RADIUS = 2.635;
 
     ////////////////////////
     // BARRIER DEFINITION //
