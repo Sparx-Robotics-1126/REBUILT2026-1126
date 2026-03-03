@@ -23,7 +23,7 @@ public final class Intake extends GRRSubsystem {
     private SparkFlexConfig intakeConfig;
     private final RelativeEncoder intakeEncoder;
     private SparkClosedLoopController intakeController;
-    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 235);
+    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 300);
     private static final TunableTable tunables = Tunables.getNested("intake");
 
     private SparkFlexConfig pivotConfig;
@@ -108,8 +108,8 @@ public final class Intake extends GRRSubsystem {
         intakeConfig.closedLoop.maxMotion
             // Set MAXMotion parameters for position control. We don't need to pass
             // a closed loop slot, as it will default to slot 0.
-            .cruiseVelocity(250)
-            .maxAcceleration(500)
+            .cruiseVelocity(300)
+            .maxAcceleration(800)
             .allowedProfileError(10);
 
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -162,6 +162,7 @@ public final class Intake extends GRRSubsystem {
         SmartDashboard.putBoolean("Intake at set point?", intakeController.isAtSetpoint());
         SmartDashboard.putNumber("Velocity", this.intakeEncoder.getVelocity());
         SmartDashboard.putNumber("Position", this.pivotMotor.getEncoder().getPosition());
+        SmartDashboard.putNumber("Pivot Temp", this.pivotMotor.getMotorTemperature());
         //        if (isOn) {
         //            intakeController.setSetpoint(voltage.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         //        }

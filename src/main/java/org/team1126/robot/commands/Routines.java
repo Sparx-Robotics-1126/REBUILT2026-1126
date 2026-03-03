@@ -72,6 +72,12 @@ public final class Routines {
         return parallel(shooter.getReadyCommand()).withName("Routines.prepareForShooting()");
     }
 
+    public Command feedShooter() {
+        return parallel(shootingLights(), storage.feedShooter(shooter::shooterIsReady), shooter.feedShooter()).withName(
+            "Routines.score()"
+        );
+    }
+
     public Command shootFuel() {
         return parallel(
             shootingLights(),

@@ -7,7 +7,6 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -106,6 +105,10 @@ public final class Shooter extends GRRSubsystem {
         );
     }
 
+    public Command haltShooter() {
+        return commandBuilder().onExecute(this::stopShooter);
+    }
+
     private void stopShooter() {
         this.shooterController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl);
     }
@@ -142,20 +145,11 @@ public final class Shooter extends GRRSubsystem {
     }
 
     public Command readyShooter() {
-        return commandBuilder()
-            .onInitialize(
-                () ->
-                    this.shooterController.setSetpoint(
-                        this.shooterShootSpeed.get(),
-                        ControlType.kMAXMotionVelocityControl
-                    ) // Changed from onExecute to onInitialize
-            )
-            .onEnd(this::idleShooter);
-        // .until(() -> this.shooterController.isAtSetpoint()); // Add until condition
+        return commandBuilder().onExecute(() -> getReady());
     }
 
     public void getReady() {
-        shooterController.setSetpoint(this.shooterIdleSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        shooterController.setSetpoint(this.shooterShootSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         // feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
     }
 
@@ -179,6 +173,12 @@ public final class Shooter extends GRRSubsystem {
 
     public boolean feederIsReady() {
         return this.feederController.isAtSetpoint();
+    }
+
+    public Command feedShooter() {
+        return commandBuilder().onExecute(() ->
+            feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl)
+        );
     }
 
     private void shooting(BooleanSupplier isReady) {
