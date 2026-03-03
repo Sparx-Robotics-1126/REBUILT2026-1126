@@ -58,11 +58,11 @@ public final class Routines {
 
     public Command lightsDisabledMode() {
         if (Alliance.isBlue()) {
-            return parallel(lights.top.setSolidBlue(), lights.sides.setSolidRed()).withName(
+            return parallel(lights.top.setSolidBlue(), lights.sides.setSolidBlue()).withName(
                 "Routines.lightsDisabledMode()"
             );
         } else {
-            return parallel(lights.top.setSolidRed(), lights.sides.setSolidBlue()).withName(
+            return parallel(lights.top.setSolidRed(), lights.sides.setSolidRed()).withName(
                 "Routines.lightsDisabledMode()"
             );
         }

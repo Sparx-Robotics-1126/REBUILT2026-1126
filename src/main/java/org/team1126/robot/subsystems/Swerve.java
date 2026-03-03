@@ -143,7 +143,7 @@ public final class Swerve extends GRRSubsystem {
         .setMechanicalProperties(5.27, (287 / 11), Units.inchesToMeters(3.85))
         .setOdometryStd(0.1, 0.1, 0.05)
         .setIMU(SwerveIMUs.pigeon2(RioCAN.CANANDGYRO))
-        .setPhoenixFeatures(new CANBus(LowerCAN.LOWER_CAN), false, false, false)
+        .setPhoenixFeatures(new CANBus(LowerCAN.LOWER_CAN), true, false, false)
         .setModules(frontLeft, frontRight, backLeft, backRight);
 
     @NotLogged
