@@ -66,7 +66,9 @@ public final class Robot extends LoggedRobot {
         coDriver = new CommandXboxController(Constants.CO_DRIVER);
 
         // Set default commands
-        swerve.setDefaultCommand(swerve.drive(this::driverX, this::driverY, this::driverAngular));
+        swerve.setDefaultCommand(
+            swerve.drive(this::driverX, this::driverY, this::driverAngular, Constants.DO_BEACHING_DEFAULT)
+        );
 
         // Create triggers
         // Trigger allowGoosing = coDriver.a().negate();
@@ -99,6 +101,8 @@ public final class Robot extends LoggedRobot {
         driver.a().whileTrue(swerve.apfDriveShootingPosition(() -> 0.8));
         // driver.b().whileTrue(swerve.drive(this::driverX, this::driverY, () -> swerve.getHubAngular()));
         driver.b().whileTrue(swerve.driveFacingHub(this::driverX, this::driverY, this::driverAngular));
+        driver.y().whileTrue(swerve.driveFacingZone(this::driverX, this::driverY, this::driverAngular));
+        driver.rightTrigger().whileTrue(swerve.drive(this::driverX, this::driverY, this::driverAngular, false));
         // driver.a().whileTrue(routines.refuelFromDepot());
         // driver.b().whileTrue(routines.refuelFromNeutral());
         // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
