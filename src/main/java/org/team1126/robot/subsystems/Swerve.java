@@ -163,7 +163,10 @@ public final class Swerve extends GRRSubsystem {
     private boolean facingHub = false;
 
     private double distanceToHub = 0.0;
+    private double distanceToShootingPoint = 0.0;
     private double angleToHub = 0.0;
+
+    private ExtTranslation shootingArc = new ExtTranslation(0.0, 0.0);
 
     // private final Orchestra orchestra;
 
@@ -252,8 +255,19 @@ public final class Swerve extends GRRSubsystem {
         final double deltaY = state.pose.getY() - Field.HUB.get().getY();
 
         distanceToHub = Math.hypot(deltaX, deltaY);
+
         angleToHub = Math.atan2(deltaY, deltaX) + Math.PI;
         // hubAngular = -angularPID.calculate(state.rotation.getRadians(), angleToHub);
+
+        distanceToShootingPoint = distanceToHub - Field.SHOOTING_RANGE_RADIUS;
+        double shootingX = state.pose.getX() + distanceToShootingPoint;
+        double shootingY = state.pose.getY() + distanceToShootingPoint;
+
+        if (state.pose.getY() > Field.CENTER_Y) {
+            shootingY = state.pose.getY() - distanceToShootingPoint;
+        }
+
+        shootingArc = new ExtTranslation(shootingX, shootingY);
     }
 
     /**
@@ -417,6 +431,23 @@ public final class Swerve extends GRRSubsystem {
                     goal.getTranslation(),
                     apfHubFacingVel.get(),
                     apfHubFacingDecel.get()
+                );
+
+                speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
+
+                api.applySpeeds(speeds, Perspective.BLUE, true, true);
+            });
+    }
+
+    public Command driveToShootingArc(final DoubleSupplier maxDeceleration) {
+        return commandBuilder("Swerve.driveToShootingArc()")
+            .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
+            .onExecute(() -> {
+                var speeds = apf.calculate(
+                    state.pose,
+                    this.shootingArc.get(),
+                    apfHubFacingVel.get(),
+                    maxDeceleration.getAsDouble()
                 );
 
                 speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
