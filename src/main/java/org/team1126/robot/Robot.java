@@ -101,6 +101,7 @@ public final class Robot extends LoggedRobot {
         driver.a().whileTrue(swerve.apfDriveShootingPosition(() -> 0.8));
         // driver.b().whileTrue(swerve.drive(this::driverX, this::driverY, () -> swerve.getHubAngular()));
         driver.b().whileTrue(swerve.driveFacingHub(this::driverX, this::driverY, this::driverAngular));
+        driver.y().whileTrue(swerve.driveFacingZone(this::driverX, this::driverY, this::driverAngular));
         driver.rightTrigger().whileTrue(swerve.drive(this::driverX, this::driverY, this::driverAngular, false));
         // driver.a().whileTrue(routines.refuelFromDepot());
         // driver.b().whileTrue(routines.refuelFromNeutral());

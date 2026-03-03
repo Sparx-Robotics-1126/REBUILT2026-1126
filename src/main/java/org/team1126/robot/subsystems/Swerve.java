@@ -411,6 +411,30 @@ public final class Swerve extends GRRSubsystem {
         });
     }
 
+    public Command driveFacingZone(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
+        return commandBuilder("Swerve.drive()").onExecute(() -> {
+            var faceHub = Perspective.OPERATOR.toPerspectiveSpeeds(
+                new ChassisSpeeds(
+                    0.0,
+                    0.0,
+                    angularPID.calculate(state.rotation.getRadians(), Alliance.isBlue() ? Math.PI : 0.0)
+                ),
+                state.rotation
+            );
+            angularPID.calculate(state.rotation.getRadians(), Alliance.isBlue() ? Math.PI : 0.0);
+
+            api.applyAssistedDriverInput(
+                x.getAsDouble(),
+                y.getAsDouble(),
+                angular.getAsDouble(),
+                faceHub,
+                Perspective.OPERATOR,
+                true,
+                true
+            );
+        });
+    }
+
     /**
      * SPIN FAST RAHHHHHHH
      * @param x The X value from the driver's joystick.
