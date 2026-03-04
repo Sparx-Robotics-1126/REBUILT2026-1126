@@ -174,10 +174,10 @@ public final class Lights {
      * @param defaultAuto If the default auto is selected.
      */
     public Command preMatch(Supplier<Pose2d> robotPose, BooleanSupplier seesAprilTag, BooleanSupplier defaultAuto) {
-        return parallel(sides.preMatch(defaultAuto), top.preMatch(robotPose, seesAprilTag))
-            .until(DriverStation::isEnabled)
-            .ignoringDisable(true)
-            .withName("Lights.disabled()");
+        return parallel(
+            sides.preMatch(defaultAuto),
+            DriverStation.getAlliance().get() == DriverStation.Alliance.Blue ? top.setSolidBlue() : top.setSolidRed()
+        ).withName("Lights.disabled()");
     }
 
     @Logged

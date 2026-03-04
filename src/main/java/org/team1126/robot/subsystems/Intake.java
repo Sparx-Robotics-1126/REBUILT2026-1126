@@ -23,7 +23,7 @@ public final class Intake extends GRRSubsystem {
     private SparkFlexConfig intakeConfig;
     private final RelativeEncoder intakeEncoder;
     private SparkClosedLoopController intakeController;
-    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 300);
+    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 325);
     private static final TunableTable tunables = Tunables.getNested("intake");
 
     private SparkFlexConfig pivotConfig;
@@ -89,8 +89,8 @@ public final class Intake extends GRRSubsystem {
             .smartCurrentLimit(40)
             .idleMode(SparkBaseConfig.IdleMode.kBrake)
             .inverted(false)
-            .openLoopRampRate(0.25)
-            .closedLoopRampRate(0.25);
+            .openLoopRampRate(0.1)
+            .closedLoopRampRate(0.1);
 
         intakeConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -103,13 +103,13 @@ public final class Intake extends GRRSubsystem {
             // Set PID values for velocity control in slot 1
             .feedForward
             // kV is now in Volts, so we multiply by the nominal voltage (12V)
-            .kV(.02);
+            .kV(.025);
 
         intakeConfig.closedLoop.maxMotion
             // Set MAXMotion parameters for position control. We don't need to pass
             // a closed loop slot, as it will default to slot 0.
-            .cruiseVelocity(300)
-            .maxAcceleration(800)
+            .cruiseVelocity(350)
+            .maxAcceleration(1750)
             .allowedProfileError(10);
 
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -128,14 +128,14 @@ public final class Intake extends GRRSubsystem {
     public Command moveIntakeMotorCommand(boolean reverse) {
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(reverse))
-            .onEnd(() -> intakeController.setSetpoint(0, SparkBase.ControlType.kVelocity));
+            .onEnd(() -> intakeController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl));
     }
 
     public void moveIntakeMotor(boolean reverse) {
         if (reverse) {
-            intakeController.setSetpoint(-this.intakeSpeed.get(), SparkBase.ControlType.kVelocity);
+            intakeController.setSetpoint(-this.intakeSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         } else {
-            intakeController.setSetpoint(this.intakeSpeed.get(), SparkBase.ControlType.kVelocity);
+            intakeController.setSetpoint(this.intakeSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         }
     }
 
