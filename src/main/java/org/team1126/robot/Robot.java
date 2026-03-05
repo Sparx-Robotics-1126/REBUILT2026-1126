@@ -135,7 +135,7 @@ public final class Robot extends LoggedRobot {
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-        coDriver.a().whileTrue(intake.extendIntakeTest());
+        coDriver.a().whileTrue(intake.extendIntake());
         coDriver.y().whileTrue(intake.retrackIntakeTest());
 
         coDriver.x().whileTrue(intake.moveIntakeTest(false));
@@ -153,8 +153,7 @@ public final class Robot extends LoggedRobot {
         RobotModeTriggers.autonomous().whileTrue(autos.runSelectedAuto());
         // Setup lights
         // scheduler.schedule(routines.lightsPreMatch(autos.runSelectedAuto()));
-
-        RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
+//        RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
         RobotModeTriggers.disabled().whileTrue(routines.lightsDisabledMode());
         // Disable loop overrun warnings from the command
         // scheduler, since we already log loop timings
@@ -198,7 +197,10 @@ public final class Robot extends LoggedRobot {
         // try {
         //     SmartDashboard.putString("fuelPose", Objects.requireNonNull(swerve.getFuelPose()).toString());
         // } catch (Exception ignored) {}
+
     }
+
+
 
     private void playSong(String filename) {
         orchestra.loadMusic(filename);

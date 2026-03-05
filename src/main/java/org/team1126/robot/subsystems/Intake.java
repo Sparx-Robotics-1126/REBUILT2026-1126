@@ -50,6 +50,7 @@ public final class Intake extends GRRSubsystem {
         pivotConfig = new SparkFlexConfig();
         pivotController = pivotMotor.getClosedLoopController();
 
+        pivotConfig.idleMode(SparkBaseConfig.IdleMode.kBrake);
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(.9, ClosedLoopSlot.kSlot0)
@@ -184,23 +185,25 @@ public final class Intake extends GRRSubsystem {
         );
     }
 
-    public Command extendIntakeTest() {
-        return commandBuilder().onExecute(() -> this.moveMotorPosOut(pivotPosition.get()));
-    }
-
     public Command extendIntake() {
         return commandBuilder()
-            .onExecute(() -> this.moveMotorPosOut(pivotPosition.get()))
-            .onEnd(interrupted -> {
-                // Stop driving and let it relax wherever it ended up
-                pivotMotor.setVoltage(0.0);
-
-                // Put the pivot motor into Coast
-                var coastCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kCoast);
-
-                pivotMotor.configure(coastCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-            });
+                .onExecute(() -> this.moveMotorPosOut(pivotPosition.get()))
+                .onEnd(this::stopPivot);
     }
+
+//    public Command extendIntake() {
+//        return commandBuilder()
+//            .onExecute(() -> this.moveMotorPosOut(pivotPosition.get()))
+//            .onEnd(interrupted -> {
+//                // Stop driving and let it relax wherever it ended up
+//                pivotMotor.setVoltage(0.0);
+//
+//                // Put the pivot motor into Coast
+//                var coastCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kCoast);
+//
+//                pivotMotor.configure(coastCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+//            });
+//    }
 
     public Command retrackIntakeTest() {
         return commandBuilder().onExecute(() -> this.moveMotorPosIn(0));
@@ -218,5 +221,8 @@ public final class Intake extends GRRSubsystem {
 
                 pivotMotor.configure(brakeCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
             });
+    }
+    private void stopPivot() {
+        pivotMotor.setVoltage(0);
     }
 }

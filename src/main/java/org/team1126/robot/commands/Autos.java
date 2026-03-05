@@ -2,7 +2,9 @@ package org.team1126.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,8 +14,8 @@ import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.robot.Robot;
-import org.team1126.robot.subsystems.Lights;
-import org.team1126.robot.subsystems.Swerve;
+import org.team1126.robot.subsystems.*;
+import org.team1126.robot.util.Field;
 
 /**
  * The Autos class declares autonomous modes, and adds them
@@ -30,6 +32,9 @@ public final class Autos {
 
     private final Lights lights;
     private final Swerve swerve;
+    private final Shooter shooter;
+    private final Storage storage;
+    private final Intake intake;
 
     private final Routines routines;
 
@@ -40,6 +45,9 @@ public final class Autos {
 
         lights = robot.lights;
         swerve = robot.swerve;
+        shooter = robot.shooter;
+        storage = robot.storage;
+        intake = robot.intake;
 
         routines = robot.routines;
 
@@ -52,13 +60,28 @@ public final class Autos {
         SmartDashboard.putData("autos", chooser);
     }
 
+
+    private Command outpost() {
+
+        var goal = Field.WAYPOINT_DEPOT.get();
+
+        return sequence(
+                deadline(routines.selfDriveLights(),shooter.readyShooter()),
+                routines.shootFuel().withTimeout(3.0),
+
+                deadline(swerve.apfDrive(() -> new Pose2d(goal.getX(), goal.getY(), Rotation2d.fromDegrees(180)), () -> 0.3), intake.extendIntake())
+        );
+    }
+
     /**
      * Returns {@code true} when the default auto is selected.
      */
-    // public boolean defaultSelected() {
-    //     return chooser.getSelected()..getAsBoolean();
-    // }
-
+//    public boolean defaultSelected() {
+//        return chooser.getSelected().getAsBoolean();
+//    }
+    public Command getAutonomousCommand() {
+        return chooser.getSelected();
+    }
     private Command driveSampleLocations() {
         var start = new ExtPose(2.0, 2.0, Rotation2d.kZero);
         var middle = new ExtPose(3.0, 5.0, Rotation2d.k180deg);

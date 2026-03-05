@@ -40,7 +40,18 @@ public final class Field {
     // DEPOT Drive Coordinates
     public static final double DEPOT_X = Units.inchesToMeters(27.0);
     public static final double DEPOT_Y = Units.inchesToMeters(213.85);
+    public static final double DEPOT_CENTER_Y = Units.inchesToMeters(234.85);
+
+    public static final double DEPOT_X_RED = Units.inchesToMeters(623.12);
+    public static final double DEPOT_Y_RED = Units.inchesToMeters(82.35);
+    public static final double DEPOT_CENTER_Y_RED = Units.inchesToMeters(623.12);
+
+    public static final double DEPOT_X_BLUE = Units.inchesToMeters(27.0);
+    public static final double DEPOT_Y_BLUE = Units.inchesToMeters(213.85);
+    public static final double DEPOT_CENTER_Y_BLUE = Units.inchesToMeters(234.85);
     public static final Rotation2d DEPOT_ROT = Rotation2d.fromDegrees(135);
+
+    public static final ExtPose WAYPOINT_DEPOT = new ExtPose(new Pose2d(DEPOT_X, DEPOT_CENTER_Y, Rotation2d.kZero));
 
     /** HUB Center Y Coordinate */
     public static final double FIELD_CENTER_Y = getTag(26).getY();
