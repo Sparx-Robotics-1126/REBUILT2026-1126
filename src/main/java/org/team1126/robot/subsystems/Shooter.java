@@ -25,7 +25,7 @@ public final class Shooter extends GRRSubsystem {
     private final SparkMaxConfig feederConfig;
     private final RelativeEncoder feederEncoder;
     // private final SparkAbsoluteEncoder feederAbsoluteEncoder;
-    private final Tunables.TunableInteger feederSpeed = tunables.value("Feeder Speed", 175);
+    private final Tunables.TunableInteger feederSpeed = tunables.value("Feeder Speed", 200);
     private final Tunables.TunableInteger feederUnJamSpeed = tunables.value("Feeder UnJam Speed", 85);
     private final SparkClosedLoopController feederController;
 

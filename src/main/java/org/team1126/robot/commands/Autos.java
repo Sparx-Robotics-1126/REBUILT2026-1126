@@ -3,12 +3,14 @@ package org.team1126.robot.commands;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
-import org.team1126.lib.util.command.AutoChooser;
 import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Swerve;
@@ -31,7 +33,7 @@ public final class Autos {
 
     private final Routines routines;
 
-    private final AutoChooser chooser;
+    SendableChooser<Command> chooser = new SendableChooser<>();
 
     public Autos(Robot robot) {
         this.robot = robot;
@@ -42,16 +44,20 @@ public final class Autos {
         routines = robot.routines;
 
         // Create the auto chooser
-        chooser = new AutoChooser();
-        chooser.add("Drive", driveSampleLocations());
+        // chooser = new AutoChooser();
+        chooser.setDefaultOption("Do nothing", Commands.none());
+        chooser.addOption("Drive", driveSampleLocations());
+        chooser.addOption("Outpost", routines.outpost());
+        // chooser.addOption("Depot", routines.dock());
+        SmartDashboard.putData("autos", chooser);
     }
 
     /**
      * Returns {@code true} when the default auto is selected.
      */
-    public boolean defaultSelected() {
-        return chooser.defaultSelected().getAsBoolean();
-    }
+    // public boolean defaultSelected() {
+    //     return chooser.getSelected()..getAsBoolean();
+    // }
 
     private Command driveSampleLocations() {
         var start = new ExtPose(2.0, 2.0, Rotation2d.kZero);
@@ -64,6 +70,11 @@ public final class Autos {
             swerve.apfDrive(end, deceleration, tolerance),
             swerve.stop(false)
         );
+    }
+
+    public Command runSelectedAuto() {
+        System.out.println("Running auto: " + chooser.getSelected().getName());
+        return chooser.getSelected();
     }
 
     // ********** Sim / Testing **********

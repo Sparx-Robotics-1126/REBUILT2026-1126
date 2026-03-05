@@ -30,7 +30,7 @@ public final class Storage extends GRRSubsystem {
     private final TunableDouble voltage;
 
     public Storage() {
-        this.voltage = tunables.value("Voltage", .2);
+        this.voltage = tunables.value("Voltage", .15);
 
         rollerMotor = new SparkMax(STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
         rollerEncoder = rollerMotor.getEncoder();

@@ -68,6 +68,16 @@ public final class Routines {
         }
     }
 
+    public Command outpost() {
+        return sequence(
+            selfDriveLights(),
+            readyFeederShooter(),
+            shootFuel(),
+            waitSeconds(3),
+            swerve.apfDrive(() -> new Pose2d(1.388, 5.717, Rotation2d.fromDegrees(180)), () -> 0.3)
+        ).withName("Routines.outpost()");
+    }
+
     public Command prepareForShooting() {
         return parallel(shooter.getReadyCommand()).withName("Routines.prepareForShooting()");
     }

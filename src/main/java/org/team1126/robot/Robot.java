@@ -32,7 +32,6 @@ public final class Robot extends LoggedRobot {
     public final Storage storage;
     public final Shooter shooter;
     public final Intake intake;
-
     public final MatchData matchData;
 
     public final Routines routines;
@@ -136,8 +135,8 @@ public final class Robot extends LoggedRobot {
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-        coDriver.y().whileTrue(intake.extendIntakeTest());
-        coDriver.a().whileTrue(intake.retrackIntakeTest());
+        coDriver.a().whileTrue(intake.extendIntakeTest());
+        coDriver.y().whileTrue(intake.retrackIntakeTest());
 
         coDriver.x().whileTrue(intake.moveIntakeTest(false));
         coDriver.b().whileTrue(intake.moveIntakeTest(true));
@@ -151,9 +150,9 @@ public final class Robot extends LoggedRobot {
         coDriver.povDown().whileTrue(storage.moveMotorCommand(false));
         // coDriver.rightBumper().onTrue(swerve.playMusic("enemy").ignoringDisable(true));
         //
-
+        RobotModeTriggers.autonomous().whileTrue(autos.runSelectedAuto());
         // Setup lights
-        scheduler.schedule(routines.lightsPreMatch(autos::defaultSelected));
+        // scheduler.schedule(routines.lightsPreMatch(autos.runSelectedAuto()));
 
         RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
         RobotModeTriggers.disabled().whileTrue(routines.lightsDisabledMode());
