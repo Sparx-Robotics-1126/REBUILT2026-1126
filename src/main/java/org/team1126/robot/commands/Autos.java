@@ -64,10 +64,11 @@ public final class Autos {
         return parallel(
             routines.shootingLights(),
             sequence(
+                swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
                 swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
                 routines.readyFeederShooter().withTimeout(.10),
-                routines.shootFuelAuto().withTimeout(3.0),
-                routines.fuelFromOutpost().withTimeout(5.0)
+                routines.shootFuelAuto().withTimeout(8.0),
+                parallel(routines.fuelFromOutpost().withTimeout(5.0))
             )
         ).withName("Autos.outpost()");
 

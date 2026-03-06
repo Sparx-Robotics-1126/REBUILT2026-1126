@@ -63,7 +63,7 @@ public final class Routines {
         var goal = Field.WAYPOINT_DEPOT.get();
         return parallel(
             swerve.apfDrive(() -> new Pose2d(goal.getX(), goal.getY(), Rotation2d.fromDegrees(180)), () -> 0.3),
-            intake.extendIntake().withTimeout(3.0)
+            intake.extendIntake(true).withTimeout(3.0)
         ).withName("Routines.fuelFromOutpost()");
     }
 

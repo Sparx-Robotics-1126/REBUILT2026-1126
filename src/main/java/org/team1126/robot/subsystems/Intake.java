@@ -169,12 +169,15 @@ public final class Intake extends GRRSubsystem {
         //        }
     }
 
-    public void moveMotorPosOut(double position) {
+    public void moveMotorPosOut(double position, boolean spinIntake) {
         this.pivotController.setSetpoint(
             position,
             SparkBase.ControlType.kMAXMotionPositionControl,
             ClosedLoopSlot.kSlot0
         );
+        if (spinIntake) {
+            moveIntakeMotor(true);
+        }
     }
 
     public void moveMotorPosIn(double position) {
@@ -185,9 +188,9 @@ public final class Intake extends GRRSubsystem {
         );
     }
 
-    public Command extendIntake() {
+    public Command extendIntake(boolean spinIntake) {
         return commandBuilder()
-            .onExecute(() -> this.moveMotorPosOut(pivotPosition.get()))
+            .onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), spinIntake))
             .onEnd(this::stopPivot);
     }
 
