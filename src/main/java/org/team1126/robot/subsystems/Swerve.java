@@ -222,6 +222,13 @@ public final class Swerve extends GRRSubsystem {
         tunables.add("api", api);
         tunables.add("apf", apf);
         tunables.add("angularPID", angularPID);
+
+        // Seed pose from vision if available
+        var measurements = vision.getUnreadResults(api.state.poseHistory, api.state.odometryPose, api.state.velocity);
+        if (measurements != null && measurements.length > 0 && measurements[0] != null) {
+            var visionPose = measurements[0].pose();
+            resetPose(() -> visionPose);
+        }
     }
 
     @Override
