@@ -17,6 +17,7 @@ import org.team1126.lib.tunable.Tunables.TunableBoolean;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.Alliance;
 import org.team1126.robot.Robot;
+import org.team1126.robot.subsystems.Intake;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
@@ -44,6 +45,7 @@ public final class Routines {
     private final Swerve swerve;
     private final Shooter shooter;
     private final Storage storage;
+    private final Intake intake;
 
     //    private final ReefSelection selection;
 
@@ -53,7 +55,16 @@ public final class Routines {
         swerve = robot.swerve;
         shooter = robot.shooter;
         storage = robot.storage;
+        intake = robot.intake;
         //        selection = robot.selection;
+    }
+
+    public Command fuelFromOutpost() {
+        var goal = Field.WAYPOINT_DEPOT.get();
+        return parallel(
+            swerve.apfDrive(() -> new Pose2d(goal.getX(), goal.getY(), Rotation2d.fromDegrees(180)), () -> 0.3),
+            intake.extendIntake().withTimeout(3.0)
+        ).withName("Routines.fuelFromOutpost()");
     }
 
     public Command lightsDisabledMode() {
@@ -68,13 +79,23 @@ public final class Routines {
         }
     }
 
+    public Command driveOutpost() {
+        // var debot = Field.WAYPOINT_DEPOT.get();
+        var goal = new Pose2d(
+            Field.WAYPOINT_DEPOT.get().getX(),
+            Field.WAYPOINT_DEPOT.get().getY(),
+            Rotation2d.fromDegrees(-177)
+        );
+        return sequence(swerve.apfDrive(() -> goal, () -> 0.3)).withName("Routines.driveOutpost()");
+    }
+
     public Command outpost() {
         return sequence(
             selfDriveLights(),
             readyFeederShooter(),
             shootFuel(),
             waitSeconds(3),
-            swerve.apfDrive(() -> new Pose2d(1.388, 5.717, Rotation2d.fromDegrees(180)), () -> 0.3)
+            swerve.apfDrive(() -> new Pose2d(1.388, 5.717, Rotation2d.fromDegrees(0)), () -> 0.3)
         ).withName("Routines.outpost()");
     }
 
@@ -88,9 +109,17 @@ public final class Routines {
         );
     }
 
+    public Command shootFuelAuto() {
+        return parallel(
+            // shootingLights(),
+            shooter.shoot(shooter::feederIsReady),
+            storage.feedShooter(shooter::shooterIsReady)
+        ).withName("Routines.score()");
+    }
+
     public Command shootFuel() {
         return parallel(
-            shootingLights(),
+            // shootingLights(),
             storage.feedShooter(shooter::shooterIsReady),
             shooter.shoot(shooter::feederIsReady)
         ).withName("Routines.score()");

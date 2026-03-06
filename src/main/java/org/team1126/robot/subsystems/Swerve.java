@@ -39,7 +39,6 @@ import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.robot.Constants;
 import org.team1126.robot.Constants.LowerCAN;
 import org.team1126.robot.Constants.RioCAN;
-import org.team1126.robot.Robot;
 import org.team1126.robot.util.Field;
 // import org.team1126.robot.util.Vision;
 
@@ -230,13 +229,13 @@ public final class Swerve extends GRRSubsystem {
         api.refresh();
         SmartDashboard.putBoolean("Is Playing Music", orchestra.isPlaying());
         // Apply vision estimates to the pose estimator.
-        if (Robot.isReal()) {
-            var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
-            SmartDashboard.putNumber("Vision X", measurements.length);
+        // if (Robot.isReal()) {
+        var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
+        SmartDashboard.putNumber("Vision X", measurements.length);
 
-            seesAprilTag = measurements.length > 0;
-            api.addVisionMeasurements(measurements);
-        }
+        seesAprilTag = measurements.length > 0;
+        api.addVisionMeasurements(measurements);
+        // }
         SmartDashboard.putNumber("Goal X", apf.getGoal().getX());
         SmartDashboard.putNumber("Goal Y", apf.getGoal().getY());
 
@@ -348,16 +347,16 @@ public final class Swerve extends GRRSubsystem {
      * Hard reset of odometry to origin relative to blue origin. This will assume the robot's back
      * right corner is on 0,0.
      */
-    public Command resetOdometry() {
-        return commandBuilder("Swerve.resetOdometry()")
-            .onInitialize(() -> {
-                // Rotation2d originRotation = new Rotation2d(0);
-                // Translation2d originOffset = new Translation2d(OFFSET_TO_BUMPER, OFFSET_TO_BUMPER);
-                // api.resetPose(new Pose2d(originOffset, originRotation));
-            })
-            .isFinished(true)
-            .ignoringDisable(true);
-    }
+    // public Command resetOdometry() {
+    //     return commandBuilder("Swerve.resetOdometry()")
+    //         .onInitialize(() -> {
+    //             Rotation2d originRotation = new Rotation2d(0);
+    //             // Translation2d originOffset = new Translation2d(OFFSET_TO_BUMPER, OFFSET_TO_BUMPER);
+    //             api.resetPose(new Pose2d(originOffset, originRotation));
+    //         })
+    //         .isFinished(true)
+    //         .ignoringDisable(true);
+    // }
 
     /**
      * Drives the robot using driver input.

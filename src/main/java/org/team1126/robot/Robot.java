@@ -97,6 +97,7 @@ public final class Robot extends LoggedRobot {
             .and(driver.rightBumper())
             .whileTrue(routines.driveTrench(() -> WaypointHeading.SOUTH, () -> false));
         // driver.a().whileTrue(routines.aimAtHub(() -> 0.2));
+        driver.x().whileTrue(routines.driveOutpost());
         driver.a().whileTrue(swerve.driveToShootingArc(() -> 0.8));
         // driver.b().whileTrue(swerve.drive(this::driverX, this::driverY, () -> swerve.getHubAngular()));
         driver.b().whileTrue(swerve.driveFacingHub(this::driverX, this::driverY, this::driverAngular));
@@ -150,10 +151,10 @@ public final class Robot extends LoggedRobot {
         coDriver.povDown().whileTrue(storage.moveMotorCommand(false));
         // coDriver.rightBumper().onTrue(swerve.playMusic("enemy").ignoringDisable(true));
         //
-        RobotModeTriggers.autonomous().whileTrue(autos.runSelectedAuto());
+        RobotModeTriggers.autonomous().whileTrue(autos.outpost());
         // Setup lights
         // scheduler.schedule(routines.lightsPreMatch(autos.runSelectedAuto()));
-//        RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
+        // RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
         RobotModeTriggers.disabled().whileTrue(routines.lightsDisabledMode());
         // Disable loop overrun warnings from the command
         // scheduler, since we already log loop timings
@@ -197,10 +198,7 @@ public final class Robot extends LoggedRobot {
         // try {
         //     SmartDashboard.putString("fuelPose", Objects.requireNonNull(swerve.getFuelPose()).toString());
         // } catch (Exception ignored) {}
-
     }
-
-
 
     private void playSong(String filename) {
         orchestra.loadMusic(filename);
