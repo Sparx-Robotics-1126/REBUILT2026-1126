@@ -53,14 +53,14 @@ public final class Intake extends GRRSubsystem {
         pivotConfig.idleMode(SparkBaseConfig.IdleMode.kBrake);
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(.9, ClosedLoopSlot.kSlot0)
+            .p(.95, ClosedLoopSlot.kSlot0)
             .i(0, ClosedLoopSlot.kSlot0)
             .d(0, ClosedLoopSlot.kSlot0)
             .feedForward.kCos(.0, ClosedLoopSlot.kSlot0);
         pivotConfig.closedLoop.maxMotion
-            .maxAcceleration(1000, ClosedLoopSlot.kSlot0) // REDUCED from 200 — slower ramp
+            .maxAcceleration(1500, ClosedLoopSlot.kSlot0) // REDUCED from 200 — slower ramp
             .allowedProfileError(1, ClosedLoopSlot.kSlot0)
-            .cruiseVelocity(650, ClosedLoopSlot.kSlot0) // Changed from 1000 to match test setpoint
+            .cruiseVelocity(750, ClosedLoopSlot.kSlot0) // Changed from 1000 to match test setpoint
             .allowedProfileError(1, ClosedLoopSlot.kSlot0);
 
         pivotConfig.closedLoop
@@ -175,9 +175,9 @@ public final class Intake extends GRRSubsystem {
             SparkBase.ControlType.kMAXMotionPositionControl,
             ClosedLoopSlot.kSlot0
         );
-        if (spinIntake) {
-            moveIntakeMotor(true);
-        }
+        // if (spinIntake) {
+        //     moveIntakeMotor(true);
+        // }
     }
 
     public void moveMotorPosIn(double position) {

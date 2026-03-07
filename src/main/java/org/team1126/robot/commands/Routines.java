@@ -59,6 +59,10 @@ public final class Routines {
         //        selection = robot.selection;
     }
 
+    public Command extendIntake() {
+        return parallel(intake.extendIntake(true)).withName("Routines.extendIntake()");
+    }
+
     public Command fuelFromOutpost() {
         var goal = Field.WAYPOINT_DEPOT.get();
         return parallel(
@@ -68,6 +72,18 @@ public final class Routines {
     }
 
     public Command lightsDisabledMode() {
+        if (Alliance.isBlue()) {
+            return parallel(lights.top.setSolidBlue(), lights.sides.setSolidBlue()).withName(
+                "Routines.lightsDisabledMode()"
+            );
+        } else {
+            return parallel(lights.top.setSolidRed(), lights.sides.setSolidRed()).withName(
+                "Routines.lightsDisabledMode()"
+            );
+        }
+    }
+
+    public Command lightsTeleopMode() {
         if (Alliance.isBlue()) {
             return parallel(lights.top.setSolidBlue(), lights.sides.setSolidBlue()).withName(
                 "Routines.lightsDisabledMode()"
@@ -125,10 +141,10 @@ public final class Routines {
         ).withName("Routines.score()");
     }
 
-    public Command shootFuelRev() {
+    public Command shootFuelReverseStorage() {
         return parallel(
             shootingLights(),
-            storage.feedShooter(shooter::shooterIsReady),
+            storage.feedShooterReverse(shooter::shooterIsReady),
             shooter.shoot(shooter::feederIsReady)
         ).withName("Routines.score()");
     }

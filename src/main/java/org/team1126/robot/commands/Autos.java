@@ -52,8 +52,10 @@ public final class Autos {
         // Create the auto chooser
         // chooser = new AutoChooser();
         chooser.setDefaultOption("Do nothing", Commands.none());
-        chooser.addOption("Drive", driveSampleLocations());
+        chooser.addOption("Just Shoot", justShoot());
+        // chooser.addOption("Drive", driveSampleLocations());
         chooser.addOption("Outpost", outpost());
+
         // chooser.addOption("Depot", routines.dock());
         SmartDashboard.putData("autos", chooser);
     }
@@ -71,6 +73,27 @@ public final class Autos {
                 parallel(routines.fuelFromOutpost().withTimeout(5.0))
             )
         ).withName("Autos.outpost()");
+
+        // deadline(routines.selfDriveLights(), shooter.readyShooter()),
+        // // routines.shootFuel().withTimeout(3.0),
+        // deadline(
+        //     swerve.apfDrive(() -> new Pose2d(goal.getX(), goal.getY(), Rotation2d.fromDegrees(180)), () -> 0.3),
+        //     intake.extendIntake()
+        // )
+    }
+
+    public Command justShoot() {
+        var goal = Field.WAYPOINT_DEPOT.get();
+
+        return parallel(
+            routines.shootingLights(),
+            sequence(
+                swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
+                swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
+                routines.readyFeederShooter().withTimeout(.10),
+                routines.shootFuelAuto().withTimeout(20.0)
+            )
+        ).withName("Autos.justShoot()");
 
         // deadline(routines.selfDriveLights(), shooter.readyShooter()),
         // // routines.shootFuel().withTimeout(3.0),
