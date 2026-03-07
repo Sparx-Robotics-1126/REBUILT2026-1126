@@ -407,7 +407,7 @@ public class PhotonPoseEstimator {
         PoseStrategy strategy
     ) {
         Optional<EstimatedRobotPose> estimatedPose = switch (strategy) {
-            case LOWEST_AMBIGUITY -> lowestAmbiguityStrategy(cameraResult);
+            case LOWEST_AMBIGUITY -> estimateLowestAmbiguityPose(cameraResult);
             case CLOSEST_TO_CAMERA_HEIGHT -> closestToCameraHeightStrategy(cameraResult);
             case CLOSEST_TO_REFERENCE_POSE -> closestToReferencePoseStrategy(cameraResult, referencePose);
             case CLOSEST_TO_LAST_POSE -> {
@@ -416,8 +416,13 @@ public class PhotonPoseEstimator {
             }
             case AVERAGE_BEST_TARGETS -> averageBestTargetsStrategy(cameraResult);
             case MULTI_TAG_PNP_ON_RIO -> multiTagOnRioStrategy(cameraResult, cameraMatrix, distCoeffs);
-            case MULTI_TAG_PNP_ON_COPROCESSOR -> multiTagOnCoprocStrategy(cameraResult);
-            case PNP_DISTANCE_TRIG_SOLVE -> pnpDistanceTrigSolveStrategy(cameraResult);
+            case MULTI_TAG_PNP_ON_COPROCESSOR -> {
+                if (cameraResult.getMultiTagResult().isEmpty()) {
+                    yield update(cameraResult, this.multiTagFallbackStrategy);
+                }
+                yield estimateCoprocMultiTagPose(cameraResult);
+            }
+            case PNP_DISTANCE_TRIG_SOLVE -> estimatePnpDistanceTrigSolvePose(cameraResult);
             case CONSTRAINED_SOLVEPNP -> constrainedPnpStrategy(
                 cameraResult,
                 cameraMatrix,
@@ -431,14 +436,20 @@ public class PhotonPoseEstimator {
         return estimatedPose;
     }
 
-    private Optional<EstimatedRobotPose> pnpDistanceTrigSolveStrategy(PhotonPipelineResult result) {
-        PhotonTrackedTarget bestTarget = result.getBestTarget();
+    public Optional<EstimatedRobotPose> estimatePnpDistanceTrigSolvePose(PhotonPipelineResult cameraResult) {
+        if (!shouldEstimate(cameraResult)) {
+            return Optional.empty();
+        }
+        PhotonTrackedTarget bestTarget = cameraResult.getBestTarget();
+
         if (bestTarget == null) return Optional.empty();
-        var headingSampleOpt = headingBuffer.getSample(result.getTimestampSeconds());
+
+        var headingSampleOpt = headingBuffer.getSample(cameraResult.getTimestampSeconds());
         if (headingSampleOpt.isEmpty()) {
             return Optional.empty();
         }
         Rotation2d headingSample = headingSampleOpt.get();
+
         Translation2d camToTagTranslation = new Translation3d(
             bestTarget.getBestCameraToTarget().getTranslation().getNorm(),
             new Rotation3d(0, -Math.toRadians(bestTarget.getPitch()), -Math.toRadians(bestTarget.getYaw()))
@@ -446,23 +457,28 @@ public class PhotonPoseEstimator {
             .rotateBy(robotToCamera.getRotation())
             .toTranslation2d()
             .rotateBy(headingSample);
+
         var tagPoseOpt = fieldTags.getTagPose(bestTarget.getFiducialId());
         if (tagPoseOpt.isEmpty()) {
             return Optional.empty();
         }
         var tagPose2d = tagPoseOpt.get().toPose2d();
+
         Translation2d fieldToCameraTranslation = tagPose2d.getTranslation().plus(camToTagTranslation.unaryMinus());
+
         Translation2d camToRobotTranslation = robotToCamera
             .getTranslation()
             .toTranslation2d()
             .unaryMinus()
             .rotateBy(headingSample);
+
         Pose2d robotPose = new Pose2d(fieldToCameraTranslation.plus(camToRobotTranslation), headingSample);
+
         return Optional.of(
             new EstimatedRobotPose(
                 new Pose3d(robotPose),
-                result.getTimestampSeconds(),
-                result.getTargets(),
+                cameraResult.getTimestampSeconds(),
+                List.of(bestTarget), // PATCH
                 PoseStrategy.PNP_DISTANCE_TRIG_SOLVE
             )
         );
@@ -548,23 +564,47 @@ public class PhotonPoseEstimator {
         );
     }
 
-    private Optional<EstimatedRobotPose> multiTagOnCoprocStrategy(PhotonPipelineResult result) {
-        if (result.getMultiTagResult().isEmpty()) {
-            return update(result, this.multiTagFallbackStrategy);
+    public Optional<EstimatedRobotPose> estimateCoprocMultiTagPose(PhotonPipelineResult cameraResult) {
+        if (cameraResult.getMultiTagResult().isEmpty() || !shouldEstimate(cameraResult)) {
+            return Optional.empty();
         }
-        var best_tf = result.getMultiTagResult().get().estimatedPose.best;
+
+        var best_tf = cameraResult.getMultiTagResult().get().estimatedPose.best;
         var best = Pose3d.kZero
             .plus(best_tf) // field-to-camera
             .relativeTo(fieldTags.getOrigin())
             .plus(robotToCamera.inverse()); // field-to-robot
+
+        // PATCH
+        List<PhotonTrackedTarget> targets = new ArrayList<>();
+        for (short id : cameraResult.getMultiTagResult().get().fiducialIDsUsed) {
+            for (var target : cameraResult.getTargets()) {
+                if (target.fiducialId == (int) id) targets.add(target);
+            }
+        }
+
         return Optional.of(
             new EstimatedRobotPose(
                 best,
-                result.getTimestampSeconds(),
-                result.getTargets(),
+                cameraResult.getTimestampSeconds(),
+                targets, // PATCH
                 PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR
             )
         );
+    }
+
+    /**
+     * @param cameraResult A pipeline result from the camera.
+     * @return Whether or not pose estimation should be performed.
+     */
+    private boolean shouldEstimate(PhotonPipelineResult cameraResult) {
+        // Time in the past -- give up, since the following if expects times > 0
+        if (cameraResult.getTimestampSeconds() < 0) {
+            return false;
+        }
+
+        // If no targets seen, trivial case -- can't do estimation
+        return cameraResult.hasTargets();
     }
 
     private Optional<EstimatedRobotPose> multiTagOnRioStrategy(
@@ -618,10 +658,15 @@ public class PhotonPoseEstimator {
      * @return the estimated position of the robot in the FCS and the estimated timestamp of this
      *     estimation.
      */
-    private Optional<EstimatedRobotPose> lowestAmbiguityStrategy(PhotonPipelineResult result) {
+    public Optional<EstimatedRobotPose> estimateLowestAmbiguityPose(PhotonPipelineResult cameraResult) {
+        if (!shouldEstimate(cameraResult)) {
+            return Optional.empty();
+        }
         PhotonTrackedTarget lowestAmbiguityTarget = null;
+
         double lowestAmbiguityScore = 10;
-        for (PhotonTrackedTarget target : result.targets) {
+
+        for (PhotonTrackedTarget target : cameraResult.targets) {
             double targetPoseAmbiguity = target.getPoseAmbiguity();
             // Make sure the target is a Fiducial target.
             if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestAmbiguityScore) {
@@ -629,23 +674,28 @@ public class PhotonPoseEstimator {
                 lowestAmbiguityTarget = target;
             }
         }
+
         // Although there are confirmed to be targets, none of them may be fiducial
         // targets.
         if (lowestAmbiguityTarget == null) return Optional.empty();
+
         int targetFiducialId = lowestAmbiguityTarget.getFiducialId();
+
         Optional<Pose3d> targetPosition = fieldTags.getTagPose(targetFiducialId);
+
         if (targetPosition.isEmpty()) {
             reportFiducialPoseError(targetFiducialId);
             return Optional.empty();
         }
+
         return Optional.of(
             new EstimatedRobotPose(
                 targetPosition
                     .get()
                     .transformBy(lowestAmbiguityTarget.getBestCameraToTarget().inverse())
                     .transformBy(robotToCamera.inverse()),
-                result.getTimestampSeconds(),
-                result.getTargets(),
+                cameraResult.getTimestampSeconds(),
+                List.of(lowestAmbiguityTarget), // PATCH
                 PoseStrategy.LOWEST_AMBIGUITY
             )
         );

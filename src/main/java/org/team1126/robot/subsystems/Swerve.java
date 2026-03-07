@@ -223,11 +223,11 @@ public final class Swerve extends GRRSubsystem {
         tunables.add("angularPID", angularPID);
 
         // Seed pose from vision if available
-        var measurements = vision.getUnreadResults(api.state.poseHistory, api.state.odometryPose, api.state.velocity);
-        if (measurements != null && measurements.length > 0 && measurements[0] != null) {
-            var visionPose = measurements[0].pose();
-            resetPose(() -> visionPose);
-        }
+        // var measurements = vision.getUnreadResults(api.state.poseHistory, api.state.odometryPose, api.state.velocity);
+        // if (measurements != null && measurements.length > 0 && measurements[0] != null) {
+        //     var visionPose = measurements[0].pose();
+        //     resetPose(() -> visionPose);
+        // }
     }
 
     @Override
@@ -237,7 +237,7 @@ public final class Swerve extends GRRSubsystem {
         SmartDashboard.putBoolean("Is Playing Music", orchestra.isPlaying());
         // Apply vision estimates to the pose estimator.
         // if (Robot.isReal()) {
-        var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose, state.velocity);
+        var measurements = vision.getUnreadResults(state.poseHistory, state.odometryPose);
         SmartDashboard.putNumber("Vision X", measurements.length);
 
         seesAprilTag = measurements.length > 0;

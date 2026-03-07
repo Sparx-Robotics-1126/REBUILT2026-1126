@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
@@ -43,6 +45,7 @@ public final class Vision {
     public static final record CameraConfig(String name, Translation3d translation, Rotation3d rotation) {}
 
     private static final TunableTable tunables = Tunables.getNested("vision");
+    private static final TunableDouble zTolerance = tunables.value("zTolerance", 0.5);
     private static final TunableDouble trigXyStd = tunables.value("trigXyStd", 0.18);
     private static final TunableDouble constrainedPnpXyStd = tunables.value("constrainedPnpXyStd", 0.4);
     private static final TunableDouble constrainedPnpAngStd = tunables.value("constrainedPnpAngStd", 0.14);
@@ -53,8 +56,22 @@ public final class Vision {
     private final Camera[] cameras;
     private final VisionSystemSim sim;
     // Variables for Epilogue logging.
-    private final List<Pose2d> estimates = new ArrayList<>();
+    private final List<Pose3d> estimates = new ArrayList<>();
     private final List<Pose3d> targets = new ArrayList<>();
+
+    private static enum StrategyWeights {
+        MULTITAG(0.1, 0.25),
+        TRIG(0.06, 1e5),
+        AMBIGUITY(0.2, 0.4);
+
+        public final TunableDouble xy;
+        public final TunableDouble angular;
+
+        private StrategyWeights(double xy, double angular) {
+            this.xy = tunables.value("xyWeights/" + name(), xy);
+            this.angular = tunables.value("angularWeights/" + name(), angular);
+        }
+    }
 
     /**
      * Create the vision manager.
@@ -88,40 +105,33 @@ public final class Vision {
      * @param odometryPose The uncorrected odometry pose of the robot. Used for simulation.
      * @param velocity The directionless measured velocity of the robot in m/s.
      */
-    public VisionMeasurement[] getUnreadResults(
-        List<TimestampedPose> poseHistory,
-        Pose2d odometryPose,
-        double velocity
-    ) {
+    public VisionMeasurement[] getUnreadResults(List<TimestampedPose> poseHistory, Pose2d odometryPose) {
         if (sim != null) {
             // Update sim, if applicable.
             sim.update(odometryPose);
         }
+
         // Clear lists from the last cycle.
         // These are only used for telemetry.
         estimates.clear();
         targets.clear();
+
         // Create a new list to save this cycle's vision measurements to.
         List<VisionMeasurement> measurements = new ArrayList<>();
+
         // Iterate over every camera.
         for (var camera : cameras) {
             // Update the camera's PhotonPoseEstimator with the robot's pose history. Since
             // we run odometry on a separate thread at a higher frequency, we have multiple
             // timestamped poses to reference which is helpful for latency compensation.
             camera.addReferencePoses(poseHistory);
+
             // Populate our lists with vision data from the camera.
-            camera.refresh(velocity, measurements, targets);
+            camera.refresh(measurements, estimates, targets);
         }
-        // Save the Pose2ds from all vision measurements
-        // to the estimates list to be logged by Epilogue.
-        estimates.addAll(
-            measurements
-                .stream()
-                .map(m -> m.pose())
-                .toList()
-        );
+
         // Convert the vision measurement list to an array and return it.
-        return measurements.stream().toArray(VisionMeasurement[]::new);
+        return measurements.toArray(new VisionMeasurement[measurements.size()]);
     }
 
     private class Camera {
@@ -129,7 +139,7 @@ public final class Vision {
         private final PhotonCamera camera;
         private final PhotonPoseEstimator estimator;
         private final Optional<ConstrainedSolvepnpParams> constrainedPnpParams;
-        private final Debouncer disabledDebounce = new Debouncer(5.0, DebounceType.kFalling);
+        private final Debouncer enabledDebounce = new Debouncer(5.0, DebounceType.kFalling);
 
         /**
          * Create a camera.
@@ -177,47 +187,110 @@ public final class Vision {
          * @param measurements A list of vision measurements to add to.
          * @param targets A list of targets to add to.
          */
-        private void refresh(double velocity, List<VisionMeasurement> measurements, List<Pose3d> targets) {
-            // If we are disabled, use Constrained SolvePNP to estimate the robot's heading.
-            // See https://github.com/Greater-Rochester-Robotics/Reefscape2025-340/issues/19
-            boolean usingTrig = disabledDebounce.calculate(DriverStation.isEnabled());
-            estimator.setPrimaryStrategy(usingTrig ? PNP_DISTANCE_TRIG_SOLVE : CONSTRAINED_SOLVEPNP);
+        private void refresh(List<VisionMeasurement> measurements, List<Pose3d> estimates, List<Pose3d> targets) {
+            boolean enabled = enabledDebounce.calculate(DriverStation.isEnabled());
+
             for (PhotonPipelineResult result : camera.getAllUnreadResults()) {
-                // Get an estimate from the PhotonPoseEstimator.
-                var estimate = estimator.update(result, Optional.empty(), Optional.empty(), constrainedPnpParams);
-                if (estimate.isEmpty() || estimate.get().targetsUsed.isEmpty()) continue;
-                // Get the target AprilTag, and reject the measurement if the
-                // tag is not configured to be utilized by the pose estimator.
-                var target = estimate.get().targetsUsed.get(0);
-                int id = target.fiducialId;
-                if (!useTag(id)) continue;
-                // Get the location of the tag on the field.
-                var tagLocation = FieldInfo.aprilTags().getTagPose(id);
-                if (tagLocation.isEmpty()) continue;
-                // Determine the distance from the camera to the tag.
-                double distance = target.bestCameraToTarget.getTranslation().getNorm();
+                if (!result.hasTargets()) continue;
+
+                // The usage of EstimatedRobotPose.targetsUsed below leverages our modifications
+                // to PhotonPoseEstimator. Utilized strategies have been modified to return
+                // PhotonTrackedTarget lists with only the AprilTags used for the solve.
+
+                Optional<EstimatedRobotPose> estimate = Optional.empty();
+                double xyWeight = 1e5;
+                double angularWeight = 1e5;
+
+                // Falls through until a suitable solve strategy is found.
+                do {
+                    var multitag = result.getMultiTagResult();
+
+                    if (
+                        multitag.isPresent()
+                        && !multitag.get().fiducialIDsUsed.isEmpty()
+                        && useTag(multitag.get().fiducialIDsUsed.get(0))
+                        && (estimate = estimator.estimateCoprocMultiTagPose(result)).isPresent()
+                    ) {
+                        xyWeight = StrategyWeights.MULTITAG.xy.get();
+                        angularWeight = StrategyWeights.MULTITAG.angular.get();
+                        break;
+                    }
+
+                    if (
+                        enabled
+                        && useTag(result.getBestTarget().fiducialId)
+                        && (estimate = estimator.estimatePnpDistanceTrigSolvePose(result)).isPresent()
+                    ) {
+                        xyWeight = StrategyWeights.TRIG.xy.get();
+                        angularWeight = StrategyWeights.TRIG.angular.get();
+                        break;
+                    }
+
+                    if (!enabled && (estimate = estimator.estimateLowestAmbiguityPose(result)).isPresent()) {
+                        boolean invalidTag = false;
+                        for (var target : estimate.get().targetsUsed) {
+                            if (!useTag(target.fiducialId)) invalidTag = true;
+                        }
+
+                        if (invalidTag) continue;
+
+                        xyWeight = StrategyWeights.AMBIGUITY.xy.get();
+                        angularWeight = StrategyWeights.AMBIGUITY.angular.get();
+                        break;
+                    }
+                } while (false);
+
+                // Escape if we couldn't retrieve a suitable estimate.
+                if (estimate.isEmpty()) continue;
+
+                // Escape if the estimate has no targets (this shouldn't happen).
+                if (estimate.get().targetsUsed.isEmpty()) {
+                    DriverStation.reportWarning("Encountered EstimatedRobotPose with no targets", false);
+                    continue;
+                }
+
+                // Escape if the estimated pose's Z position is outside an acceptable tolerance.
+                if (Math.abs(estimate.get().estimatedPose.getZ()) > zTolerance.get()) continue;
+
+                // Calculate the average distance to the detected AprilTags.
+                double avgDistance = 0.0;
+                for (var target : estimate.get().targetsUsed) {
+                    avgDistance += target.getBestCameraToTarget().getTranslation().getNorm();
+                }
+
+                avgDistance /= estimate.get().targetsUsed.size();
+
                 // Calculate the pose estimation weights for X/Y location. As
                 // distance increases, the tag is trusted exponentially less.
-                double xyStd = (usingTrig ? trigXyStd.get() : constrainedPnpXyStd.get()) * distance * distance;
-                // Calculate the angular pose estimation weight. If we're solving via trig, reject
-                // the heading estimate to ensure the pose estimator doesn't "poison" itself with
-                // essentially duplicate data. Otherwise, weight the estimate similar to X/Y.
-                double angStd = (usingTrig ? 1e5 : constrainedPnpAngStd.get()) * distance * distance;
-                // Apply a heuristic to the measurement's latency, that accounts for
-                // increased translational error at high chassis velocities.
-                double timestamp = estimate.get().timestampSeconds - (velocity * velocityLatencyFactor.get());
+                double xyStd = xyWeight * avgDistance * avgDistance;
+
+                // Calculate the angular pose estimation weight, similar to X/Y.
+                double angularStd = angularWeight * avgDistance * avgDistance;
+
                 // Push the measurement to the supplied measurements list.
                 measurements.add(
                     new VisionMeasurement(
                         estimate.get().estimatedPose.toPose2d(),
-                        timestamp,
-                        VecBuilder.fill(xyStd, xyStd, angStd)
+                        estimate.get().timestampSeconds,
+                        VecBuilder.fill(xyStd, xyStd, angularStd)
                     )
                 );
-                // Push the location of the tag to the targets list for telemetry.
-                targets.add(tagLocation.get());
+
+                // Push the pose estimate to the estimates list for telemetry.
+                estimates.add(estimate.get().estimatedPose);
+
+                // Push the locations of the tags to the targets list for telemetry.
+                for (var target : estimate.get().targetsUsed) {
+                    var pose = FieldInfo.aprilTags().getTagPose(target.fiducialId);
+                    if (pose.isPresent()) targets.add(pose.get());
+                    else DriverStation.reportWarning(
+                        "Unknown AprilTag ID slipped through: " + target.fiducialId,
+                        false
+                    );
+                }
             }
         }
+        
 
         /**
          * Returns {@code true} if an AprilTag should be utilized.
