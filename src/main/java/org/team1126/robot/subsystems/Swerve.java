@@ -561,6 +561,7 @@ public final class Swerve extends GRRSubsystem {
                     state.rotation.getRadians(),
                     goal.getRotation().getRadians()
                 );
+                angularPID.calculate(state.rotation.getRadians(), goal.getRotation().getRadians());
 
                 api.applySpeeds(speeds, Perspective.BLUE, true, true);
             });
