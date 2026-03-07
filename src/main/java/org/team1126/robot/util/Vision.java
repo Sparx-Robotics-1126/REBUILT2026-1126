@@ -1,6 +1,5 @@
 package org.team1126.robot.util;
 
-import static org.photonvision.PhotonPoseEstimator.PoseStrategy.CONSTRAINED_SOLVEPNP;
 import static org.photonvision.PhotonPoseEstimator.PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
 import edu.wpi.first.epilogue.Logged;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
@@ -290,7 +288,6 @@ public final class Vision {
                 }
             }
         }
-        
 
         /**
          * Returns {@code true} if an AprilTag should be utilized.
