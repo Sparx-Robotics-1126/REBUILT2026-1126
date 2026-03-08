@@ -1,6 +1,8 @@
 package org.team1126.robot.commands;
 
-import static edu.wpi.first.wpilibj2.command.Commands.*;
+import static edu.wpi.first.wpilibj2.command.Commands.parallel;
+import static edu.wpi.first.wpilibj2.command.Commands.sequence;
+import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -57,10 +59,6 @@ public final class Routines {
         storage = robot.storage;
         intake = robot.intake;
         //        selection = robot.selection;
-    }
-
-    public Command extendIntake() {
-        return parallel(intake.extendIntake(true)).withName("Routines.extendIntake()");
     }
 
     public Command fuelFromOutpost() {
@@ -136,6 +134,14 @@ public final class Routines {
     public Command shootFuel() {
         return parallel(
             // shootingLights(),
+            storage.feedShooter(shooter::shooterIsReady),
+            shooter.shoot(shooter::feederIsReady)
+        ).withName("Routines.score()");
+    }
+
+    public Command shootFuelRev() {
+        return parallel(
+            shootingLights(),
             storage.feedShooter(shooter::shooterIsReady),
             shooter.shoot(shooter::feederIsReady)
         ).withName("Routines.score()");
