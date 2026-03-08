@@ -245,14 +245,8 @@ public final class Routines {
     public Command driveTrench(Supplier<WaypointHeading> headingSupplier, BooleanSupplier left) {
         return TrenchNavigator.get()
             .heading(headingSupplier.get())
-            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), 0))
-            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), 0))
-            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), 1))
-            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), 1))
-            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), 2))
-            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), 2))
-            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), 3))
-            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), 3));
+            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), left, 0))
+            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), left, 1));
     }
 
     /**

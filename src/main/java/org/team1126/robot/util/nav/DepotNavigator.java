@@ -8,15 +8,15 @@ import org.team1126.robot.subsystems.Swerve;
  * Utility class to help with trench navigation. This gives a wrapper around a list of
  * waypoints with their associated decels.
  */
-public final class TrenchNavigator extends NorthDefaultNavigator {
+public final class DepotNavigator extends NorthDefaultNavigator {
 
-    private static TrenchNavigator instance;
+    private static DepotNavigator instance;
 
     public static void init(Swerve swerve) {
-        instance = new TrenchNavigator(swerve);
+        instance = new DepotNavigator(swerve);
     }
 
-    public static TrenchNavigator get() {
+    public static DepotNavigator get() {
         if (instance == null) {
             return null;
         }
@@ -27,13 +27,13 @@ public final class TrenchNavigator extends NorthDefaultNavigator {
     /**
      * Singleton constructor
      */
-    private TrenchNavigator(Swerve swerve) {
+    private DepotNavigator(Swerve swerve) {
         this.swerve = swerve;
 
         double decel = RobotBase.isSimulation() ? SIMULATION_DECEL : DEFAULT_DECEL;
         waypoints = Arrays.asList(
-            new Waypoint(2.975, 0.603, Math.toRadians(0.0), decel),
-            new Waypoint(5.877, 0.603, Math.toRadians(0.0), decel)
+            new Waypoint(2.610, 6.667, Math.toRadians(4.58), decel),
+            new Waypoint(0.903, 5.867, Math.toRadians(0.0), decel)
         ).toArray(new Waypoint[0]);
     }
 }

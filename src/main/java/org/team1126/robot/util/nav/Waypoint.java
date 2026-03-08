@@ -17,7 +17,7 @@ public final class Waypoint {
         this.decel = decel;
     }
 
-    public ExtPose asPose() {
-        return new ExtPose(coord.get(), new Rotation2d(rot));
+    public ExtPose asPose(boolean left) {
+        return new ExtPose(coord.get(left), new Rotation2d(rot));
     }
 }
