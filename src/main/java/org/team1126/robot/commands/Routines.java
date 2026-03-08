@@ -141,6 +141,14 @@ public final class Routines {
         ).withName("Routines.score()");
     }
 
+    public Command shootFieldFuel() {
+        return parallel(
+            // shootingLights(),
+            storage.feedShooter(shooter::shooterIsReady),
+            shooter.shootField(shooter::feederIsReady)
+        ).withName("Routines.score()");
+    }
+
     public Command shootFuelReverseStorage() {
         return parallel(
             shootingLights(),
