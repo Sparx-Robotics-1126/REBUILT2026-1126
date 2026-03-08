@@ -5,6 +5,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -41,6 +42,7 @@ public final class Robot extends LoggedRobot {
     private final CommandXboxController driver;
     private final CommandXboxController coDriver;
     private final Orchestra orchestra;
+    private Command autoSelected;
 
     public Robot() {
         PhoenixUtil.disableDaemons();
@@ -72,6 +74,7 @@ public final class Robot extends LoggedRobot {
             swerve.drive(this::driverX, this::driverY, this::driverAngular, Constants.DO_BEACHING_DEFAULT)
         );
 
+        lights.sides.setDefaultCommand(routines.lightsTeleopMode());
         // Create triggers
         // Trigger allowGoosing = coDriver.a().negate();
         // Trigger changedReference = RobotModeTriggers.teleop().and(swerve::changedReference);
@@ -132,14 +135,17 @@ public final class Robot extends LoggedRobot {
 
         // coDriver.leftTrigger().whileTrue(routines.unJamFeederShooter());
         coDriver.rightBumper().toggleOnTrue(shooter.readyShooter());
+        coDriver.rightTrigger().toggleOnTrue(shooter.readyFieldShooter(() -> true));
+        coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
         coDriver.leftBumper().toggleOnTrue(shooter.haltShooter());
         coDriver.povRight().whileTrue(routines.shootFuel());
+        coDriver.povLeft().whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightTrigger().and(coDriver.povRight()).whileTrue(routines.shootFuel());
         // coDriver.rightTrigger().and(coDriver.povLeft()).whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-        coDriver.a().whileTrue(intake.extendIntake(false));
+        coDriver.a().whileTrue(intake.extendIntake(true));
         coDriver.y().whileTrue(intake.retrackIntakeTest());
 
         coDriver.x().whileTrue(intake.moveIntakeTest(false));
@@ -155,6 +161,8 @@ public final class Robot extends LoggedRobot {
         // coDriver.rightBumper().onTrue(swerve.playMusic("enemy").ignoringDisable(true));
         //
         // RobotModeTriggers.autonomous().whileTrue(autos.outpost());
+        autoSelected = autos.getAutonomousCommand();
+
         // Setup lights
         // scheduler.schedule(routines.lightsPreMatch(autos.runSelectedAuto()));
         // RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
@@ -206,5 +214,14 @@ public final class Robot extends LoggedRobot {
     private void playSong(String filename) {
         orchestra.loadMusic(filename);
         orchestra.play();
+    }
+
+    @Override
+    public void autonomousInit() {
+        autoSelected = autos.getAutonomousCommand();
+
+        if (autoSelected != null) {
+            CommandScheduler.getInstance().schedule(autoSelected);
+        }
     }
 }
