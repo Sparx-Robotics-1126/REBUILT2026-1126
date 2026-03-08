@@ -1,4 +1,4 @@
-package org.team1126.robot.util;
+package org.team1126.robot.util.nav;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import java.util.HashMap;
@@ -103,7 +103,7 @@ public class WaypointNavigator {
      */
     public static WaypointHeading currentWaypointHeading(Pose2d currentPose) {
         ExtPose abstractPose = new ExtPose(currentPose);
-        return abstractPose.getBlue().getX() < EQUATOR ? WaypointHeading.NORTH : WaypointHeading.SOUTH;
+        return abstractPose.get().getX() < EQUATOR ? WaypointHeading.NORTH : WaypointHeading.SOUTH;
     }
 
     private WaypointNavigator() {

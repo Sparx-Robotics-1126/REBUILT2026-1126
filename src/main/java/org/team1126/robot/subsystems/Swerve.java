@@ -43,8 +43,6 @@ import org.team1126.robot.util.Field;
 // import org.team1126.robot.util.Vision;
 
 import org.team1126.robot.util.Vision;
-import org.team1126.robot.util.WaypointNavigator;
-import org.team1126.robot.util.WaypointNavigator.Nudge;
 
 /**
  * The robot's swerve drivetrain.
@@ -563,31 +561,6 @@ public final class Swerve extends GRRSubsystem {
                 );
 
                 api.applySpeeds(speeds, Perspective.BLUE, true, true);
-            });
-    }
-
-    /**
-     * Drives to a precalculated shooting position.
-     *
-     * @param deceleration how fast we're going to drive there.
-     * @return the command that will drive us there.
-     */
-    public Command apfDriveShootingPosition(DoubleSupplier deceleration) {
-        return commandBuilder("Swerve.apfDriveShootingPosition()")
-            .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
-            .onExecute(() -> {
-                ExtTranslation goal = WaypointNavigator.waypointForShooting(state.pose, Nudge.CENTER);
-                if (goal != null) {
-                    var speeds = apf.calculate(
-                        state.pose,
-                        goal.get(),
-                        apfVel.get(),
-                        deceleration.getAsDouble(),
-                        Field.OBSTACLES
-                    );
-                    speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
-                    api.applySpeeds(speeds, Perspective.BLUE, true, true);
-                }
             });
     }
 
