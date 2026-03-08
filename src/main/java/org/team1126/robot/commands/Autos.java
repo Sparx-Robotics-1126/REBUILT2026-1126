@@ -123,6 +123,29 @@ public final class Autos {
             )
         ).withName("Autos.driveToFuel()");
     }
+    
+
+    public Command intakeCenter(boolean left) {
+        WaypointHeading heading = WaypointHeading.NORTH;
+        return sequence (
+            swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
+            swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
+            routines.readyFeederShooter().withTimeout(.10),
+            routines.shootFuelAuto().withTimeout(6.0),
+            swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
+            SweepCenterAutosMap.get()
+                .heading(heading)
+                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 0))
+                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 1))
+                .andThen(parallel(
+                    intake.extendIntake(false).withTimeout(1.5).andThen(intake.moveIntakeMotorCommand(false)),
+                    Commands.waitSeconds(2.0)
+                    .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 2))
+                    .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 3))
+                    .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 4))
+                    .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 5))
+                    .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 6))))).withName("Autos.sweepCenterLineRightTrench()");
+    }
 
     public Command sweepCenterLineTrench(boolean left) {
         WaypointHeading heading = WaypointHeading.NORTH;
