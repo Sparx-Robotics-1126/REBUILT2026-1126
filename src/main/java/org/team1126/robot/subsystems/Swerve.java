@@ -206,7 +206,7 @@ public final class Swerve extends GRRSubsystem {
 
         vision = new Vision(Constants.AT_CAMERAS);
 
-        apf = new PAPFController(9.0, 0.5, 0.01, true, Field.OBSTACLES);
+        apf = new PAPFController(9.0, 0.1, 0.01, true, Field.OBSTACLES);
         angularPID = new ProfiledPIDController(8.0, 0.0, 0.0, new Constraints(10.0, 26.0));
         angularPID.enableContinuousInput(-Math.PI, Math.PI);
 

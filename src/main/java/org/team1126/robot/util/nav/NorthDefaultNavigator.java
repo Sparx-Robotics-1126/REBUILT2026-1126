@@ -12,7 +12,7 @@ public abstract class NorthDefaultNavigator implements Navigator {
 
     protected static final double DEFAULT_DECEL = 1.8;
     protected static final double SIMULATION_DECEL = 20.0;
-    protected static final double DEFAULT_TOL = 0.1;
+    protected static final double DEFAULT_TOL = 0.5;
 
     protected Swerve swerve;
     protected WaypointHeading direction = WaypointHeading.NORTH;
