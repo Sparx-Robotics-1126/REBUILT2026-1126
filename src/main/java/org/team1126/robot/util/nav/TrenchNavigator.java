@@ -30,6 +30,7 @@ public final class TrenchNavigator extends NorthDefaultNavigator {
     private TrenchNavigator(Swerve swerve) {
         this.swerve = swerve;
 
+        // Check for continuous input on rotation to keep it turning the right way - this is probably already set.
         double decel = RobotBase.isSimulation() ? SIMULATION_DECEL : DEFAULT_DECEL;
         waypoints = Arrays.asList(
             new Waypoint(2.975, 0.603, Math.toRadians(0.0), decel),
