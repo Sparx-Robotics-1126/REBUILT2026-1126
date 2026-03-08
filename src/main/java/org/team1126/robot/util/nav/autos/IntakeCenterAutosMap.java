@@ -13,6 +13,9 @@ import org.team1126.robot.util.nav.Waypoint;
  */
 public final class IntakeCenterAutosMap extends NorthDefaultNavigator {
 
+    // TODO: Make this tunable
+    public static final double INTAKE_FACTOR = 0.75;
+
     private static IntakeCenterAutosMap instance;
 
     public static void init(Swerve swerve) {
@@ -42,11 +45,10 @@ public final class IntakeCenterAutosMap extends NorthDefaultNavigator {
         waypoints = Arrays.asList(
             new Waypoint(2.975, 0.603, Math.toRadians(0.0), decel),
             new Waypoint(5.877, 0.603, Math.toRadians(0.0), decel),
-            new Waypoint(Field.CENTER_X - Swerve.OFFSET, 1.2, Math.toRadians(270.0), decel),
-            new Waypoint(Field.CENTER_X - Swerve.OFFSET, 5.764, Math.toRadians(270.0), decel),
-            new Waypoint(Field.CENTER_X - Swerve.OFFSET, 5.764, Math.toRadians(270.0), decel),
+            new Waypoint(Field.CENTER_X - Swerve.OFFSET, 1.2, Math.toRadians(270.0), decel * INTAKE_FACTOR),
+            new Waypoint(Field.CENTER_X - Swerve.OFFSET, 5.764, Math.toRadians(270.0), decel * INTAKE_FACTOR),
+            new Waypoint(Field.CENTER_X - Swerve.OFFSET, 5.764, Math.toRadians(270.0), decel * INTAKE_FACTOR),
             new Waypoint(6.815, 7.458, Math.toRadians(178.91), decel)
-            // new Waypoint(2.70, 7.458, Math.toRadians(178.91), decel)
         ).toArray(new Waypoint[0]);
     }
 }

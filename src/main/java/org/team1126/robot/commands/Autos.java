@@ -15,6 +15,7 @@ import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.*;
 import org.team1126.robot.util.Field;
 import org.team1126.robot.util.nav.WaypointHeading;
+import org.team1126.robot.util.nav.autos.IntakeCenterAutosMap;
 import org.team1126.robot.util.nav.autos.SweepCenterAutosMap;
 
 /**
@@ -52,6 +53,7 @@ public final class Autos {
         routines = robot.routines;
 
         SweepCenterAutosMap.init(swerve);
+        IntakeCenterAutosMap.init(swerve);
 
         // Create the auto chooser
         // chooser = new AutoChooser();
@@ -62,6 +64,8 @@ public final class Autos {
         chooser.addOption("Trench", driveToFuel());
         chooser.addOption("SweepRight", sweepCenterLineTrench(false));
         chooser.addOption("SweepLeft", sweepCenterLineTrench(true));
+        chooser.addOption("Intake Right", intakeCenter(false));
+        chooser.addOption("Intake Left", intakeCenter(true));
         // chooser.addOption("Depot", routines.dock());
         SmartDashboard.putData("autos", chooser);
     }
@@ -123,28 +127,31 @@ public final class Autos {
             )
         ).withName("Autos.driveToFuel()");
     }
-    
 
     public Command intakeCenter(boolean left) {
         WaypointHeading heading = WaypointHeading.NORTH;
-        return sequence (
+        return sequence(
             swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
             swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
             routines.readyFeederShooter().withTimeout(.10),
             routines.shootFuelAuto().withTimeout(6.0),
             swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
-            SweepCenterAutosMap.get()
+            IntakeCenterAutosMap.get()
                 .heading(heading)
-                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 0))
-                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 1))
-                .andThen(parallel(
-                    intake.extendIntake(false).withTimeout(1.5).andThen(intake.moveIntakeMotorCommand(false)),
-                    Commands.waitSeconds(2.0)
-                    .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 2))
-                    .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 3))
-                    .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 4))
-                    .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 5))
-                    .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 6))))).withName("Autos.sweepCenterLineRightTrench()");
+                .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 0))
+                .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 1))
+                .andThen(
+                    parallel(
+                        intake.extendIntake(false).withTimeout(1.5).andThen(intake.moveIntakeMotorCommand(false)),
+                        Commands.waitSeconds(2.0)
+                            .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 2))
+                            .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 3))
+                            .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 4))
+                            .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 5))
+                            .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 6))
+                    )
+                )
+        ).withName("Autos.intakeCenter()");
     }
 
     public Command sweepCenterLineTrench(boolean left) {
