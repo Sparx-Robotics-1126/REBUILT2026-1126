@@ -159,7 +159,7 @@ public final class Autos {
         return sequence(
             swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
             swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
-            routines.readyFeederShooter().withTimeout(.10),
+            routines.readyFeederShooter().withTimeout(1.00),
             routines.shootFuelAuto().withTimeout(8.0),
             swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
             SweepCenterAutosMap.get()
