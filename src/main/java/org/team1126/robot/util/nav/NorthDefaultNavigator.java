@@ -22,7 +22,6 @@ public abstract class NorthDefaultNavigator implements Navigator {
     public Command driveWaypoint(WaypointHeading direction, BooleanSupplier left, int index) {
         if (index < waypoints.length) {
             int adj = (direction == WaypointHeading.NORTH) ? index : (waypoints.length - 1) - index;
-            // FIXME: this is a hack
             return swerve.apfDrive(
                 waypoints[adj].asPose(left.getAsBoolean()),
                 () -> waypoints[adj].decel,

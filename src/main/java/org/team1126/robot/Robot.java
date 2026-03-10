@@ -9,9 +9,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.util.DisableWatchdog;
+import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
@@ -20,7 +22,7 @@ import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
-import org.team1126.robot.util.MatchData;
+import org.team1126.robot.util.ShiftTracker;
 import org.team1126.robot.util.nav.TrenchNavigator;
 import org.team1126.robot.util.nav.WaypointHeading;
 
@@ -34,7 +36,7 @@ public final class Robot extends LoggedRobot {
     public final Storage storage;
     public final Shooter shooter;
     public final Intake intake;
-    public final MatchData matchData;
+    public final ShiftTracker shiftTracker;
 
     public final Routines routines;
     public final Autos autos;
@@ -59,10 +61,12 @@ public final class Robot extends LoggedRobot {
         shooter = new Shooter();
         intake = new Intake();
 
-        matchData = new MatchData();
+        shiftTracker = new ShiftTracker();
 
         // Initialize compositions
-        routines = new Routines(this);
+        // Switching routines to be singleton for better access in autos.
+        Routines.init(this);
+        routines = Routines.getInstance();
         autos = new Autos(this);
 
         // Initialize controllers
@@ -167,6 +171,11 @@ public final class Robot extends LoggedRobot {
         // scheduler.schedule(routines.lightsPreMatch(autos.runSelectedAuto()));
         // RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
         RobotModeTriggers.disabled().whileTrue(routines.lightsDisabledMode());
+
+        new Trigger(() -> shiftTracker.shiftTimeLeft() < 5.0)
+            .onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.3).onlyIf(this::isTeleop))
+            .onFalse(new RumbleCommand(driver, 1.0).withTimeout(0.6).onlyIf(this::isTeleop));
+
         // Disable loop overrun warnings from the command
         // scheduler, since we already log loop timings
         DisableWatchdog.in(scheduler, "m_watchdog");
@@ -205,7 +214,6 @@ public final class Robot extends LoggedRobot {
         Profiler.run("scheduler", scheduler::run);
         Profiler.run("lights", lights::update);
 
-        MatchData.shouldIShoot();
         // try {
         //     SmartDashboard.putString("fuelPose", Objects.requireNonNull(swerve.getFuelPose()).toString());
         // } catch (Exception ignored) {}
