@@ -26,6 +26,18 @@ public interface AutosRoutine {
     public Command action(AutosFlip flip);
 
     /**
+     * This will create the action command for the routine with the ability to determine
+     * a starting point that is within the set of the AutosStart enum. This is to be used
+     * with autos that will shoot first and will be starting within one of the pre-determined
+     * shooting locations.
+     *
+     * @param startAt the starting point for the autos.
+     * @param flip whether or not to flip to the left or keep it right.
+     * @return the COmmand to invoke in autos.
+     */
+    public Command action(AutosStart startAt, AutosFlip flip);
+
+    /**
      * The value that this routine will name the action.
      *
      * @return the action name for the routine.

@@ -1,8 +1,8 @@
 package org.team1126.robot.util.autos;
 
 public enum AutosFlip {
-    LEFT(true, " (left)"),
-    RIGHT(false, " (right)"),
+    LEFT(true, " (left trench)"),
+    RIGHT(false, " (right trench)"),
     NONE(false, "");
 
     private final boolean flip;

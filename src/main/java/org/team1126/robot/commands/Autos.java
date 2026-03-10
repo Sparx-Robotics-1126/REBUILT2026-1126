@@ -15,9 +15,10 @@ import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.*;
 import org.team1126.robot.util.Field;
 import org.team1126.robot.util.autos.AutosFlip;
-import org.team1126.robot.util.autos.routines.SweepCenterAutos;
+import org.team1126.robot.util.autos.routines.GrabAndShoot;
+import org.team1126.robot.util.autos.routines.IntakeCenter;
+import org.team1126.robot.util.autos.routines.SweepCenter;
 import org.team1126.robot.util.nav.WaypointHeading;
-import org.team1126.robot.util.nav.autos.IntakeCenterAutosMap;
 import org.team1126.robot.util.nav.autos.ShootFirstAskQuestionsLaterAutosMap;
 
 /**
@@ -54,11 +55,12 @@ public final class Autos {
 
         routines = robot.routines;
 
-        SweepCenterAutos.init(swerve);
+        SweepCenter.init(swerve, robot);
+        IntakeCenter.init(swerve, robot);
+        GrabAndShoot.init(swerve, robot);
 
         AutosFlip right = AutosFlip.RIGHT;
         AutosFlip left = AutosFlip.LEFT;
-        IntakeCenterAutosMap.init(swerve);
         ShootFirstAskQuestionsLaterAutosMap.init(swerve);
 
         // Create the auto chooser
@@ -68,12 +70,12 @@ public final class Autos {
         // chooser.addOption("Drive", driveSampleLocations());
         chooser.addOption("Outpost", outpost());
         chooser.addOption("Trench", driveToFuel());
-        chooser.addOption(SweepCenterAutos.get().getDisplayName(right), SweepCenterAutos.get().action(right));
-        chooser.addOption(SweepCenterAutos.get().getDisplayName(left), SweepCenterAutos.get().action(left));
-        chooser.addOption("Intake Right", intakeCenter(false));
-        chooser.addOption("Intake Left", intakeCenter(true));
-        chooser.addOption("Shoot First, Ask Questions Later (Right)", shootFirstAskQuestionsLater(false));
-        chooser.addOption("Shoot First, Ask Questions Later (Left)", shootFirstAskQuestionsLater(true));
+        chooser.addOption(SweepCenter.get().getDisplayName(right), SweepCenter.get().action(right));
+        chooser.addOption(SweepCenter.get().getDisplayName(left), SweepCenter.get().action(left));
+        chooser.addOption(IntakeCenter.get().getDisplayName(right), IntakeCenter.get().action(right));
+        chooser.addOption(IntakeCenter.get().getDisplayName(left), IntakeCenter.get().action(left));
+        chooser.addOption(GrabAndShoot.get().getDisplayName(right), GrabAndShoot.get().action(right));
+        chooser.addOption(GrabAndShoot.get().getDisplayName(left), GrabAndShoot.get().action(left));
         // chooser.addOption("Depot", routines.dock());
         SmartDashboard.putData("autos", chooser);
     }
@@ -134,33 +136,6 @@ public final class Autos {
                 routines.driveTrench(() -> WaypointHeading.NORTH, () -> true)
             )
         ).withName("Autos.driveToFuel()");
-    }
-
-    public Command intakeCenter(boolean left) {
-        WaypointHeading heading = WaypointHeading.NORTH;
-        return sequence(
-            swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
-            swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
-            routines.readyFeederShooter().withTimeout(.10),
-            routines.shootFuelAuto().withTimeout(5.0),
-            swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
-            IntakeCenterAutosMap.get()
-                .heading(heading)
-                .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 0))
-                .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 1))
-                .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 2))
-                .andThen(
-                    parallel(
-                        intake.extendIntake(false).withTimeout(1.5).andThen(intake.moveIntakeMotorCommand(false)),
-                        Commands.waitSeconds(2.0)
-                            .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 3))
-                            .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 4))
-                            .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 5))
-                            .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 6))
-                        // .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 7))
-                    )
-                )
-        ).withName("Autos.intakeCenter()");
     }
 
     /**

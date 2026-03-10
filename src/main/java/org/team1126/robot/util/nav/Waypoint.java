@@ -11,27 +11,40 @@ public final class Waypoint {
     public final ExtTranslation coord;
     public final double rot;
     public final double decel;
+    public final boolean limitField;
+
+    public Waypoint(double x, double y, double rot, double decel) {
+        this(x, y, rot, decel, false);
+    }
+
+    public Waypoint(double x, double y, double rot, double decel, boolean limitField) {
+        this(
+            "WAYPOINT_("
+                + Double.toString(x)
+                + ", "
+                + Double.toString(y)
+                + ")_"
+                + Double.toString(rot)
+                + "_"
+                + Double.toString(decel),
+            x,
+            y,
+            rot,
+            decel,
+            limitField
+        );
+    }
 
     public Waypoint(String name, double x, double y, double rot, double decel) {
+        this(name, x, y, rot, decel, false);
+    }
+
+    public Waypoint(String name, double x, double y, double rot, double decel, boolean limitField) {
         this.coord = new ExtTranslation(new Translation2d(x, y));
         this.rot = rot;
         this.decel = decel;
         this.name = name;
-    }
-
-    public Waypoint(double x, double y, double rot, double decel) {
-        this.name =
-            "WAYPOINT_("
-            + Double.toString(x)
-            + ", "
-            + Double.toString(y)
-            + ")_"
-            + Double.toString(rot)
-            + "_"
-            + Double.toString(decel);
-        this.coord = new ExtTranslation(new Translation2d(x, y));
-        this.rot = rot;
-        this.decel = decel;
+        this.limitField = limitField;
     }
 
     public ExtPose asPose(boolean left) {

@@ -22,6 +22,12 @@ public abstract class NorthDefaultNavigator implements Navigator {
     public Command driveWaypoint(WaypointHeading direction, BooleanSupplier left, int index) {
         if (index < waypoints.length) {
             int adj = (direction == WaypointHeading.NORTH) ? index : (waypoints.length - 1) - index;
+            Waypoint waypoint = waypoints[adj];
+            // if there is a hard stop so that we don't drive off the field.
+            if (waypoint.limitField) {
+                return Commands.none();
+            }
+
             return swerve.apfDrive(
                 waypoints[adj].asPose(left.getAsBoolean()),
                 () -> waypoints[adj].decel,
