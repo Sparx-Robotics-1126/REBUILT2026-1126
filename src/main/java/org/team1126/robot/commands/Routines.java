@@ -1,6 +1,8 @@
 package org.team1126.robot.commands;
 
-import static edu.wpi.first.wpilibj2.command.Commands.*;
+import static edu.wpi.first.wpilibj2.command.Commands.parallel;
+import static edu.wpi.first.wpilibj2.command.Commands.sequence;
+import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -10,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableBoolean;
@@ -23,7 +24,8 @@ import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.Field;
-import org.team1126.robot.util.WaypointNavigator.WaypointHeading;
+import org.team1126.robot.util.nav.TrenchNavigator;
+import org.team1126.robot.util.nav.WaypointHeading;
 
 /**
  * The Routines class contains command compositions, such as sequences
@@ -68,6 +70,18 @@ public final class Routines {
     }
 
     public Command lightsDisabledMode() {
+        if (Alliance.isBlue()) {
+            return parallel(lights.top.setSolidBlue(), lights.sides.setSolidBlue()).withName(
+                "Routines.lightsDisabledMode()"
+            );
+        } else {
+            return parallel(lights.top.setSolidRed(), lights.sides.setSolidRed()).withName(
+                "Routines.lightsDisabledMode()"
+            );
+        }
+    }
+
+    public Command lightsTeleopMode() {
         if (Alliance.isBlue()) {
             return parallel(lights.top.setSolidBlue(), lights.sides.setSolidBlue()).withName(
                 "Routines.lightsDisabledMode()"
@@ -129,6 +143,22 @@ public final class Routines {
         return parallel(
             shootingLights(),
             storage.feedShooter(shooter::shooterIsReady),
+            shooter.shoot(shooter::feederIsReady)
+        ).withName("Routines.score()");
+    }
+
+    public Command shootFieldFuel() {
+        return parallel(
+            // shootingLights(),
+            storage.feedShooter(shooter::shooterIsReady),
+            shooter.shootField(shooter::feederIsReady)
+        ).withName("Routines.score()");
+    }
+
+    public Command shootFuelReverseStorage() {
+        return parallel(
+            shootingLights(),
+            storage.feedShooterReverse(shooter::shooterIsReady),
             shooter.shoot(shooter::feederIsReady)
         ).withName("Routines.score()");
     }
@@ -204,41 +234,19 @@ public final class Routines {
         return waypoint;
     }
 
-    private Command driveWaypoint(WaypointHeading heading, boolean left) {
-        final Pose2d waypoint = waypoint(heading, left);
-        return swerve.apfDrive(() -> waypoint, waypointDecel, waypointTol);
-    }
-
-    private ExtPose endpoint(WaypointHeading heading) {
-        final boolean blue = Alliance.isBlue();
-        Pose2d endpoint;
-        if (WaypointHeading.NORTH == heading) {
-            endpoint = blue ? Field.WAYPOINT_GOAL_FAR.getBlue() : Field.WAYPOINT_GOAL_FAR.getRed();
-        } else {
-            endpoint = blue ? Field.WAYPOINT_GOAL_NEAR.getBlue() : Field.WAYPOINT_GOAL_NEAR.getRed();
-        }
-        SmartDashboard.putBoolean("Blue", blue);
-        SmartDashboard.putString(
-            "Endpoint",
-            "X: " + endpoint.getX() + ", Y: " + endpoint.getY() + ", rot: " + endpoint.getRotation()
-        );
-        return new ExtPose(endpoint);
-    }
-
-    private Command driveEndpoint(WaypointHeading heading) {
-        ExtPose endpoint = endpoint(heading);
-        return swerve.apfDrive(endpoint, waypointDecel, waypointTol);
-    }
-
     public Command aimAtHub(final DoubleSupplier maxDeceleration) {
         return parallel(selfDriveLights(), swerve.aimAtHub(maxDeceleration));
     }
 
+    public Command driveTrenchWithLights(Supplier<WaypointHeading> headingSupplier, BooleanSupplier left) {
+        return parallel(selfDriveLights(), driveTrench(headingSupplier, left));
+    }
+
     public Command driveTrench(Supplier<WaypointHeading> headingSupplier, BooleanSupplier left) {
-        return parallel(
-            selfDriveLights(),
-            driveWaypoint(headingSupplier.get(), left.getAsBoolean()).andThen(driveEndpoint(headingSupplier.get()))
-        );
+        return TrenchNavigator.get()
+            .heading(headingSupplier.get())
+            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), left, 0))
+            .andThen(TrenchNavigator.get().driveWaypoint(headingSupplier.get(), left, 1));
     }
 
     /**

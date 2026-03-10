@@ -5,6 +5,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -22,7 +23,8 @@ import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.ShiftTracker;
-import org.team1126.robot.util.WaypointNavigator.WaypointHeading;
+import org.team1126.robot.util.nav.TrenchNavigator;
+import org.team1126.robot.util.nav.WaypointHeading;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -42,6 +44,7 @@ public final class Robot extends LoggedRobot {
     private final CommandXboxController driver;
     private final CommandXboxController coDriver;
     private final Orchestra orchestra;
+    private Command autoSelected;
 
     public Robot() {
         PhoenixUtil.disableDaemons();
@@ -51,6 +54,8 @@ public final class Robot extends LoggedRobot {
         lights = new Lights();
         swerve = new Swerve();
         swerve.applyOrchestra(orchestra);
+
+        TrenchNavigator.init(swerve);
 
         storage = new Storage();
         shooter = new Shooter();
@@ -71,6 +76,7 @@ public final class Robot extends LoggedRobot {
             swerve.drive(this::driverX, this::driverY, this::driverAngular, Constants.DO_BEACHING_DEFAULT)
         );
 
+        lights.sides.setDefaultCommand(routines.lightsTeleopMode());
         // Create triggers
         // Trigger allowGoosing = coDriver.a().negate();
         // Trigger changedReference = RobotModeTriggers.teleop().and(swerve::changedReference);
@@ -85,19 +91,19 @@ public final class Robot extends LoggedRobot {
         driver
             .povUp()
             .and(driver.leftBumper())
-            .whileTrue(routines.driveTrench(() -> WaypointHeading.NORTH, () -> true));
+            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.NORTH, () -> true));
         driver
             .povUp()
             .and(driver.rightBumper())
-            .whileTrue(routines.driveTrench(() -> WaypointHeading.NORTH, () -> false));
+            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.NORTH, () -> false));
         driver
             .povDown()
             .and(driver.leftBumper())
-            .whileTrue(routines.driveTrench(() -> WaypointHeading.SOUTH, () -> true));
+            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> true));
         driver
             .povDown()
             .and(driver.rightBumper())
-            .whileTrue(routines.driveTrench(() -> WaypointHeading.SOUTH, () -> false));
+            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> false));
         // driver.a().whileTrue(routines.aimAtHub(() -> 0.2));
         driver.x().whileTrue(routines.driveOutpost());
         driver.a().whileTrue(swerve.driveToShootingArc(() -> 0.8));
@@ -131,14 +137,17 @@ public final class Robot extends LoggedRobot {
 
         // coDriver.leftTrigger().whileTrue(routines.unJamFeederShooter());
         coDriver.rightBumper().toggleOnTrue(shooter.readyShooter());
+        coDriver.rightTrigger().toggleOnTrue(shooter.readyFieldShooter(() -> true));
+        coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
         coDriver.leftBumper().toggleOnTrue(shooter.haltShooter());
         coDriver.povRight().whileTrue(routines.shootFuel());
+        coDriver.povLeft().whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightTrigger().and(coDriver.povRight()).whileTrue(routines.shootFuel());
         // coDriver.rightTrigger().and(coDriver.povLeft()).whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-        coDriver.a().whileTrue(intake.extendIntake(false));
+        coDriver.a().whileTrue(intake.extendIntake(true));
         coDriver.y().whileTrue(intake.retrackIntakeTest());
 
         coDriver.x().whileTrue(intake.moveIntakeTest(false));
@@ -153,7 +162,9 @@ public final class Robot extends LoggedRobot {
         coDriver.povDown().whileTrue(storage.moveMotorCommand(false));
         // coDriver.rightBumper().onTrue(swerve.playMusic("enemy").ignoringDisable(true));
         //
-        RobotModeTriggers.autonomous().whileTrue(autos.outpost());
+        // RobotModeTriggers.autonomous().whileTrue(autos.outpost());
+        autoSelected = autos.getAutonomousCommand();
+
         // Setup lights
         // scheduler.schedule(routines.lightsPreMatch(autos.runSelectedAuto()));
         // RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
@@ -209,5 +220,14 @@ public final class Robot extends LoggedRobot {
     private void playSong(String filename) {
         orchestra.loadMusic(filename);
         orchestra.play();
+    }
+
+    @Override
+    public void autonomousInit() {
+        autoSelected = autos.getAutonomousCommand();
+
+        if (autoSelected != null) {
+            CommandScheduler.getInstance().schedule(autoSelected);
+        }
     }
 }
