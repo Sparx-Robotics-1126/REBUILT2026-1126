@@ -15,6 +15,7 @@ import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.*;
 import org.team1126.robot.util.Field;
 import org.team1126.robot.util.autos.AutosFlip;
+import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.routines.GrabAndShoot;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
 import org.team1126.robot.util.autos.routines.SweepCenter;
@@ -61,6 +62,10 @@ public final class Autos {
 
         AutosFlip right = AutosFlip.RIGHT;
         AutosFlip left = AutosFlip.LEFT;
+        AutosStart startLeft = AutosStart.LEFT;
+        AutosStart startCenter = AutosStart.CENTER;
+        AutosStart startRight = AutosStart.RIGHT;
+
         ShootFirstAskQuestionsLaterAutosMap.init(swerve);
 
         // Create the auto chooser
@@ -70,10 +75,35 @@ public final class Autos {
         // chooser.addOption("Drive", driveSampleLocations());
         chooser.addOption("Outpost", outpost());
         chooser.addOption("Trench", driveToFuel());
-        chooser.addOption(SweepCenter.get().getDisplayName(right), SweepCenter.get().action(right));
-        chooser.addOption(SweepCenter.get().getDisplayName(left), SweepCenter.get().action(left));
-        chooser.addOption(IntakeCenter.get().getDisplayName(right), IntakeCenter.get().action(right));
-        chooser.addOption(IntakeCenter.get().getDisplayName(left), IntakeCenter.get().action(left));
+        chooser.addOption(
+            SweepCenter.get().getDisplayName(startRight, right),
+            SweepCenter.get().action(startRight, right)
+        );
+        chooser.addOption(
+            SweepCenter.get().getDisplayName(startCenter, right),
+            SweepCenter.get().action(startCenter, right)
+        );
+        chooser.addOption(
+            SweepCenter.get().getDisplayName(startCenter, left),
+            SweepCenter.get().action(startCenter, left)
+        );
+        chooser.addOption(SweepCenter.get().getDisplayName(startLeft, left), SweepCenter.get().action(startLeft, left));
+        chooser.addOption(
+            IntakeCenter.get().getDisplayName(startRight, right),
+            IntakeCenter.get().action(startRight, right)
+        );
+        chooser.addOption(
+            IntakeCenter.get().getDisplayName(startCenter, left),
+            IntakeCenter.get().action(startCenter, left)
+        );
+        chooser.addOption(
+            IntakeCenter.get().getDisplayName(startCenter, right),
+            IntakeCenter.get().action(startCenter, right)
+        );
+        chooser.addOption(
+            IntakeCenter.get().getDisplayName(startLeft, left),
+            IntakeCenter.get().action(startLeft, left)
+        );
         chooser.addOption(GrabAndShoot.get().getDisplayName(right), GrabAndShoot.get().action(right));
         chooser.addOption(GrabAndShoot.get().getDisplayName(left), GrabAndShoot.get().action(left));
         // chooser.addOption("Depot", routines.dock());
