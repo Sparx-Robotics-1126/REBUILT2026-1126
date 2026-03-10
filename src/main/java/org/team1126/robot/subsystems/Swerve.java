@@ -276,7 +276,19 @@ public final class Swerve extends GRRSubsystem {
             shootingY = state.pose.getY() - distanceToShootingPoint;
         }
 
+        if (Alliance.isRed()) {
+            shootingX = state.pose.getX() - distanceToShootingPoint;
+        }
+
         shootingArc = new ExtTranslation(shootingX, shootingY);
+
+        //     if (Alliance.isBlue()) {
+        //         shootingArc = new ExtTranslation(shootingX, shootingY);
+        //     } else {
+        //         Pose2d tmp = new Pose2d(shootingX, shootingY, state.pose.getRotation());
+        //         Pose2d blueTmp = FieldFlip.overLength(tmp);
+        //         shootingArc = new ExtTranslation(blueTmp.getX(), blueTmp.getY());
+        //     }
     }
 
     /**
@@ -500,7 +512,11 @@ public final class Swerve extends GRRSubsystem {
 
                 speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
 
-                api.applySpeeds(speeds, Perspective.BLUE, true, true);
+                if (Alliance.isBlue()) {
+                    api.applySpeeds(speeds, Perspective.BLUE, true, true);
+                } else {
+                    api.applySpeeds(speeds, Perspective.RED, true, true);
+                }
             });
     }
 

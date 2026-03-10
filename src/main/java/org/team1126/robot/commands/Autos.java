@@ -16,6 +16,7 @@ import org.team1126.robot.subsystems.*;
 import org.team1126.robot.util.Field;
 import org.team1126.robot.util.nav.WaypointHeading;
 import org.team1126.robot.util.nav.autos.IntakeCenterAutosMap;
+import org.team1126.robot.util.nav.autos.ShootFirstAskQuestionsLaterAutosMap;
 import org.team1126.robot.util.nav.autos.SweepCenterAutosMap;
 
 /**
@@ -54,6 +55,7 @@ public final class Autos {
 
         SweepCenterAutosMap.init(swerve);
         IntakeCenterAutosMap.init(swerve);
+        ShootFirstAskQuestionsLaterAutosMap.init(swerve);
 
         // Create the auto chooser
         // chooser = new AutoChooser();
@@ -66,6 +68,8 @@ public final class Autos {
         chooser.addOption("SweepLeft", sweepCenterLineTrench(true));
         chooser.addOption("Intake Right", intakeCenter(false));
         chooser.addOption("Intake Left", intakeCenter(true));
+        chooser.addOption("Shoot First, Ask Questions Later (Right)", shootFirstAskQuestionsLater(false));
+        chooser.addOption("Shoot First, Ask Questions Later (Left)", shootFirstAskQuestionsLater(true));
         // chooser.addOption("Depot", routines.dock());
         SmartDashboard.putData("autos", chooser);
     }
@@ -134,21 +138,22 @@ public final class Autos {
             swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
             swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
             routines.readyFeederShooter().withTimeout(.10),
-            routines.shootFuelAuto().withTimeout(6.0),
+            routines.shootFuelAuto().withTimeout(5.0),
             swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
             IntakeCenterAutosMap.get()
                 .heading(heading)
                 .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 0))
                 .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 1))
+                .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 2))
                 .andThen(
                     parallel(
                         intake.extendIntake(false).withTimeout(1.5).andThen(intake.moveIntakeMotorCommand(false)),
                         Commands.waitSeconds(2.0)
-                            .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 2))
                             .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 3))
                             .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 4))
                             .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 5))
                             .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 6))
+                        // .andThen(IntakeCenterAutosMap.get().driveWaypoint(heading, () -> left, 7))
                     )
                 )
         ).withName("Autos.intakeCenter()");
@@ -172,6 +177,72 @@ public final class Autos {
                 .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 5))
                 .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 6))
         ).withName("Autos.sweepCenterLineRightTrench()");
+    }
+
+    /**
+     * Starting point: Just south of blue line in line with trench
+     * Step 1: Parallel:
+     *            * Activate intake
+     *            * Drive to turning point
+     * Step 2: Pick up balls to center line
+     * Step 3: Turn toward hub, come back through same side
+     * Step 4: Shoot
+     *
+     * @param left
+     * @return
+     */
+    public Command shootFirstAskQuestionsLater(boolean left) {
+        // 3.539, 0.625, 0.00
+        WaypointHeading heading = WaypointHeading.NORTH;
+        return sequence(
+            swerve.resetPose(new ExtPose(3.539, 0.625, Rotation2d.kZero)),
+            ShootFirstAskQuestionsLaterAutosMap.get()
+                .heading(heading)
+                .andThen(
+                    sequence(
+                        parallel(
+                            intake.extendIntake(false).withTimeout(1.5).andThen(intake.moveIntakeMotorCommand(false)),
+                            Commands.waitSeconds(2.0)
+                                .andThen(
+                                    ShootFirstAskQuestionsLaterAutosMap.get().driveWaypoint(heading, () -> left, 0)
+                                )
+                                .andThen(
+                                    ShootFirstAskQuestionsLaterAutosMap.get().driveWaypoint(heading, () -> left, 1)
+                                )
+                                .andThen(
+                                    ShootFirstAskQuestionsLaterAutosMap.get().driveWaypoint(heading, () -> left, 2)
+                                )
+                                .andThen(
+                                    ShootFirstAskQuestionsLaterAutosMap.get().driveWaypoint(heading, () -> left, 3)
+                                )
+                        ),
+                        ShootFirstAskQuestionsLaterAutosMap.get()
+                            .driveWaypoint(heading, () -> left, 4)
+                            .andThen(ShootFirstAskQuestionsLaterAutosMap.get().driveWaypoint(heading, () -> left, 5))
+                            .andThen(
+                                parallel(
+                                    ShootFirstAskQuestionsLaterAutosMap.get()
+                                        .driveWaypoint(heading, () -> left, 6)
+                                        .andThen(
+                                            ShootFirstAskQuestionsLaterAutosMap.get().driveWaypoint(
+                                                heading,
+                                                () -> left,
+                                                7
+                                            )
+                                        )
+                                        .andThen(
+                                            ShootFirstAskQuestionsLaterAutosMap.get().driveWaypoint(
+                                                heading,
+                                                () -> left,
+                                                8
+                                            )
+                                        ),
+                                    routines.readyFeederShooter().withTimeout(1.00).andThen(routines.shootFuelAuto())
+                                )
+                            )
+                    )
+                )
+        ).withName("Autos.intakeCenter()");
     }
 
     /**

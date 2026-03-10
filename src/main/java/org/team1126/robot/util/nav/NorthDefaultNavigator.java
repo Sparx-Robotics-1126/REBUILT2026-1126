@@ -23,15 +23,11 @@ public abstract class NorthDefaultNavigator implements Navigator {
         if (index < waypoints.length) {
             int adj = (direction == WaypointHeading.NORTH) ? index : (waypoints.length - 1) - index;
             // FIXME: this is a hack
-            return swerve
-                .apfDrive(waypoints[adj].asPose(left.getAsBoolean()), () -> waypoints[adj].decel, () -> DEFAULT_TOL)
-                .andThen(
-                    swerve.apfDrive(
-                        waypoints[adj].asPose(left.getAsBoolean()),
-                        () -> waypoints[adj].decel,
-                        () -> DEFAULT_TOL
-                    )
-                );
+            return swerve.apfDrive(
+                waypoints[adj].asPose(left.getAsBoolean()),
+                () -> waypoints[adj].decel,
+                () -> DEFAULT_TOL
+            );
         } else {
             return Commands.none();
         }

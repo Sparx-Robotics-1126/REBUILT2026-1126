@@ -45,10 +45,11 @@ public final class IntakeCenterAutosMap extends NorthDefaultNavigator {
         waypoints = Arrays.asList(
             new Waypoint(2.975, 0.603, Math.toRadians(0.0), decel),
             new Waypoint(5.877, 0.603, Math.toRadians(0.0), decel),
-            new Waypoint(Field.CENTER_X - Swerve.OFFSET, 1.2, Math.toRadians(270.0), decel * INTAKE_FACTOR),
-            new Waypoint(Field.CENTER_X - Swerve.OFFSET, 5.764, Math.toRadians(270.0), decel * INTAKE_FACTOR),
-            new Waypoint(Field.CENTER_X - Swerve.OFFSET, 5.764, Math.toRadians(270.0), decel * INTAKE_FACTOR),
-            new Waypoint(6.815, 7.458, Math.toRadians(178.91), decel)
+            new Waypoint(6.191, 2.248, Math.toRadians(0.0), decel * INTAKE_FACTOR),
+            new Waypoint((Field.CENTER_X - Swerve.OFFSET - 0.50), 1.2, Math.toRadians(90.0), decel * INTAKE_FACTOR),
+            new Waypoint((Field.CENTER_X - Swerve.OFFSET - 0.50), 5.764, Math.toRadians(90.0), decel * INTAKE_FACTOR),
+            new Waypoint((Field.CENTER_X - Swerve.OFFSET - 0.50), 5.764, Math.toRadians(90.0), decel * INTAKE_FACTOR) //,
+            // new Waypoint(6.815, 7.458, Math.toRadians(178.91), decel)
         ).toArray(new Waypoint[0]);
     }
 }

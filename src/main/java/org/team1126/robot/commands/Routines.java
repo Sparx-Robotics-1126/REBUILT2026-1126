@@ -7,7 +7,6 @@ import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -217,21 +216,6 @@ public final class Routines {
             lights.sides.fade(Lights.Color.BLUE, Lights.Color.RED),
             lights.top.knightRider(Lights.Color.BLUE, Lights.Color.RED)
         ).withName("Routines.selfDriveLights()");
-    }
-
-    private Pose2d waypoint(WaypointHeading heading, boolean left) {
-        final boolean blue = Alliance.isBlue();
-        Pose2d waypoint;
-        if (WaypointHeading.NORTH == heading) {
-            waypoint = blue ? Field.WAYPOINT_FAR.getBlue(left) : Field.WAYPOINT_FAR.getRed(left);
-        } else {
-            waypoint = blue ? Field.WAYPOINT_NEAR.getBlue(left) : Field.WAYPOINT_NEAR.getRed(left);
-        }
-        SmartDashboard.putString(
-            "Waypoint",
-            "X: " + waypoint.getX() + ", Y: " + waypoint.getY() + ", rot: " + waypoint.getRotation()
-        );
-        return waypoint;
     }
 
     public Command aimAtHub(final DoubleSupplier maxDeceleration) {
