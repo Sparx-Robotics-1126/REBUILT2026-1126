@@ -14,8 +14,9 @@ import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.*;
 import org.team1126.robot.util.Field;
+import org.team1126.robot.util.autos.AutosFlip;
+import org.team1126.robot.util.autos.routines.SweepCenterAutos;
 import org.team1126.robot.util.nav.WaypointHeading;
-import org.team1126.robot.util.nav.autos.SweepCenterAutosMap;
 
 /**
  * The Autos class declares autonomous modes, and adds them
@@ -51,7 +52,10 @@ public final class Autos {
 
         routines = robot.routines;
 
-        SweepCenterAutosMap.init(swerve);
+        SweepCenterAutos.init(swerve);
+
+        AutosFlip right = AutosFlip.RIGHT;
+        AutosFlip left = AutosFlip.LEFT;
 
         // Create the auto chooser
         // chooser = new AutoChooser();
@@ -60,8 +64,8 @@ public final class Autos {
         // chooser.addOption("Drive", driveSampleLocations());
         chooser.addOption("Outpost", outpost());
         chooser.addOption("Trench", driveToFuel());
-        chooser.addOption("SweepRight", sweepCenterLineTrench(false));
-        chooser.addOption("SweepLeft", sweepCenterLineTrench(true));
+        chooser.addOption(SweepCenterAutos.get().getDisplayName(right), SweepCenterAutos.get().action(right));
+        chooser.addOption(SweepCenterAutos.get().getDisplayName(left), SweepCenterAutos.get().action(left));
         // chooser.addOption("Depot", routines.dock());
         SmartDashboard.putData("autos", chooser);
     }
@@ -122,26 +126,6 @@ public final class Autos {
                 routines.driveTrench(() -> WaypointHeading.NORTH, () -> true)
             )
         ).withName("Autos.driveToFuel()");
-    }
-
-    public Command sweepCenterLineTrench(boolean left) {
-        WaypointHeading heading = WaypointHeading.NORTH;
-        return sequence(
-            swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
-            swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
-            routines.readyFeederShooter().withTimeout(1.00),
-            routines.shootFuelAuto().withTimeout(8.0),
-            swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
-            SweepCenterAutosMap.get()
-                .heading(heading)
-                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 0))
-                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 1))
-                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 2))
-                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 3))
-                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 4))
-                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 5))
-                .andThen(SweepCenterAutosMap.get().driveWaypoint(heading, () -> left, 6))
-        ).withName("Autos.sweepCenterLineRightTrench()");
     }
 
     /**

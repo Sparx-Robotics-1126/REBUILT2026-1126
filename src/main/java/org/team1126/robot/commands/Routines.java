@@ -34,6 +34,18 @@ import org.team1126.robot.util.nav.WaypointHeading;
 @SuppressWarnings("unused")
 public final class Routines {
 
+    public static void init(Robot robot) {
+        if (instance == null) {
+            instance = new Routines(robot);
+        }
+    }
+
+    public static Routines getInstance() {
+        return instance;
+    }
+
+    private static Routines instance;
+
     private static final TunableTable tunables = Tunables.getNested("routines");
 
     private static final TunableDouble waypointDecel = tunables.value("waypointDecel", 0.4);
@@ -49,9 +61,7 @@ public final class Routines {
     private final Storage storage;
     private final Intake intake;
 
-    //    private final ReefSelection selection;
-
-    public Routines(Robot robot) {
+    private Routines(Robot robot) {
         this.robot = robot;
         lights = robot.lights;
         swerve = robot.swerve;

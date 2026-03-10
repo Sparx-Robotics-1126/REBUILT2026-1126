@@ -276,6 +276,10 @@ public final class Swerve extends GRRSubsystem {
             shootingY = state.pose.getY() - distanceToShootingPoint;
         }
 
+        if (Alliance.isRed()) {
+            shootingX = state.pose.getX() - distanceToShootingPoint;
+        }
+
         shootingArc = new ExtTranslation(shootingX, shootingY);
     }
 

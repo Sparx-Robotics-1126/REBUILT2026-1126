@@ -64,7 +64,9 @@ public final class Robot extends LoggedRobot {
         shiftTracker = new ShiftTracker();
 
         // Initialize compositions
-        routines = new Routines(this);
+        // Switching routines to be singleton for better access in autos.
+        Routines.init(this);
+        routines = Routines.getInstance();
         autos = new Autos(this);
 
         // Initialize controllers
