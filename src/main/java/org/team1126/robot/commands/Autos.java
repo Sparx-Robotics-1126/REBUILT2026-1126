@@ -17,7 +17,9 @@ import org.team1126.robot.util.Field;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.routines.GrabAndShoot;
+import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
+import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
 import org.team1126.robot.util.autos.routines.SweepCenter;
 import org.team1126.robot.util.nav.WaypointHeading;
 import org.team1126.robot.util.nav.autos.ShootFirstAskQuestionsLaterAutosMap;
@@ -59,9 +61,12 @@ public final class Autos {
         SweepCenter.init(robot);
         IntakeCenter.init(robot);
         GrabAndShoot.init(robot);
+        ShootFirstAskQuestionsLater.init(robot);
+        InTheTrenches.init(robot);
 
         AutosFlip right = AutosFlip.RIGHT;
         AutosFlip left = AutosFlip.LEFT;
+        AutosFlip noTrench = AutosFlip.NONE;
         AutosStart startLeft = AutosStart.LEFT;
         AutosStart startCenter = AutosStart.CENTER;
         AutosStart startRight = AutosStart.RIGHT;
@@ -69,12 +74,14 @@ public final class Autos {
         ShootFirstAskQuestionsLaterAutosMap.init(swerve);
 
         // Create the auto chooser
-        // chooser = new AutoChooser();
         chooser.setDefaultOption("Do nothing", Commands.none());
-        chooser.addOption("Just Shoot", justShoot());
-        // chooser.addOption("Drive", driveSampleLocations());
-        chooser.addOption("Outpost", outpost());
-        chooser.addOption("Trench", driveToFuel());
+        chooser.addOption(InTheTrenches.get().getDisplayName(startRight, right, true), InTheTrenches.get().action(startRight, right));
+        chooser.addOption(InTheTrenches.get().getDisplayName(startCenter, right, true), InTheTrenches.get().action(startCenter, right));
+        chooser.addOption(InTheTrenches.get().getDisplayName(startLeft, left, true), InTheTrenches.get().action(startLeft, left));
+        chooser.addOption(InTheTrenches.get().getDisplayName(startCenter, left, true), InTheTrenches.get().action(startCenter, left));
+        chooser.addOption(ShootFirstAskQuestionsLater.get().getDisplayName(startRight, true), ShootFirstAskQuestionsLater.get().action(startRight, noTrench));
+        chooser.addOption(ShootFirstAskQuestionsLater.get().getDisplayName(startCenter, true), ShootFirstAskQuestionsLater.get().action(startCenter, noTrench));
+        chooser.addOption(ShootFirstAskQuestionsLater.get().getDisplayName(startLeft, true), ShootFirstAskQuestionsLater.get().action(startLeft, noTrench));
         chooser.addOption(
             SweepCenter.get().getDisplayName(startRight, right, true),
             SweepCenter.get().action(startRight, right)
@@ -113,91 +120,15 @@ public final class Autos {
         SmartDashboard.putData("autos", chooser);
     }
 
-    public Command outpost() {
-        var goal = Field.WAYPOINT_DEPOT.get();
-
-        return parallel(
-            routines.shootingLights(),
-            sequence(
-                swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
-                swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
-                routines.readyFeederShooter().withTimeout(.10),
-                routines.shootFuelAuto().withTimeout(8.0),
-                parallel(routines.fuelFromOutpost().withTimeout(5.0))
-            )
-        ).withName("Autos.outpost()");
-
-        // deadline(routines.selfDriveLights(), shooter.readyShooter()),
-        // // routines.shootFuel().withTimeout(3.0),
-        // deadline(
-        //     swerve.apfDrive(() -> new Pose2d(goal.getX(), goal.getY(), Rotation2d.fromDegrees(180)), () -> 0.3),
-        //     intake.extendIntake()
-        // )
-    }
-
-    public Command justShoot() {
-        var goal = Field.WAYPOINT_DEPOT.get();
-
-        return parallel(
-            routines.shootingLights(),
-            sequence(
-                swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
-                swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
-                routines.readyFeederShooter().withTimeout(.10),
-                routines.shootFuelAuto().withTimeout(20.0)
-            )
-        ).withName("Autos.justShoot()");
-
-        // deadline(routines.selfDriveLights(), shooter.readyShooter()),
-        // // routines.shootFuel().withTimeout(3.0),
-        // deadline(
-        //     swerve.apfDrive(() -> new Pose2d(goal.getX(), goal.getY(), Rotation2d.fromDegrees(180)), () -> 0.3),
-        //     intake.extendIntake()
-        // )
-    }
-
-    public Command driveToFuel() {
-        var goal = Field.WAYPOINT_DEPOT.get();
-
-        return parallel(
-            routines.shootingLights(),
-            sequence(
-                swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
-                swerve.driveToShootingArc(() -> 0.8).withTimeout(1),
-                routines.readyFeederShooter().withTimeout(.10),
-                routines.shootFuelAuto().withTimeout(8.0),
-                routines.driveTrench(() -> WaypointHeading.NORTH, () -> true)
-            )
-        ).withName("Autos.driveToFuel()");
-    }
-
     /**
      * Returns {@code true} when the default auto is selected.
      */
-    //    public boolean defaultSelected() {
-    //        return chooser.getSelected().getAsBoolean();
-    //    }
     public Command getAutonomousCommand() {
         return chooser.getSelected();
-    }
-
-    private Command driveSampleLocations() {
-        var start = new ExtPose(2.0, 2.0, Rotation2d.kZero);
-        var middle = new ExtPose(3.0, 5.0, Rotation2d.k180deg);
-        var end = new ExtPose(6.0, 2.5, Rotation2d.kCW_90deg);
-
-        return sequence(
-            swerve.resetPose(start),
-            swerve.apfDrive(middle, deceleration, tolerance),
-            swerve.apfDrive(end, deceleration, tolerance),
-            swerve.stop(false)
-        );
     }
 
     public Command runSelectedAuto() {
         System.out.println("Running auto: " + chooser.getSelected().getName());
         return chooser.getSelected();
     }
-
-    // ********** Sim / Testing **********
 }
