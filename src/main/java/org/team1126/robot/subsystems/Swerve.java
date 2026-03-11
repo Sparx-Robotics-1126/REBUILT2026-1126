@@ -21,7 +21,6 @@ import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.Math2;
 import org.team1126.lib.math.PAPFController;
-import org.team1126.lib.math.geometry.ExtTranslation;
 import org.team1126.lib.swerve.Perspective;
 import org.team1126.lib.swerve.SwerveAPI;
 import org.team1126.lib.swerve.SwerveState;
@@ -169,7 +168,7 @@ public final class Swerve extends GRRSubsystem {
     private double distanceToShootingPoint = 0.0;
     private double angleToHub = 0.0;
 
-    private ExtTranslation shootingArc = new ExtTranslation(0.0, 0.0);
+    private Translation2d shootingArc = new Translation2d(0.0, 0.0);
 
     // private final Orchestra orchestra;
 
@@ -281,7 +280,7 @@ public final class Swerve extends GRRSubsystem {
             shootingX = state.pose.getX() - distanceToShootingPoint;
         }
 
-        shootingArc = new ExtTranslation(shootingX, shootingY);
+        shootingArc = new Translation2d(shootingX, shootingY);
 
         //     if (Alliance.isBlue()) {
         //         shootingArc = new ExtTranslation(shootingX, shootingY);
@@ -509,18 +508,14 @@ public final class Swerve extends GRRSubsystem {
             .onExecute(() -> {
                 var speeds = apf.calculate(
                     state.pose,
-                    this.shootingArc.get(),
+                    this.shootingArc,
                     apfHubFacingVel.get(),
                     maxDeceleration.getAsDouble()
                 );
 
                 speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
 
-                if (Alliance.isBlue()) {
-                    api.applySpeeds(speeds, Perspective.BLUE, true, true);
-                } else {
-                    api.applySpeeds(speeds, Perspective.RED, true, true);
-                }
+                api.applySpeeds(speeds, Perspective.BLUE, true, true);
             });
     }
 
