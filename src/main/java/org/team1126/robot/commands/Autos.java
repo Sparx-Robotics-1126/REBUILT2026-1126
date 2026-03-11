@@ -2,18 +2,15 @@ package org.team1126.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.*;
-import org.team1126.robot.util.Field;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.routines.GrabAndShoot;
@@ -21,7 +18,6 @@ import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
 import org.team1126.robot.util.autos.routines.SweepCenter;
-import org.team1126.robot.util.nav.WaypointHeading;
 import org.team1126.robot.util.nav.autos.ShootFirstAskQuestionsLaterAutosMap;
 
 /**
@@ -75,13 +71,34 @@ public final class Autos {
 
         // Create the auto chooser
         chooser.setDefaultOption("Do nothing", Commands.none());
-        chooser.addOption(InTheTrenches.get().getDisplayName(startRight, right, true), InTheTrenches.get().action(startRight, right));
-        chooser.addOption(InTheTrenches.get().getDisplayName(startCenter, right, true), InTheTrenches.get().action(startCenter, right));
-        chooser.addOption(InTheTrenches.get().getDisplayName(startLeft, left, true), InTheTrenches.get().action(startLeft, left));
-        chooser.addOption(InTheTrenches.get().getDisplayName(startCenter, left, true), InTheTrenches.get().action(startCenter, left));
-        chooser.addOption(ShootFirstAskQuestionsLater.get().getDisplayName(startRight, true), ShootFirstAskQuestionsLater.get().action(startRight, noTrench));
-        chooser.addOption(ShootFirstAskQuestionsLater.get().getDisplayName(startCenter, true), ShootFirstAskQuestionsLater.get().action(startCenter, noTrench));
-        chooser.addOption(ShootFirstAskQuestionsLater.get().getDisplayName(startLeft, true), ShootFirstAskQuestionsLater.get().action(startLeft, noTrench));
+        chooser.addOption(
+            InTheTrenches.get().getDisplayName(startRight, right, true),
+            InTheTrenches.get().action(startRight, right)
+        );
+        chooser.addOption(
+            InTheTrenches.get().getDisplayName(startCenter, right, true),
+            InTheTrenches.get().action(startCenter, right)
+        );
+        chooser.addOption(
+            InTheTrenches.get().getDisplayName(startLeft, left, true),
+            InTheTrenches.get().action(startLeft, left)
+        );
+        chooser.addOption(
+            InTheTrenches.get().getDisplayName(startCenter, left, true),
+            InTheTrenches.get().action(startCenter, left)
+        );
+        chooser.addOption(
+            ShootFirstAskQuestionsLater.get().getDisplayName(startRight, true),
+            ShootFirstAskQuestionsLater.get().action(startRight, noTrench)
+        );
+        chooser.addOption(
+            ShootFirstAskQuestionsLater.get().getDisplayName(startCenter, true),
+            ShootFirstAskQuestionsLater.get().action(startCenter, noTrench)
+        );
+        chooser.addOption(
+            ShootFirstAskQuestionsLater.get().getDisplayName(startLeft, true),
+            ShootFirstAskQuestionsLater.get().action(startLeft, noTrench)
+        );
         chooser.addOption(
             SweepCenter.get().getDisplayName(startRight, right, true),
             SweepCenter.get().action(startRight, right)

@@ -1,5 +1,6 @@
 package org.team1126.robot.util.autos;
 
+import static edu.wpi.first.wpilibj2.command.Commands.parallel;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -137,9 +138,45 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
         return Commands.none();
     }
 
+    public Command driveToShootingArch() {
+        return robot.swerve.driveToShootingArc(defaultDecel);
+    }
+
     protected Command shootFuel() {
         return sequence(
             routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
+            routines.shootFuelAuto().withTimeout(secondsPerBall.getAsDouble() * defaultFuelLoad.getAsInt())
+        );
+    }
+
+    /**
+     * This is meant to shoot fuel until autos are over, therefore no timeout. Hopefully we will have a good
+     * amount of fuel in the hopper.
+     *
+     * @return the command to drive and shoot fuel.
+     */
+    protected Command driveArchAndShootFuel() {
+        return sequence(
+            parallel(
+                routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
+                driveToShootingArch()
+            ),
+            routines.shootFuelAuto()
+        );
+    }
+
+    /**
+     * This is meant to drive to the shooting arch and shoot the 8 balls that are known to be
+     * in the hopper, it should timeout on that amount of fuel.
+     * 
+     * @return the command to do this.
+     */
+    protected Command driveArchAndShootFuelStart() {
+        return sequence(
+            parallel(
+                routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
+                driveToShootingArch()
+            ),
             routines.shootFuelAuto().withTimeout(secondsPerBall.getAsDouble() * defaultFuelLoad.getAsInt())
         );
     }

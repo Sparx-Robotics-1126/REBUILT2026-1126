@@ -8,6 +8,7 @@ import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.DefaultAutosRoutine;
 import org.team1126.robot.util.nav.Waypoint;
+import org.team1126.robot.util.nav.WaypointHeading;
 
 /**
  * Starting point: Just south of blue line in line with trench
@@ -18,19 +19,19 @@ import org.team1126.robot.util.nav.Waypoint;
  * Step 3: Turn toward hub, come back through same side
  * Step 4: Shoot
  */
-public final class ShootFirstAskQuestionsLater extends DefaultAutosRoutine {
+public final class InTheTrenches extends DefaultAutosRoutine {
 
-    public static final String COMMAND_NAME = "ShootNowAskQuestionsLater.action()";
-    public static final String DISPLAY_NAME = "Just Shoot";
-    public static final String ABBREVIATION = "PEWPEW";
+    public static final String COMMAND_NAME = "InTheTrenches.action()";
+    public static final String DISPLAY_NAME = "Drive Trenches";
+    public static final String ABBREVIATION = "TRENCH";
 
-    private static ShootFirstAskQuestionsLater instance;
+    private static InTheTrenches instance;
 
     public static void init(Robot robot) {
-        instance = new ShootFirstAskQuestionsLater(COMMAND_NAME, DISPLAY_NAME, ABBREVIATION, robot);
+        instance = new InTheTrenches(COMMAND_NAME, DISPLAY_NAME, ABBREVIATION, robot);
     }
 
-    public static ShootFirstAskQuestionsLater get() {
+    public static InTheTrenches get() {
         if (instance == null) {
             return null;
         }
@@ -41,14 +42,19 @@ public final class ShootFirstAskQuestionsLater extends DefaultAutosRoutine {
     /**
      * Singleton constructor
      */
-    private ShootFirstAskQuestionsLater(String commandName, String displayName, String abbreviatedName, Robot robot) {
+    private InTheTrenches(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = new Waypoint[0];
     }
 
     public Command action(AutosStart startAt, AutosFlip flip) {
-        return sequence(atStartingPoint(startAt.getStartingPoint()), driveArchAndShootFuelStart()).withName(
-            getCommandName()
-        );
+        return parallel(
+            routines.shootingLights(),
+            sequence(
+                atStartingPoint(startAt.getStartingPoint()),
+                driveArchAndShootFuelStart(),
+                routines.driveTrench(() -> WaypointHeading.NORTH, () -> flip.shouldFlip())
+            )
+        ).withName(getCommandName());
     }
 }

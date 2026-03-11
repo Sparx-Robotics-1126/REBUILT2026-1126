@@ -73,7 +73,7 @@ public final class IntakeCenter extends DefaultAutosRoutine {
     public Command action(AutosStart startAt, AutosFlip flip) {
         return sequence(
             atStartingPoint(startAt.getStartingPoint()),
-            shootFuel(),
+            driveArchAndShootFuelStart(),
             atPoint(new ExtPose(2.287, 4.037, Rotation2d.kZero).get(flip.shouldFlip())),
             driveWaypoint(flip, 0)
                 .andThen(driveWaypoint(flip, 1))

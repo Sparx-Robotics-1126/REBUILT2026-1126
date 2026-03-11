@@ -15,6 +15,7 @@ import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.util.DisableWatchdog;
 import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
+import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
 import org.team1126.robot.subsystems.Intake;
 import org.team1126.robot.subsystems.Lights;

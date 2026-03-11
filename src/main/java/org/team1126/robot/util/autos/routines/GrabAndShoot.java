@@ -102,10 +102,10 @@ public final class GrabAndShoot extends DefaultAutosRoutine {
             driveWaypoint(flip, 4)
                 .andThen(driveWaypoint(flip, 5))
                 .andThen(
-                    parallel(
-                        driveWaypoint(flip, 6).andThen(driveWaypoint(flip, 7)).andThen(driveWaypoint(flip, 8)),
-                        shootFuel()
-                    )
+                    driveWaypoint(flip, 6)
+                        .andThen(driveWaypoint(flip, 7))
+                        .andThen(driveWaypoint(flip, 8))
+                        .andThen(driveArchAndShootFuel())
                 )
         ).withName(getCommandName());
     }

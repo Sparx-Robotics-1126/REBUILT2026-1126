@@ -55,7 +55,7 @@ public final class SweepCenter extends DefaultAutosRoutine {
     public Command action(AutosStart startAt, AutosFlip flip) {
         return sequence(
             atStartingPoint(startAt.getStartingPoint()),
-            shootFuel(),
+            driveArchAndShootFuelStart(),
             driveWaypoint(flip, 0)
                 .andThen(driveWaypoint(flip, 1))
                 .andThen(driveWaypoint(flip, 2))
