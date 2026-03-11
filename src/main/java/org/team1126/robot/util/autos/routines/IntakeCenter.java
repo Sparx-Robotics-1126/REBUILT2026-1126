@@ -22,12 +22,13 @@ import org.team1126.robot.util.nav.Waypoint;
 public final class IntakeCenter extends DefaultAutosRoutine {
 
     public static final String COMMAND_NAME = "IntakeCenterAutos.action()";
-    public static final String DISPLAY_NAME = "Intake across center line";
+    public static final String DISPLAY_NAME = "High Across Intake";
+    public static final String ABBREVIATION = "HAI";
 
     private static IntakeCenter instance;
 
-    public static void init(Swerve swerve, Robot robot) {
-        instance = new IntakeCenter(COMMAND_NAME, DISPLAY_NAME, swerve, robot);
+    public static void init(Robot robot) {
+        instance = new IntakeCenter(COMMAND_NAME, DISPLAY_NAME, ABBREVIATION, robot);
     }
 
     public static IntakeCenter get() {
@@ -41,8 +42,8 @@ public final class IntakeCenter extends DefaultAutosRoutine {
     /**
      * Singleton constructor
      */
-    private IntakeCenter(String commandName, String displayName, Swerve swerve, Robot robot) {
-        super(commandName, displayName, swerve, robot);
+    private IntakeCenter(String commandName, String displayName, String abbreviatedName, Robot robot) {
+        super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
             new Waypoint(2.975, 0.603, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.877, 0.603, Math.toRadians(0.0), getDefaultDecel()),
@@ -71,13 +72,12 @@ public final class IntakeCenter extends DefaultAutosRoutine {
 
     public Command action(AutosStart startAt, AutosFlip flip) {
         return sequence(
-            swerve.resetPose(startAt.getStartingPoint()),
-            routines.readyFeederShooter().withTimeout(.10),
-            routines.shootFuelAuto().withTimeout(5.0),
-            swerve.resetPose(new ExtPose(2.287, 4.037, Rotation2d.kZero)),
-            driveWaypoint(direction, () -> flip.shouldFlip(), 0)
-                .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 1))
-                .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 2))
+            atStartingPoint(startAt.getStartingPoint()),
+            shootFuel(),
+            atPoint(new ExtPose(2.287, 4.037, Rotation2d.kZero).get(flip.shouldFlip())),
+            driveWaypoint(flip, 0)
+                .andThen(driveWaypoint(flip, 1))
+                .andThen(driveWaypoint(flip, 2))
                 .andThen(
                     parallel(
                         robot.intake
@@ -85,13 +85,13 @@ public final class IntakeCenter extends DefaultAutosRoutine {
                             .withTimeout(1.5)
                             .andThen(robot.intake.moveIntakeMotorCommand(false)),
                         Commands.waitSeconds(2.0)
-                            .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 3))
-                            .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 4))
-                            .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 5))
-                            .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 6))
-                            .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 7))
+                            .andThen(driveWaypoint(flip, 3))
+                            .andThen(driveWaypoint(flip, 4))
+                            .andThen(driveWaypoint(flip, 5))
+                            .andThen(driveWaypoint(flip, 6))
+                            .andThen(driveWaypoint(flip, 7))
                     )
                 )
-        ).withName(commandName);
+        ).withName(getCommandName());
     }
 }

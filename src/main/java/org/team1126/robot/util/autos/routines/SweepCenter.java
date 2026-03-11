@@ -19,12 +19,13 @@ import org.team1126.robot.util.nav.Waypoint;
 public final class SweepCenter extends DefaultAutosRoutine {
 
     public static final String COMMAND_NAME = "SweepCenterAutos.action()";
-    public static final String DISPLAY_NAME = "Sweep center line, no intake";
+    public static final String DISPLAY_NAME = "Sweep High, Intake None";
+    public static final String ABBREVIATION = "SHIN";
 
     private static SweepCenter instance;
 
-    public static void init(Swerve swerve, Robot robot) {
-        instance = new SweepCenter(COMMAND_NAME, DISPLAY_NAME, swerve, robot);
+    public static void init(Robot robot) {
+        instance = new SweepCenter(COMMAND_NAME, DISPLAY_NAME, ABBREVIATION, robot);
     }
 
     public static SweepCenter get() {
@@ -38,8 +39,8 @@ public final class SweepCenter extends DefaultAutosRoutine {
     /**
      * Singleton constructor
      */
-    private SweepCenter(String commandName, String displayName, Swerve swerve, Robot robot) {
-        super(commandName, displayName, swerve, robot);
+    private SweepCenter(String commandName, String displayName, String abbreviatedName, Robot robot) {
+        super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
             new Waypoint(2.975, 0.603, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.877, 0.603, Math.toRadians(0.0), getDefaultDecel()),
@@ -53,16 +54,15 @@ public final class SweepCenter extends DefaultAutosRoutine {
 
     public Command action(AutosStart startAt, AutosFlip flip) {
         return sequence(
-            swerve.resetPose(startAt.getStartingPoint()),
-            routines.readyFeederShooter().withTimeout(1.00),
-            routines.shootFuelAuto().withTimeout(5.0),
-            driveWaypoint(direction, () -> flip.shouldFlip(), 0)
-                .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 1))
-                .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 2))
-                .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 3))
-                .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 4))
-                .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 5))
-                .andThen(driveWaypoint(direction, () -> flip.shouldFlip(), 6))
-        ).withName(commandName);
+            atStartingPoint(startAt.getStartingPoint()),
+            shootFuel(),
+            driveWaypoint(flip, 0)
+                .andThen(driveWaypoint(flip, 1))
+                .andThen(driveWaypoint(flip, 2))
+                .andThen(driveWaypoint(flip, 3))
+                .andThen(driveWaypoint(flip, 4))
+                .andThen(driveWaypoint(flip, 5))
+                .andThen(driveWaypoint(flip, 6))
+        ).withName(getCommandName());
     }
 }

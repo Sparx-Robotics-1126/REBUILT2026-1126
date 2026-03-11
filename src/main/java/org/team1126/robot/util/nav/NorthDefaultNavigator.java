@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.BooleanSupplier;
 import org.team1126.robot.subsystems.Swerve;
+import org.team1126.robot.util.autos.AutosFlip;
 
 /**
  * Abstract navigator that assumes the coordinates will be north heading.
@@ -23,7 +24,7 @@ public abstract class NorthDefaultNavigator implements Navigator {
         if (index < waypoints.length) {
             int adj = (direction == WaypointHeading.NORTH) ? index : (waypoints.length - 1) - index;
             Waypoint waypoint = waypoints[adj];
-            // if there is a hard stop so that we don't drive off the field.
+            // if there is a hard stop so that we dokn't drive off the field.
             if (waypoint.limitField) {
                 return Commands.none();
             }
@@ -42,5 +43,9 @@ public abstract class NorthDefaultNavigator implements Navigator {
         return Commands.runOnce(() -> this.direction = heading)
             .ignoringDisable(true)
             .withName("Navigator.heading()");
+    }
+
+    public Command driveWaypoint(AutosFlip flip, int index) {
+        return driveWaypoint(direction, () -> flip.shouldFlip(), index);
     }
 }

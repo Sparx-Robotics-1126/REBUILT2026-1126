@@ -50,4 +50,10 @@ public interface AutosRoutine {
      * @return the name of the command to display in the autos chooser.
      */
     public String getDisplayName();
+    public String getDisplayName(AutosFlip flip);
+    public String getDisplayName(AutosFlip flip, boolean succinct);
+    public String getDisplayName(AutosStart startAt);
+    public String getDisplayName(AutosStart startAt, boolean succinct);
+    public String getDisplayName(AutosStart startAt, AutosFlip flip);
+    public String getDisplayName(AutosStart startAt, AutosFlip flip, boolean succinct);
 }
