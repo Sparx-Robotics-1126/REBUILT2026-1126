@@ -60,10 +60,11 @@ public final class Swerve extends GRRSubsystem {
     private static final TunableTable beachTunables = tunables.getNested("beach");
     private static final TunableDouble beachSpeed = beachTunables.value("speed", 3.0);
     private static final TunableDouble beachTolerance = beachTunables.value("tolerance", 0.15);
-    private static final TunableDouble rampAngle = beachTunables.value(
+    private static final TunableDouble defaultRampAngle = beachTunables.value(
         "rampAngle",
         Alliance.isBlue() ? Math2.THREE_QUARTERS_PI : Math2.THREE_QUARTERS_PI + Math.PI
     );
+    private double rampAngle = defaultRampAngle.getAsDouble();
 
     private static final TunableTable apfTunables = tunables.getNested("apf");
     private static final TunableDouble apfX = apfTunables.value("x", 1.14);
@@ -383,7 +384,14 @@ public final class Swerve extends GRRSubsystem {
      */
     public Command drive(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular, boolean doBeaching) {
         return commandBuilder("Swerve.drive()")
-            .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
+            .onInitialize(() -> {
+                angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond);
+                if (inNeutralZone()) {
+                    rampAngle = defaultRampAngle.getAsDouble() + Math.PI;
+                } else {
+                    rampAngle = defaultRampAngle.getAsDouble();
+                }
+            })
             .onExecute(() -> {
                 double pitch = state.pitch.getRadians();
                 double roll = state.roll.getRadians();
@@ -400,14 +408,10 @@ public final class Swerve extends GRRSubsystem {
                     );
                 } else {
                     driverAssistedSpeeds = Perspective.OPERATOR.toPerspectiveSpeeds(
-                        new ChassisSpeeds(
-                            0.0,
-                            0.0,
-                            angularPID.calculate(state.rotation.getRadians(), rampAngle.getAsDouble())
-                        ),
+                        new ChassisSpeeds(0.0, 0.0, angularPID.calculate(state.rotation.getRadians(), rampAngle)),
                         state.rotation
                     );
-                    angularPID.calculate(state.rotation.getRadians(), rampAngle.getAsDouble());
+                    // angularPID.calculate(state.rotation.getRadians(), rampAngle.getAsDouble());
                 }
 
                 api.applyAssistedDriverInput(
@@ -451,7 +455,7 @@ public final class Swerve extends GRRSubsystem {
                 ),
                 state.rotation
             );
-            angularPID.calculate(state.rotation.getRadians(), Alliance.isBlue() ? Math.PI : 0.0);
+            // angularPID.calculate(state.rotation.getRadians(), Alliance.isBlue() ? Math.PI : 0.0);
 
             api.applyAssistedDriverInput(
                 x.getAsDouble(),
@@ -575,7 +579,7 @@ public final class Swerve extends GRRSubsystem {
                     state.rotation.getRadians(),
                     goal.getRotation().getRadians()
                 );
-                angularPID.calculate(state.rotation.getRadians(), goal.getRotation().getRadians());
+                // angularPID.calculate(state.rotation.getRadians(), goal.getRotation().getRadians());
 
                 api.applySpeeds(speeds, Perspective.BLUE, true, true);
             });
@@ -589,9 +593,38 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.stop(" + lock + ")").onExecute(() -> api.applyStop(lock));
     }
 
-    public double getHubAngular() {
-        return angularPID.calculate(state.rotation.getRadians(), angleToHub);
+    /**
+     * Checks if the origin of the robot is in the neutral zone (between the blue zone and the red zone).
+     * @return {@code true} if we are in the neutral zone, {@code false} otherwise.
+     */
+    public boolean inNeutralZone() {
+        final double x = state.pose.getX();
+        return Field.BLUE_ZONE <= x && Field.RED_ZONE >= x;
     }
+
+    private void setBestRampAngle() {
+        double currentAngle = state.rotation.getRadians();
+        double angleA, angleB;
+        if (inNeutralZone()) {
+            // Example: angles for neutral zone
+            angleA = defaultRampAngle.getAsDouble() + Math2.HALF_PI;
+            angleB = defaultRampAngle.getAsDouble() + Math.PI;
+        } else {
+            // Example: angles for non-neutral zone
+            angleA = defaultRampAngle.getAsDouble();
+            angleB = defaultRampAngle.getAsDouble() - Math2.HALF_PI;
+        }
+
+        // Helper: wrap difference to [-PI, PI]
+        double diffA = Math.abs(Math.atan2(Math.sin(currentAngle - angleA), Math.cos(currentAngle - angleA)));
+        double diffB = Math.abs(Math.atan2(Math.sin(currentAngle - angleB), Math.cos(currentAngle - angleB)));
+
+        rampAngle = (diffA < diffB) ? angleA : angleB;
+    }
+
+    // public double getHubAngular() {
+    //     return angularPID.calculate(state.rotation.getRadians(), angleToHub);
+    // }
 
     public void applyOrchestra(Orchestra orchestra) {
         this.api.applyOrchestra(orchestra);

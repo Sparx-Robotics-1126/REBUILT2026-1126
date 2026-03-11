@@ -15,7 +15,6 @@ import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.util.DisableWatchdog;
 import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
-import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
 import org.team1126.robot.subsystems.Intake;
 import org.team1126.robot.subsystems.Lights;
@@ -37,6 +36,7 @@ public final class Robot extends LoggedRobot {
     public final Shooter shooter;
     public final Intake intake;
     public final ShiftTracker shiftTracker;
+    private final boolean rumbleOn = true;
 
     public final Routines routines;
     public final Autos autos;
@@ -172,9 +172,11 @@ public final class Robot extends LoggedRobot {
         // RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
         RobotModeTriggers.disabled().whileTrue(routines.lightsDisabledMode());
 
-        new Trigger(() -> shiftTracker.shiftTimeLeft() < 5.0)
-            .onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.3).onlyIf(this::isTeleop))
-            .onFalse(new RumbleCommand(driver, 1.0).withTimeout(0.6).onlyIf(this::isTeleop));
+        if (rumbleOn) {
+            new Trigger(() -> shiftTracker.shiftTimeLeft() < 5.0)
+                .onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.3).onlyIf(this::isTeleop))
+                .onFalse(new RumbleCommand(driver, 1.0).withTimeout(0.6).onlyIf(this::isTeleop));
+        }
 
         // Disable loop overrun warnings from the command
         // scheduler, since we already log loop timings
