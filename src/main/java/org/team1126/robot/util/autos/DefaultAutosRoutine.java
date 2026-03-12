@@ -206,7 +206,7 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
             }
 
             return robot.swerve.apfDrive(
-                waypoints[index].asPose(flip.shouldFlip()),
+                () -> waypoints[index].asPose(flip.shouldFlip()),
                 () -> waypoints[index].decel,
                 () -> defaultTolerance.getAsDouble()
             );

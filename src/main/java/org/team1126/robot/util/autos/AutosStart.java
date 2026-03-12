@@ -3,6 +3,7 @@ package org.team1126.robot.util.autos;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.team1126.lib.math.geometry.ExtPose;
+import org.team1126.lib.util.Alliance;
 
 public enum AutosStart {
     LEFT(2.54, 5.23, 23.85, "Starting LEFT", "SL"),
@@ -21,7 +22,7 @@ public enum AutosStart {
     }
 
     public Pose2d getStartingPoint() {
-        return startingPoint.get();
+        return Alliance.isBlue() ? startingPoint.getBlue() : startingPoint.getRed();
     }
 
     public String display(boolean succinct) {

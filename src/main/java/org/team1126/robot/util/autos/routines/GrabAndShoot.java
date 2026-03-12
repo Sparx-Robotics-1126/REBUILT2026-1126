@@ -6,8 +6,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.Arrays;
 import org.team1126.lib.math.geometry.ExtPose;
+import org.team1126.lib.util.Alliance;
 import org.team1126.robot.Robot;
 import org.team1126.robot.util.autos.AutosFlip;
+import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.DefaultAutosRoutine;
 import org.team1126.robot.util.nav.Waypoint;
 
@@ -26,6 +28,7 @@ public final class GrabAndShoot extends DefaultAutosRoutine {
     public static final String DISPLAY_NAME = "Grab And Shoot";
     public static final String ABBREVIATION = "GAS";
 
+    private static final ExtPose START_AT = new ExtPose(3.539, 0.625, Rotation2d.kZero);
     private static GrabAndShoot instance;
 
     public static void init(Robot robot) {
@@ -82,9 +85,11 @@ public final class GrabAndShoot extends DefaultAutosRoutine {
         ).toArray(new Waypoint[0]);
     }
 
-    public Command action(AutosFlip flip) {
+    public Command action(AutosStart startAt, AutosFlip flip) {
         return sequence(
-            atStartingPoint(new ExtPose(3.539, 0.625, Rotation2d.kZero).get(flip.shouldFlip())),
+            atStartingPoint(
+                Alliance.isBlue() ? START_AT.getBlue(flip.shouldFlip()) : START_AT.getRed(flip.shouldFlip())
+            ),
             robot.intake
                 .extendIntake(false)
                 .withTimeout(intakeTimer.getAsDouble())

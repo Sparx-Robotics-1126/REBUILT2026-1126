@@ -30,7 +30,7 @@ public abstract class NorthDefaultNavigator implements Navigator {
             }
 
             return swerve.apfDrive(
-                waypoints[adj].asPose(left.getAsBoolean()),
+                () -> waypoints[adj].asPose(left.getAsBoolean()),
                 () -> waypoints[adj].decel,
                 () -> DEFAULT_TOL
             );

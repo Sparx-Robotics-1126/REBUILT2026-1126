@@ -1,9 +1,11 @@
 package org.team1126.robot.util.nav;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.math.geometry.ExtTranslation;
+import org.team1126.lib.util.Alliance;
 
 public final class Waypoint {
 
@@ -50,7 +52,12 @@ public final class Waypoint {
         this.limitField = limitField;
     }
 
-    public ExtPose asPose(boolean left) {
-        return new ExtPose(coord.get(left), new Rotation2d(left ? flipRot : rot));
+    public Pose2d asPose(boolean left) {
+        ExtPose pose = new ExtPose(coord.get(left), new Rotation2d(left ? flipRot : rot));
+        if (Alliance.isBlue()) {
+            return pose.getBlue(left);
+        } else {
+            return pose.getRed(left);
+        }
     }
 }
