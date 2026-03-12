@@ -21,7 +21,7 @@ public enum AutosStart {
     }
 
     public Pose2d getStartingPoint(boolean blue) {
-        return startingPoint.get(blue);
+        return startingPoint.get();
     }
 
     public String display(boolean succinct) {
