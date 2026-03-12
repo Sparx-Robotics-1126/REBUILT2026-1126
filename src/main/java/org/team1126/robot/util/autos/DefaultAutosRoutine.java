@@ -105,7 +105,7 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
     }
 
     public String getDisplayName(AutosStart startAt, AutosFlip flip, boolean succinct) {
-        String separator = succinct ? "-" : " - ";
+        String separator = succinct ? ":" : " - ";
         return (
             (succinct ? abbreviatedName : displayName)
             + (startAt != AutosStart.OTHER ? separator : "")
