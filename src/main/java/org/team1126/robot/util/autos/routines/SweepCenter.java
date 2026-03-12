@@ -57,17 +57,17 @@ public final class SweepCenter extends DefaultAutosRoutine {
         ).toArray(new Waypoint[0]);
     }
 
-    public Command action(AutosStart startAt, AutosFlip flip) {
+    public Command action(AutosStart startAt, AutosFlip flip, boolean blue) {
         return sequence(
-            atStartingPoint(startAt.getStartingPoint()),
+            atStartingPoint(startAt.getStartingPoint(blue)),
             driveArchAndShootFuelStart(),
-            driveWaypoint(flip, 0)
-                .andThen(driveWaypoint(flip, 1))
-                .andThen(driveWaypoint(flip, 2))
-                .andThen(driveWaypoint(flip, 3))
-                .andThen(driveWaypoint(flip, 4))
-                .andThen(driveWaypoint(flip, 5))
-                .andThen(driveWaypoint(flip, 6))
+            driveWaypoint(flip, 0, blue)
+                .andThen(driveWaypoint(flip, 1, blue))
+                .andThen(driveWaypoint(flip, 2, blue))
+                .andThen(driveWaypoint(flip, 3, blue))
+                .andThen(driveWaypoint(flip, 4, blue))
+                .andThen(driveWaypoint(flip, 5, blue))
+                .andThen(driveWaypoint(flip, 6, blue))
         ).withName(getCommandName());
     }
 }

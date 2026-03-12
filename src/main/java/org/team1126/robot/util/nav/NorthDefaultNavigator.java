@@ -3,6 +3,7 @@ package org.team1126.robot.util.nav;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.BooleanSupplier;
+import org.team1126.lib.util.Alliance;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.autos.AutosFlip;
 
@@ -30,7 +31,7 @@ public abstract class NorthDefaultNavigator implements Navigator {
             }
 
             return swerve.apfDrive(
-                () -> waypoints[adj].asPose(left.getAsBoolean()),
+                () -> waypoints[adj].asPose(Alliance.isBlue(), left.getAsBoolean()),
                 () -> waypoints[adj].decel,
                 () -> DEFAULT_TOL
             );

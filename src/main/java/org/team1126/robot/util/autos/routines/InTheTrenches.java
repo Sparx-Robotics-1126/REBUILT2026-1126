@@ -50,14 +50,14 @@ public final class InTheTrenches extends DefaultAutosRoutine {
         ).toArray(new Waypoint[0]);
     }
 
-    public Command action(AutosStart startAt, AutosFlip flip) {
+    public Command action(AutosStart startAt, AutosFlip flip, boolean blue) {
         return parallel(
             routines.shootingLights(),
             sequence(
-                atStartingPoint(startAt.getStartingPoint()),
+                atStartingPoint(startAt.getStartingPoint(blue)),
                 driveArchAndShootFuelStart(),
                 routines.driveTrench(() -> WaypointHeading.NORTH, () -> flip.shouldFlip()),
-                driveWaypoint(flip, 0)
+                driveWaypoint(flip, 0, blue)
             )
         ).withName(getCommandName());
     }

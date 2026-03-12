@@ -6,10 +6,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.Arrays;
 import org.team1126.lib.math.geometry.ExtPose;
-import org.team1126.lib.util.Alliance;
 import org.team1126.robot.Robot;
 import org.team1126.robot.util.autos.AutosFlip;
-import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.DefaultAutosRoutine;
 import org.team1126.robot.util.nav.Waypoint;
 
@@ -85,28 +83,26 @@ public final class GrabAndShoot extends DefaultAutosRoutine {
         ).toArray(new Waypoint[0]);
     }
 
-    public Command action(AutosStart startAt, AutosFlip flip) {
+    public Command action(AutosFlip flip, boolean blue) {
         return sequence(
-            atStartingPoint(
-                Alliance.isBlue() ? START_AT.getBlue(flip.shouldFlip()) : START_AT.getRed(flip.shouldFlip())
-            ),
+            atStartingPoint(START_AT.get(blue, flip.shouldFlip())),
             robot.intake
                 .extendIntake(false)
                 .withTimeout(intakeTimer.getAsDouble())
                 .andThen(
                     robot.intake
                         .moveIntakeMotorCommand(false)
-                        .withDeadline(driveWaypoint(flip, 0))
-                        .andThen(driveWaypoint(flip, 1))
-                        .andThen(driveWaypoint(flip, 2))
-                        .andThen(driveWaypoint(flip, 3))
+                        .withDeadline(driveWaypoint(flip, 0, blue))
+                        .andThen(driveWaypoint(flip, 1, blue))
+                        .andThen(driveWaypoint(flip, 2, blue))
+                        .andThen(driveWaypoint(flip, 3, blue))
                 ),
-            driveWaypoint(flip, 4)
-                .andThen(driveWaypoint(flip, 5))
+            driveWaypoint(flip, 4, blue)
+                .andThen(driveWaypoint(flip, 5, blue))
                 .andThen(
-                    driveWaypoint(flip, 6)
-                        .andThen(driveWaypoint(flip, 7))
-                        .andThen(driveWaypoint(flip, 8))
+                    driveWaypoint(flip, 6, blue)
+                        .andThen(driveWaypoint(flip, 7, blue))
+                        .andThen(driveWaypoint(flip, 8, blue))
                         .andThen(driveArchAndShootFuel())
                 )
         ).withName(getCommandName());

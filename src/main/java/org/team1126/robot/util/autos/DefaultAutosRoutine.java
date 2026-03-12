@@ -4,6 +4,7 @@ import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.function.BooleanSupplier;
@@ -11,6 +12,7 @@ import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableBoolean;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
+import org.team1126.lib.util.Alliance;
 import org.team1126.robot.Robot;
 import org.team1126.robot.commands.Routines;
 import org.team1126.robot.util.nav.Navigator;
@@ -72,6 +74,7 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
         this.displayName = displayName;
         this.abbreviatedName = abbreviatedName;
         this.robot = robot;
+        SmartDashboard.putBoolean("Blue Alliance", Alliance.isBlue());
     }
 
     public String getCommandName() {
@@ -128,6 +131,10 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
         return Commands.none();
     }
 
+    public Command action(AutosFlip flip, boolean blue) {
+        return Commands.none();
+    }
+
     /**
      * Default implementaiton to prevent errors since the action method will be
      * mutually exclusive if there is a starting point.
@@ -137,6 +144,10 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
      * @returns the none command.
      */
     public Command action(AutosStart startAt, AutosFlip flip) {
+        return Commands.none();
+    }
+
+    public Command action(AutosStart startAt, AutosFlip flip, boolean blue) {
         return Commands.none();
     }
 
@@ -198,7 +209,7 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
      * @param index
      * @return
      */
-    public Command driveWaypoint(AutosFlip flip, int index) {
+    public Command driveWaypoint(AutosFlip flip, int index, boolean blue) {
         if (index < waypoints.length) {
             Waypoint waypoint = waypoints[index];
             if (waypoint.limitField) {
@@ -206,13 +217,17 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
             }
 
             return robot.swerve.apfDrive(
-                () -> waypoints[index].asPose(flip.shouldFlip()),
+                () -> waypoints[index].asPose(blue, flip.shouldFlip()),
                 () -> waypoints[index].decel,
                 () -> defaultTolerance.getAsDouble()
             );
         } else {
             return Commands.none();
         }
+    }
+
+    public Command driveWaypoint(AutosFlip flip, int index) {
+        return driveWaypoint(flip, index, Alliance.isBlue());
     }
 
     /**

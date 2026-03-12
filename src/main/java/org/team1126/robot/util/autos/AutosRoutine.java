@@ -25,6 +25,8 @@ public interface AutosRoutine {
      */
     public Command action(AutosFlip flip);
 
+    public Command action(AutosFlip flip, boolean blue);
+
     /**
      * This will create the action command for the routine with the ability to determine
      * a starting point that is within the set of the AutosStart enum. This is to be used
@@ -36,6 +38,8 @@ public interface AutosRoutine {
      * @return the COmmand to invoke in autos.
      */
     public Command action(AutosStart startAt, AutosFlip flip);
+
+    public Command action(AutosStart startAt, AutosFlip flip, boolean blue);
 
     /**
      * The value that this routine will name the action.

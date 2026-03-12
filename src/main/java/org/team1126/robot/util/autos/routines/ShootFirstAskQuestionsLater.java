@@ -46,8 +46,8 @@ public final class ShootFirstAskQuestionsLater extends DefaultAutosRoutine {
         waypoints = new Waypoint[0];
     }
 
-    public Command action(AutosStart startAt, AutosFlip flip) {
-        return sequence(atStartingPoint(startAt.getStartingPoint()), driveArchAndShootFuelStart()).withName(
+    public Command action(AutosStart startAt, AutosFlip flip, boolean blue) {
+        return sequence(atStartingPoint(startAt.getStartingPoint(blue)), driveArchAndShootFuelStart()).withName(
             getCommandName()
         );
     }

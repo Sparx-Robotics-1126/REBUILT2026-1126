@@ -84,14 +84,14 @@ public final class IntakeCenter extends DefaultAutosRoutine {
         ).toArray(new Waypoint[0]);
     }
 
-    public Command action(AutosStart startAt, AutosFlip flip) {
+    public Command action(AutosStart startAt, AutosFlip flip, boolean blue) {
         return sequence(
-            atStartingPoint(startAt.getStartingPoint()),
+            atStartingPoint(startAt.getStartingPoint(blue)),
             driveArchAndShootFuelStart(),
-            atPoint(new ExtPose(2.287, 4.037, Rotation2d.kZero).get(flip.shouldFlip())),
-            driveWaypoint(flip, 0)
-                .andThen(driveWaypoint(flip, 1))
-                .andThen(driveWaypoint(flip, 2))
+            atPoint(new ExtPose(2.287, 4.037, Rotation2d.kZero).get(blue, flip.shouldFlip())),
+            driveWaypoint(flip, 0, blue)
+                .andThen(driveWaypoint(flip, 1, blue))
+                .andThen(driveWaypoint(flip, 2, blue))
                 .andThen(
                     parallel(
                         robot.intake
@@ -99,11 +99,11 @@ public final class IntakeCenter extends DefaultAutosRoutine {
                             .withTimeout(1.5)
                             .andThen(robot.intake.moveIntakeMotorCommand(false)),
                         Commands.waitSeconds(2.0)
-                            .andThen(driveWaypoint(flip, 3))
-                            .andThen(driveWaypoint(flip, 4))
-                            .andThen(driveWaypoint(flip, 5))
-                            .andThen(driveWaypoint(flip, 6))
-                            .andThen(driveWaypoint(flip, 7))
+                            .andThen(driveWaypoint(flip, 3, blue))
+                            .andThen(driveWaypoint(flip, 4, blue))
+                            .andThen(driveWaypoint(flip, 5, blue))
+                            .andThen(driveWaypoint(flip, 6, blue))
+                            .andThen(driveWaypoint(flip, 7, blue))
                     )
                 )
         ).withName(getCommandName());

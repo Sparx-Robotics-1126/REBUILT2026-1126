@@ -5,7 +5,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.math.geometry.ExtTranslation;
-import org.team1126.lib.util.Alliance;
 
 public final class Waypoint {
 
@@ -52,12 +51,8 @@ public final class Waypoint {
         this.limitField = limitField;
     }
 
-    public Pose2d asPose(boolean left) {
-        ExtPose pose = new ExtPose(coord.get(left), new Rotation2d(left ? flipRot : rot));
-        if (Alliance.isBlue()) {
-            return pose.getBlue(left);
-        } else {
-            return pose.getRed(left);
-        }
+    public Pose2d asPose(boolean blue, boolean left) {
+        ExtPose pose = new ExtPose(coord.get(), new Rotation2d(left ? flipRot : rot));
+        return pose.get(blue, left);
     }
 }
