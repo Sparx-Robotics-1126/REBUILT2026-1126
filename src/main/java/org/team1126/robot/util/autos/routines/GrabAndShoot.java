@@ -69,13 +69,13 @@ public final class GrabAndShoot extends DefaultAutosRoutine {
                 getDefaultDecel() * intakeFactor.get()
             ),
             new Waypoint(
-                6.032,
+                6.932,
                 3.594,
                 Math.toRadians(180.0),
                 Math.toRadians(180.0),
                 getDefaultDecel() * intakeFactor.get()
             ),
-            new Waypoint(6.032, 3.594, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(6.732, 3.594, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.005, 0.625, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(3.14, 0.625, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(2.849, 0.625, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
