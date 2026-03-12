@@ -7,8 +7,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import java.util.Arrays;
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.robot.Robot;
-import org.team1126.robot.subsystems.Swerve;
-import org.team1126.robot.util.Field;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.DefaultAutosRoutine;
 import org.team1126.robot.util.nav.Waypoint;
@@ -49,39 +47,38 @@ public final class GrabAndShoot extends DefaultAutosRoutine {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
             new Waypoint(
-                (Field.CENTER_X - Swerve.OFFSET - 0.50),
+                7.532,
                 1.2,
                 Math.toRadians(90.0),
+                Math.toRadians(270.0),
                 getDefaultDecel() * intakeFactor.get()
             ),
             new Waypoint(
-                (Field.CENTER_X - Swerve.OFFSET - 0.50),
-                Field.CENTER_Y,
+                7.532,
+                3.594,
                 Math.toRadians(90.0),
+                Math.toRadians(270.0),
                 getDefaultDecel() * intakeFactor.get()
             ),
             new Waypoint(
-                (Field.CENTER_X - Swerve.OFFSET - 0.50),
-                Field.CENTER_Y,
+                7.532,
+                3.594,
+                Math.toRadians(180.0),
                 Math.toRadians(180.0),
                 getDefaultDecel() * intakeFactor.get()
             ),
             new Waypoint(
-                (Field.CENTER_X - Swerve.OFFSET - 1.50),
-                Field.CENTER_Y,
+                6.032,
+                3.594,
+                Math.toRadians(180.0),
                 Math.toRadians(180.0),
                 getDefaultDecel() * intakeFactor.get()
             ),
-            new Waypoint(
-                (Field.CENTER_X - Swerve.OFFSET - 1.50),
-                Field.CENTER_Y,
-                Math.toRadians(0.0),
-                getDefaultDecel()
-            ),
-            new Waypoint(5.005, 0.625, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(3.14, 0.625, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(2.849, 0.625, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(2.849, 2.315, Math.toRadians(36.0), getDefaultDecel())
+            new Waypoint(6.032, 3.594, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(5.005, 0.625, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(3.14, 0.625, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(2.849, 0.625, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(2.849, 2.315, Math.toRadians(36.0), Math.toRadians(-36.0), getDefaultDecel())
         ).toArray(new Waypoint[0]);
     }
 

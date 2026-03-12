@@ -32,8 +32,8 @@ public final class DepotNavigator extends NorthDefaultNavigator {
 
         double decel = RobotBase.isSimulation() ? SIMULATION_DECEL : DEFAULT_DECEL;
         waypoints = Arrays.asList(
-            new Waypoint(2.610, 6.667, Math.toRadians(4.58), decel),
-            new Waypoint(0.903, 5.867, Math.toRadians(0.0), decel)
+            new Waypoint(2.610, 6.667, Math.toRadians(4.58), Math.toRadians(4.58), decel),
+            new Waypoint(0.903, 5.867, Math.toRadians(0.0), Math.toRadians(0.0), decel)
         ).toArray(new Waypoint[0]);
     }
 }

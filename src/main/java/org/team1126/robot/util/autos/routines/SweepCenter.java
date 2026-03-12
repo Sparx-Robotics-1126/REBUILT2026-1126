@@ -5,8 +5,6 @@ import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.Arrays;
 import org.team1126.robot.Robot;
-import org.team1126.robot.subsystems.Swerve;
-import org.team1126.robot.util.Field;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.DefaultAutosRoutine;
@@ -42,13 +40,20 @@ public final class SweepCenter extends DefaultAutosRoutine {
     private SweepCenter(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
-            new Waypoint(2.975, 0.603, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(5.877, 0.603, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(Field.CENTER_X - Swerve.OFFSET - 0.25, 1.2, Math.toRadians(270.0), getDefaultDecel()),
-            new Waypoint(Field.CENTER_X - Swerve.OFFSET - 0.25, 5.764, Math.toRadians(270.0), getDefaultDecel()),
-            new Waypoint(Field.CENTER_X - Swerve.OFFSET - 0.25, 5.764, Math.toRadians(270.0), getDefaultDecel()),
-            new Waypoint(6.815, 7.458, Math.toRadians(178.91), getDefaultDecel()),
-            new Waypoint(2.70, 7.458, Math.toRadians(178.91), getDefaultDecel(), limitedField.get())
+            new Waypoint(2.975, 0.603, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(5.877, 0.603, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(7.532, 1.2, Math.toRadians(90.0), Math.toRadians(270.0), getDefaultDecel()),
+            new Waypoint(7.532, 5.764, Math.toRadians(90.0), Math.toRadians(270.0), getDefaultDecel()),
+            new Waypoint(7.532, 5.764, Math.toRadians(90.0), Math.toRadians(270.0), getDefaultDecel()),
+            new Waypoint(6.815, 7.458, Math.toRadians(178.91), Math.toRadians(-178.91), getDefaultDecel()),
+            new Waypoint(
+                2.70,
+                7.458,
+                Math.toRadians(178.91),
+                Math.toRadians(-178.91),
+                getDefaultDecel(),
+                limitedField.get()
+            )
         ).toArray(new Waypoint[0]);
     }
 

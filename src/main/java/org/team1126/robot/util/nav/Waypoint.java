@@ -10,14 +10,15 @@ public final class Waypoint {
     public final String name;
     public final ExtTranslation coord;
     public final double rot;
+    public final double flipRot;
     public final double decel;
     public final boolean limitField;
 
-    public Waypoint(double x, double y, double rot, double decel) {
-        this(x, y, rot, decel, false);
+    public Waypoint(double x, double y, double rot, double flipRot, double decel) {
+        this(x, y, rot, flipRot, decel, false);
     }
 
-    public Waypoint(double x, double y, double rot, double decel, boolean limitField) {
+    public Waypoint(double x, double y, double rot, double flipRot, double decel, boolean limitField) {
         this(
             "WAYPOINT_("
                 + Double.toString(x)
@@ -30,24 +31,26 @@ public final class Waypoint {
             x,
             y,
             rot,
+            flipRot,
             decel,
             limitField
         );
     }
 
-    public Waypoint(String name, double x, double y, double rot, double decel) {
-        this(name, x, y, rot, decel, false);
+    public Waypoint(String name, double x, double y, double rot, double flipRot, double decel) {
+        this(name, x, y, rot, flipRot, decel, false);
     }
 
-    public Waypoint(String name, double x, double y, double rot, double decel, boolean limitField) {
+    public Waypoint(String name, double x, double y, double rot, double flipRot, double decel, boolean limitField) {
         this.coord = new ExtTranslation(new Translation2d(x, y));
         this.rot = rot;
+        this.flipRot = flipRot;
         this.decel = decel;
         this.name = name;
         this.limitField = limitField;
     }
 
     public ExtPose asPose(boolean left) {
-        return new ExtPose(coord.get(left), new Rotation2d(rot));
+        return new ExtPose(coord.get(left), new Rotation2d(left ? flipRot : rot));
     }
 }

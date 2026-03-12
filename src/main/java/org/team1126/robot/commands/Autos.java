@@ -18,7 +18,6 @@ import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
 import org.team1126.robot.util.autos.routines.SweepCenter;
-import org.team1126.robot.util.nav.autos.ShootFirstAskQuestionsLaterAutosMap;
 
 /**
  * The Autos class declares autonomous modes, and adds them
@@ -66,8 +65,6 @@ public final class Autos {
         AutosStart startLeft = AutosStart.LEFT;
         AutosStart startCenter = AutosStart.CENTER;
         AutosStart startRight = AutosStart.RIGHT;
-
-        ShootFirstAskQuestionsLaterAutosMap.init(swerve);
 
         // Create the auto chooser
         chooser.setDefaultOption("Do nothing", Commands.none());

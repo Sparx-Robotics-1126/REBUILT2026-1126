@@ -3,6 +3,7 @@ package org.team1126.robot.util.autos.routines;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.Arrays;
 import org.team1126.robot.Robot;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
@@ -44,7 +45,9 @@ public final class InTheTrenches extends DefaultAutosRoutine {
      */
     private InTheTrenches(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
-        waypoints = new Waypoint[0];
+        waypoints = Arrays.asList(
+            new Waypoint(6.885, 1.899, Math.toRadians(60.0), Math.toRadians(330.0), getDefaultDecel())
+        ).toArray(new Waypoint[0]);
     }
 
     public Command action(AutosStart startAt, AutosFlip flip) {
@@ -53,7 +56,8 @@ public final class InTheTrenches extends DefaultAutosRoutine {
             sequence(
                 atStartingPoint(startAt.getStartingPoint()),
                 driveArchAndShootFuelStart(),
-                routines.driveTrench(() -> WaypointHeading.NORTH, () -> flip.shouldFlip())
+                routines.driveTrench(() -> WaypointHeading.NORTH, () -> flip.shouldFlip()),
+                driveWaypoint(flip, 0)
             )
         ).withName(getCommandName());
     }

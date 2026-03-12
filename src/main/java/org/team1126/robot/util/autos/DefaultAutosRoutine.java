@@ -1,7 +1,6 @@
 package org.team1126.robot.util.autos;
 
-import static edu.wpi.first.wpilibj2.command.Commands.parallel;
-import static edu.wpi.first.wpilibj2.command.Commands.sequence;
+import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -12,7 +11,6 @@ import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableBoolean;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
-import org.team1126.lib.tunable.Tunables.TunableInteger;
 import org.team1126.robot.Robot;
 import org.team1126.robot.commands.Routines;
 import org.team1126.robot.util.nav.Navigator;
@@ -40,7 +38,11 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
         "Default swerve end tolerance (in meters)",
         0.25
     );
-    protected static final TunableInteger defaultFuelLoad = tunables.value("Default fuel amount at start of autos", 8);
+    protected static final TunableDouble defaultFuelLoad = tunables.value("Default fuel amount at start of autos", 8.0);
+    protected static final TunableDouble maxShootingArcTravelTime = tunables.value(
+        "Max amount of time to drive to shooting arc",
+        1.0
+    );
 
     /**
      * Sets the decel based on whether we are in a simulator instance or on the real robot.
@@ -145,7 +147,7 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
     protected Command shootFuel() {
         return sequence(
             routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
-            routines.shootFuelAuto().withTimeout(secondsPerBall.getAsDouble() * defaultFuelLoad.getAsInt())
+            routines.shootFuelAuto().withTimeout(secondsPerBall.getAsDouble() * defaultFuelLoad.getAsDouble())
         );
     }
 
@@ -159,7 +161,7 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
         return sequence(
             parallel(
                 routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
-                driveToShootingArch()
+                driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
             ),
             routines.shootFuelAuto()
         );
@@ -175,9 +177,9 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
         return sequence(
             parallel(
                 routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
-                driveToShootingArch()
+                driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
             ),
-            routines.shootFuelAuto().withTimeout(secondsPerBall.getAsDouble() * defaultFuelLoad.getAsInt())
+            routines.shootFuelAuto().withTimeout(secondsPerBall.getAsDouble() * defaultFuelLoad.getAsDouble())
         );
     }
 

@@ -5,9 +5,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import org.team1126.lib.math.geometry.ExtPose;
 
 public enum AutosStart {
-    LEFT(2.54, 5.23, 23.85, "Starting LEFT - ", "SL"),
-    CENTER(2.287, 4.038, 0.0, "Starting CENTER - ", "SC"),
-    RIGHT(3.131, 2.228, 51.13, "Starting RIGHT - ", "SR"),
+    LEFT(2.54, 5.23, 23.85, "Starting LEFT", "SL"),
+    CENTER(2.287, 4.038, 0.0, "Starting CENTER", "SC"),
+    RIGHT(3.131, 2.228, 51.13, "Starting RIGHT", "SR"),
     OTHER(0.0, 0.0, 0.0, "", "");
 
     private final ExtPose startingPoint;
