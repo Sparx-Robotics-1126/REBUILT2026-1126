@@ -168,7 +168,7 @@ public abstract class DefaultAutosRoutine implements AutosRoutine, Navigator {
     /**
      * This is meant to drive to the shooting arch and shoot the 8 balls that are known to be
      * in the hopper, it should timeout on that amount of fuel.
-     * 
+     *
      * @return the command to do this.
      */
     protected Command driveArchAndShootFuelStart() {
