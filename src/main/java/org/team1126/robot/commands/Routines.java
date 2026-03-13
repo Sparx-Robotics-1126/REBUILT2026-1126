@@ -143,6 +143,8 @@ public final class Routines {
     public Command shootFuel() {
         return parallel(
             // shootingLights(),
+            lights.sides.chase(Lights.Color.SHOOTING),
+            lights.top.convergeToMiddle(Lights.Color.SHOOTING),
             storage.feedShooter(shooter::shooterIsReady),
             shooter.shoot(shooter::feederIsReady)
         ).withName("Routines.score()");
@@ -150,7 +152,7 @@ public final class Routines {
 
     public Command shootFuelRev() {
         return parallel(
-            shootingLights(),
+            // shootingLights(),
             storage.feedShooter(shooter::shooterIsReady),
             shooter.shoot(shooter::feederIsReady)
         ).withName("Routines.score()");
