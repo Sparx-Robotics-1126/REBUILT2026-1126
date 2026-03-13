@@ -54,15 +54,15 @@ public final class Field {
     public static final double HUB_CENTER_Y = getTag(26).getY();
 
     /** Center X of the hub is half way between AT26 and AT20. */
-    public static final double HUB_CENTER_X = getTag(26).getX();
-    public static final double HUB_CENTER_MEASURE = getTag(20).getX() - getTag(26).getX();
+    public static final double HUB_CENTER_MEASURE = (getTag(20).getX() - getTag(26).getX()) / 2.0;
+    public static final double HUB_CENTER_X = getTag(26).getX() + HUB_CENTER_MEASURE;
     public static final double HUB_SHOOTING_X = HUB_CENTER_X - 2.0;
     public static final ExtPose HUB_SHOOTING_LOCATION = new ExtPose(HUB_SHOOTING_X, HUB_CENTER_Y, Rotation2d.kZero);
 
     /** Picking the center of the hub as the hub's location, for the purpose of aiming. */
     public static final ExtTranslation HUB = new ExtTranslation(HUB_CENTER_X, HUB_CENTER_Y);
     public static final ExtTranslation SHOOTING_POSITION = new ExtTranslation(2.261, 4.075);
-    public static final double SHOOTING_RANGE_RADIUS = 3.0 - HUB_CENTER_MEASURE;
+    public static final double SHOOTING_RANGE_RADIUS = 3.0;
 
     ////////////////////////
     // BARRIER DEFINITION //
