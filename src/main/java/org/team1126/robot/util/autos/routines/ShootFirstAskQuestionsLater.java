@@ -3,6 +3,7 @@ package org.team1126.robot.util.autos.routines;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.team1126.robot.Robot;
@@ -45,12 +46,15 @@ public final class ShootFirstAskQuestionsLater extends BaseAutosRoutine {
      */
     private ShootFirstAskQuestionsLater(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
-        waypoints = new Waypoint[0];
+        waypoints = Arrays.asList(new Waypoint(3.172, 3.232, Math.toRadians(0.0), getDefaultDecel())).toArray(
+            new Waypoint[0]
+        );
     }
 
     public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
-            atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean())),
+            atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean(), flip.get().shouldFlip())),
+            driveWaypoint(flip, 0, blue),
             driveArchAndShootFuelStart()
         ).withName(getCommandName());
     }

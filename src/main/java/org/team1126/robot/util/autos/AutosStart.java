@@ -5,9 +5,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import org.team1126.lib.math.geometry.ExtPose;
 
 public enum AutosStart {
-    LEFT(2.54, 5.23, 23.85, "Starting LEFT", "SL"),
-    CENTER(2.287, 4.038, 0.0, "Starting CENTER", "SC"),
-    RIGHT(3.131, 2.228, 51.13, "Starting RIGHT", "SR"),
+    CENTER(3.611, 4.046, 0.0, "CENTER", "CENTER"),
+    BUMP(3.611, 2.544, 0.0, "BUMP", "BUMP"),
+    TRENCH(3.611, 0.625, 0.0, "TRENCH", "TRENCH"),
     OTHER(0.0, 0.0, 0.0, "", "");
 
     private final ExtPose startingPoint;
@@ -20,11 +20,11 @@ public enum AutosStart {
         this.abbreviation = abbreviation;
     }
 
-    public Pose2d getStartingPoint(boolean blue) {
-        return startingPoint.get();
+    public Pose2d getStartingPoint(boolean blue, boolean left) {
+        return startingPoint.get(blue, left);
     }
 
-    public String display(boolean succinct) {
+    public String display(boolean succinct, boolean left) {
         return succinct ? abbreviation : description;
     }
 }

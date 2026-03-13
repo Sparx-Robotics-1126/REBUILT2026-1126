@@ -45,6 +45,7 @@ public final class IntakeCenter extends BaseAutosRoutine {
     private IntakeCenter(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
+            new Waypoint(3.172, 3.232, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(2.975, 0.603, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.877, 0.603, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(6.191, 2.248, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
@@ -57,14 +58,15 @@ public final class IntakeCenter extends BaseAutosRoutine {
 
     public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
-            atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean())),
+            atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean(), flip.get().shouldFlip())),
+            driveWaypoint(flip, 0, blue),
             driveArchAndShootFuelStart(),
             atPoint(() ->
                 new ExtPose(2.287, 4.037, Rotation2d.kZero).get(blue.getAsBoolean(), flip.get().shouldFlip())
             ),
-            driveWaypoint(flip, 0, blue)
-                .andThen(driveWaypoint(flip, 1, blue))
+            driveWaypoint(flip, 1, blue)
                 .andThen(driveWaypoint(flip, 2, blue))
+                .andThen(driveWaypoint(flip, 3, blue))
                 .andThen(
                     parallel(
                         robot.intake
@@ -72,11 +74,11 @@ public final class IntakeCenter extends BaseAutosRoutine {
                             .withTimeout(1.5)
                             .andThen(robot.intake.moveIntakeMotorCommand(false)),
                         Commands.waitSeconds(2.0)
-                            .andThen(driveWaypoint(flip, 3, blue))
                             .andThen(driveWaypoint(flip, 4, blue))
                             .andThen(driveWaypoint(flip, 5, blue))
                             .andThen(driveWaypoint(flip, 6, blue))
                             .andThen(driveWaypoint(flip, 7, blue))
+                            .andThen(driveWaypoint(flip, 8, blue))
                     )
                 )
         ).withName(getCommandName());

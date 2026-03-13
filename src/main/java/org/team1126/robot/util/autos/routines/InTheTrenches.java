@@ -25,7 +25,7 @@ public final class InTheTrenches extends BaseAutosRoutine {
 
     public static final String COMMAND_NAME = "InTheTrenches.action()";
     public static final String DISPLAY_NAME = "Drive Trenches";
-    public static final String ABBREVIATION = "TRENCH";
+    public static final String ABBREVIATION = "TRENCHING";
 
     private static InTheTrenches instance;
 
@@ -47,6 +47,7 @@ public final class InTheTrenches extends BaseAutosRoutine {
     private InTheTrenches(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
+            new Waypoint(3.172, 3.232, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(2.975, 0.603, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.877, 0.603, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(6.885, 1.899, Math.toRadians(60.0), getDefaultDecel())
@@ -57,11 +58,12 @@ public final class InTheTrenches extends BaseAutosRoutine {
         return parallel(
             routines.shootingLights(),
             sequence(
-                atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean())),
-                driveArchAndShootFuelStart(),
+                atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean(), flip.get().shouldFlip())),
                 driveWaypoint(flip, 0, blue),
+                driveArchAndShootFuelStart(),
                 driveWaypoint(flip, 1, blue),
-                driveWaypoint(flip, 2, blue)
+                driveWaypoint(flip, 2, blue),
+                driveWaypoint(flip, 3, blue)
             )
         ).withName(getCommandName());
     }

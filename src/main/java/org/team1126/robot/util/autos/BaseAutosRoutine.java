@@ -113,7 +113,7 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
         return (
             (succinct ? abbreviatedName : displayName)
             + (startAt != AutosStart.OTHER ? separator : "")
-            + startAt.display(succinct)
+            + startAt.display(succinct, flip.shouldFlip())
             + (flip != AutosFlip.NONE ? separator : "")
             + flip.display(succinct)
         );

@@ -42,6 +42,7 @@ public final class SweepCenter extends BaseAutosRoutine {
     private SweepCenter(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
+            new Waypoint(3.172, 3.232, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(2.975, 0.603, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.877, 0.603, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(7.532, 1.2, Math.toRadians(90.0), getDefaultDecel()),
@@ -54,15 +55,16 @@ public final class SweepCenter extends BaseAutosRoutine {
 
     public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
-            atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean())),
+            atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean(), flip.get().shouldFlip())),
+            driveWaypoint(flip, 0, blue),
             driveArchAndShootFuelStart(),
-            driveWaypoint(flip, 0, blue)
-                .andThen(driveWaypoint(flip, 1, blue))
+            driveWaypoint(flip, 1, blue)
                 .andThen(driveWaypoint(flip, 2, blue))
                 .andThen(driveWaypoint(flip, 3, blue))
                 .andThen(driveWaypoint(flip, 4, blue))
                 .andThen(driveWaypoint(flip, 5, blue))
                 .andThen(driveWaypoint(flip, 6, blue))
+                .andThen(driveWaypoint(flip, 7, blue))
         ).withName(getCommandName());
     }
 }
