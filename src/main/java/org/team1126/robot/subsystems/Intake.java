@@ -189,9 +189,8 @@ public final class Intake extends GRRSubsystem {
     }
 
     public Command extendIntake(boolean spinIntake) {
-        return commandBuilder()
-            .onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), spinIntake))
-            .onEnd(this::stopPivot);
+        return commandBuilder().onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), spinIntake));
+        // .onEnd(this::stopPivot);
     }
 
     //    public Command extendIntake() {
