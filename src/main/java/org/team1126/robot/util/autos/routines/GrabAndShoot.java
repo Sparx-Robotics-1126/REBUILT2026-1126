@@ -60,6 +60,20 @@ public final class GrabAndShoot extends BaseAutosRoutine {
             new Waypoint(7.532, 2.11, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
             new Waypoint(7.532, 2.71, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
             new Waypoint(7.532, 3.594, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+
+            // new Waypoint(6.532, 3.594, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            // new Waypoint(7.532, 2.71, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            // new Waypoint(7.532, 2.11, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            // new Waypoint(7.532, 2.51, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            // new Waypoint(7.532, 1.91, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            // new Waypoint(7.532, 2.11, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            // new Waypoint(7.532, 1.51, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            // new Waypoint(7.532, 1.81, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            // new Waypoint(7.532, 1.21, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            // new Waypoint(7.532, 1.51, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+
+
+
             new Waypoint(6.932, 3.594, Math.toRadians(180.0), getDefaultDecel() * intakeFactor.get()),
             new Waypoint(6.732, 3.594, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.005, 0.625, Math.toRadians(0.0), getDefaultDecel()),
@@ -76,9 +90,9 @@ public final class GrabAndShoot extends BaseAutosRoutine {
                 .extendIntake(false)
                 .withTimeout(intakeTimer.getAsDouble())
                 .andThen(
-                    robot.intake
-                        .moveIntakeMotorCommand(false)
-                        .withDeadline(driveWaypoint(flip, 0, blue))
+                    parallel(
+                    robot.intake.moveIntakeMotorCommand(false),
+                    driveWaypoint(flip, 0, blue)
                         .andThen(driveWaypoint(flip, 1, blue))
                         .andThen(driveWaypoint(flip, 2, blue))
                         .andThen(driveWaypoint(flip, 3, blue))
@@ -91,6 +105,7 @@ public final class GrabAndShoot extends BaseAutosRoutine {
                         .andThen(driveWaypoint(flip, 10, blue))
                         .andThen(driveWaypoint(flip, 11, blue))
                         .andThen(driveWaypoint(flip, 12, blue))
+                    )
                 ),
             driveWaypoint(flip, 13, blue)
                 .andThen(driveWaypoint(flip, 14, blue))
