@@ -85,24 +85,24 @@ public final class Autos {
             InTheTrenches.get().getDisplayName(startCenter, left, true),
             InTheTrenches.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
         );
-        // start re-work - figure out how to do the left/right thing
+
+        // PEWPEW
         chooser.addOption(
-            ShootFirstAskQuestionsLater.get().getDisplayName(startBump, true),
+            ShootFirstAskQuestionsLater.get().getDisplayName(startBump, right, true),
             ShootFirstAskQuestionsLater.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            ShootFirstAskQuestionsLater.get().getDisplayName(startCenter, true),
+            ShootFirstAskQuestionsLater.get().getDisplayName(startCenter, right, true),
             ShootFirstAskQuestionsLater.get().action(() -> startCenter, () -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            ShootFirstAskQuestionsLater.get().getDisplayName(startBump, true),
+            ShootFirstAskQuestionsLater.get().getDisplayName(startBump, left, true),
             ShootFirstAskQuestionsLater.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            ShootFirstAskQuestionsLater.get().getDisplayName(startCenter, true),
+            ShootFirstAskQuestionsLater.get().getDisplayName(startCenter, left, true),
             ShootFirstAskQuestionsLater.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
         );
-        // end re-work
 
         // Sweep Center
         chooser.addOption(
