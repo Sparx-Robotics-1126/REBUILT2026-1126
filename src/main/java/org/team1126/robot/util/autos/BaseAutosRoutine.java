@@ -24,8 +24,8 @@ import org.team1126.robot.util.nav.Waypoint;
 public abstract class BaseAutosRoutine implements AutosRoutine {
 
     protected static final TunableTable tunables = Tunables.getNested("Robot Autos Defaults");
-    protected static final TunableDouble flywheelWarmupTimer = tunables.value("Flywheel Warmup Timer", 0.1);
-    protected static final TunableDouble secondsPerBall = tunables.value("Seconds per Ball (shooting)", 0.55);
+    protected static final TunableDouble flywheelWarmupTimer = tunables.value("Flywheel Warmup Timer", 1.0);
+    protected static final TunableDouble secondsPerBall = tunables.value("Seconds per Ball (shooting)", 0.7);
     protected static final TunableDouble simulationDecel = tunables.value("Simulation Default Deceleration", 20.0);
     protected static final TunableDouble defaultDecel = tunables.value("Robot Autos Default Deceleration", 1.3);
     protected static final TunableDouble intakeTimer = tunables.value("Intake extension timer", 1.5);
