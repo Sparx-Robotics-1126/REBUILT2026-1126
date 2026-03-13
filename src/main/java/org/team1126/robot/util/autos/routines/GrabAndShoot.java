@@ -51,8 +51,15 @@ public final class GrabAndShoot extends BaseAutosRoutine {
         waypoints = Arrays.asList(
             new Waypoint(5.532, 0.625, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
             new Waypoint(7.532, 1.2, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 1.51, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 1.81, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 1.51, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 1.81, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 2.51, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 2.81, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 2.51, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 2.81, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
             new Waypoint(7.532, 3.594, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
-            new Waypoint(7.532, 3.594, Math.toRadians(180.0), getDefaultDecel() * intakeFactor.get()),
             new Waypoint(6.932, 3.594, Math.toRadians(180.0), getDefaultDecel() * intakeFactor.get()),
             new Waypoint(6.732, 3.594, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.005, 0.625, Math.toRadians(0.0), getDefaultDecel()),
@@ -76,13 +83,21 @@ public final class GrabAndShoot extends BaseAutosRoutine {
                         .andThen(driveWaypoint(flip, 2, blue))
                         .andThen(driveWaypoint(flip, 3, blue))
                         .andThen(driveWaypoint(flip, 4, blue))
-                ),
-            driveWaypoint(flip, 5, blue)
-                .andThen(driveWaypoint(flip, 6, blue))
-                .andThen(
-                    driveWaypoint(flip, 7, blue)
+                        .andThen(driveWaypoint(flip, 5, blue))
+                        .andThen(driveWaypoint(flip, 6, blue))
+                        .andThen(driveWaypoint(flip, 7, blue))
                         .andThen(driveWaypoint(flip, 8, blue))
                         .andThen(driveWaypoint(flip, 9, blue))
+                        .andThen(driveWaypoint(flip, 10, blue))
+                        .andThen(driveWaypoint(flip, 11, blue))
+                        .andThen(driveWaypoint(flip, 12, blue))
+                ),
+            driveWaypoint(flip, 13, blue)
+                .andThen(driveWaypoint(flip, 14, blue))
+                .andThen(
+                    driveWaypoint(flip, 15, blue)
+                        .andThen(driveWaypoint(flip, 16, blue))
+                        .andThen(driveWaypoint(flip, 17, blue))
                         .andThen(driveArchAndShootFuel())
                 )
         ).withName(getCommandName());
