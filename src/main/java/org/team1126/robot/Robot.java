@@ -175,8 +175,18 @@ public final class Robot extends LoggedRobot {
 
         if (rumbleOn) {
             new Trigger(() -> shiftTracker.shiftTimeLeft() < 5.0)
-                .onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.3).onlyIf(this::isTeleop))
-                .onFalse(new RumbleCommand(driver, 1.0).withTimeout(0.6).onlyIf(this::isTeleop));
+                .onTrue(
+                    new RumbleCommand(driver, 1.0)
+                        .withTimeout(0.3)
+                        .onlyIf(this::isTeleop)
+                        .alongWith(new RumbleCommand(coDriver, 1.0).withTimeout(0.3).onlyIf(this::isTeleop))
+                )
+                .onFalse(
+                    new RumbleCommand(driver, 1.0)
+                        .withTimeout(0.6)
+                        .onlyIf(this::isTeleop)
+                        .alongWith(new RumbleCommand(coDriver, 1.0).withTimeout(0.6).onlyIf(this::isTeleop))
+                );
         }
 
         // Disable loop overrun warnings from the command
