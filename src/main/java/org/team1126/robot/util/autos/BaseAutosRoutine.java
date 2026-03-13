@@ -7,6 +7,9 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.team1126.lib.tunable.TunableTable;
@@ -29,7 +32,7 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
     protected static final TunableDouble simulationDecel = tunables.value("Simulation Default Deceleration", 20.0);
     protected static final TunableDouble defaultDecel = tunables.value("Robot Autos Default Deceleration", 1.3);
     protected static final TunableDouble intakeTimer = tunables.value("Intake extension timer", 1.5);
-    protected static final TunableDouble intakeFactor = tunables.value("Intake factor on set deceleration", 0.75);
+    protected static final TunableDouble intakeFactor = tunables.value("Intake factor on set deceleration", 0.25);
     protected static final TunableBoolean limitedField = tunables.value(
         "Running full field (false at home, true at competitions)",
         true
@@ -44,6 +47,9 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
         "Max amount of time to drive to shooting arc",
         1.0
     );
+    protected static final TunableDouble intakeForwardOscilation = tunables.value("Forward Intake Oscilation Distance", 0.4);
+    protected static final TunableDouble intakeBackOscilation = tunables.value("Backward Intake Oscilation Distance", 0.1);
+    protected static final TunableDouble intakeSideOscilation = tunables.value("Side-to-side Intake Oscilation Disctance", 0.15);
 
     /**
      * Sets the decel based on whether we are in a simulator instance or on the real robot.
@@ -65,7 +71,42 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
 
     // TODO: design this better when there is more time.
     protected final Robot robot;
+    
+    // @FunctionalInterface
+    // interface WaypointCalculator {
+    //     Waypoint nextWaypoint(Waypoint prev, Waypoint curr);
+    // }
 
+    // protected WaypointCalculator oscilator = (prev, curr) -> {
+        
+    // }
+
+    // @FunctionalInterface
+    // interface Pather {
+    //     Command createLine(Waypoint start, Waypoint end);
+    // }
+    
+    // protected Pather pathOscilator = (start, end) -> {
+    //     double length = Math.abs(end.coord.get().getX() - start.coord.get().getX());
+    //     Waypoint next = oscilator.nextWaypoint(start, end);
+
+    //     List<Waypoint> line = new ArrayList<>();
+    //     while (next.coord.get().getX() < end.coord.get().getX()) {
+    //         next = oscilator.nextWaypoint(next, end);
+            
+    //     }
+
+    // }
+    
+    // protected Command wiggle(Waypoint start, Waypoint end) {
+    //     return sequence(
+    //     }
+    // }
+    
+    // protected 
+    //     Waypoint calculateNext(Waypoint current, double oscilateForward, double osclateBack, double oscilateSide);
+    // }
+    
     protected Waypoint[] waypoints;
 
     protected BaseAutosRoutine(String commandName, String displayName, String abbreviatedName, Robot robot) {
@@ -228,4 +269,5 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
     public Command driveWaypoint(Supplier<AutosFlip> flip, int index) {
         return driveWaypoint(flip, index, () -> Alliance.isBlue());
     }
+    
 }
