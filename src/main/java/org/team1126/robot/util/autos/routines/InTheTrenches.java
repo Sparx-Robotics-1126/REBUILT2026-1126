@@ -4,12 +4,13 @@ import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.Arrays;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import org.team1126.robot.Robot;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
-import org.team1126.robot.util.autos.DefaultAutosRoutine;
+import org.team1126.robot.util.autos.BaseAutosRoutine;
 import org.team1126.robot.util.nav.Waypoint;
-import org.team1126.robot.util.nav.WaypointHeading;
 
 /**
  * Starting point: Just south of blue line in line with trench
@@ -20,7 +21,7 @@ import org.team1126.robot.util.nav.WaypointHeading;
  * Step 3: Turn toward hub, come back through same side
  * Step 4: Shoot
  */
-public final class InTheTrenches extends DefaultAutosRoutine {
+public final class InTheTrenches extends BaseAutosRoutine {
 
     public static final String COMMAND_NAME = "InTheTrenches.action()";
     public static final String DISPLAY_NAME = "Drive Trenches";
@@ -46,18 +47,21 @@ public final class InTheTrenches extends DefaultAutosRoutine {
     private InTheTrenches(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
-            new Waypoint(6.885, 1.899, Math.toRadians(60.0), Math.toRadians(330.0), getDefaultDecel())
+            new Waypoint(2.975, 0.603, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(5.877, 0.603, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(6.885, 1.899, Math.toRadians(60.0), getDefaultDecel())
         ).toArray(new Waypoint[0]);
     }
 
-    public Command action(AutosStart startAt, AutosFlip flip, boolean blue) {
+    public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return parallel(
             routines.shootingLights(),
             sequence(
-                atStartingPoint(startAt.getStartingPoint(blue)),
+                atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean())),
                 driveArchAndShootFuelStart(),
-                routines.driveTrench(() -> WaypointHeading.NORTH, () -> flip.shouldFlip()),
-                driveWaypoint(flip, 0, blue)
+                driveWaypoint(flip, 0, blue),
+                driveWaypoint(flip, 1, blue),
+                driveWaypoint(flip, 2, blue)
             )
         ).withName(getCommandName());
     }

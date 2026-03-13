@@ -1,6 +1,8 @@
 package org.team1126.robot.util.autos;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 /**
  * Interface to wrap autos routines. This provides a nice wrapper to include the routines
@@ -23,9 +25,9 @@ public interface AutosRoutine {
      * @param flip whether or not to flip to the left or keep it right.
      * @return the Command to invoke as part of the autos.
      */
-    public Command action(AutosFlip flip);
+    public Command action(Supplier<AutosFlip> flip);
 
-    public Command action(AutosFlip flip, boolean blue);
+    public Command action(Supplier<AutosFlip> flip, BooleanSupplier blue);
 
     /**
      * This will create the action command for the routine with the ability to determine
@@ -37,9 +39,9 @@ public interface AutosRoutine {
      * @param flip whether or not to flip to the left or keep it right.
      * @return the COmmand to invoke in autos.
      */
-    public Command action(AutosStart startAt, AutosFlip flip);
+    public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip);
 
-    public Command action(AutosStart startAt, AutosFlip flip, boolean blue);
+    public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue);
 
     /**
      * The value that this routine will name the action.

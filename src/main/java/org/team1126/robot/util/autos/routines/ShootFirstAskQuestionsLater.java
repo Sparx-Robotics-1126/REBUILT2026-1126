@@ -3,10 +3,12 @@ package org.team1126.robot.util.autos.routines;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import org.team1126.robot.Robot;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
-import org.team1126.robot.util.autos.DefaultAutosRoutine;
+import org.team1126.robot.util.autos.BaseAutosRoutine;
 import org.team1126.robot.util.nav.Waypoint;
 
 /**
@@ -18,7 +20,7 @@ import org.team1126.robot.util.nav.Waypoint;
  * Step 3: Turn toward hub, come back through same side
  * Step 4: Shoot
  */
-public final class ShootFirstAskQuestionsLater extends DefaultAutosRoutine {
+public final class ShootFirstAskQuestionsLater extends BaseAutosRoutine {
 
     public static final String COMMAND_NAME = "ShootNowAskQuestionsLater.action()";
     public static final String DISPLAY_NAME = "Just Shoot";
@@ -46,9 +48,10 @@ public final class ShootFirstAskQuestionsLater extends DefaultAutosRoutine {
         waypoints = new Waypoint[0];
     }
 
-    public Command action(AutosStart startAt, AutosFlip flip, boolean blue) {
-        return sequence(atStartingPoint(startAt.getStartingPoint(blue)), driveArchAndShootFuelStart()).withName(
-            getCommandName()
-        );
+    public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue) {
+        return sequence(
+            atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean())),
+            driveArchAndShootFuelStart()
+        ).withName(getCommandName());
     }
 }

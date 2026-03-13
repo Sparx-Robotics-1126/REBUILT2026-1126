@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
+import org.team1126.lib.util.Alliance;
 import org.team1126.robot.Robot;
 import org.team1126.robot.subsystems.*;
 import org.team1126.robot.util.autos.AutosFlip;
@@ -69,142 +70,74 @@ public final class Autos {
         // Create the auto chooser
         chooser.setDefaultOption("Do nothing", Commands.none());
         chooser.addOption(
-            "BLUE:" + InTheTrenches.get().getDisplayName(startRight, right, true),
-            InTheTrenches.get().action(startRight, right, true)
+            InTheTrenches.get().getDisplayName(startRight, right, true),
+            InTheTrenches.get().action(() -> startRight, () -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + InTheTrenches.get().getDisplayName(startCenter, right, true),
-            InTheTrenches.get().action(startCenter, right, true)
+            InTheTrenches.get().getDisplayName(startCenter, right, true),
+            InTheTrenches.get().action(() -> startCenter, () -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + InTheTrenches.get().getDisplayName(startLeft, left, true),
-            InTheTrenches.get().action(startLeft, left, true)
+            InTheTrenches.get().getDisplayName(startLeft, left, true),
+            InTheTrenches.get().action(() -> startLeft, () -> left, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + InTheTrenches.get().getDisplayName(startCenter, left, true),
-            InTheTrenches.get().action(startCenter, left, true)
+            InTheTrenches.get().getDisplayName(startCenter, left, true),
+            InTheTrenches.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + ShootFirstAskQuestionsLater.get().getDisplayName(startRight, true),
-            ShootFirstAskQuestionsLater.get().action(startRight, noTrench, true)
+            ShootFirstAskQuestionsLater.get().getDisplayName(startRight, true),
+            ShootFirstAskQuestionsLater.get().action(() -> startRight, () -> noTrench, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + ShootFirstAskQuestionsLater.get().getDisplayName(startCenter, true),
-            ShootFirstAskQuestionsLater.get().action(startCenter, noTrench, true)
+            ShootFirstAskQuestionsLater.get().getDisplayName(startCenter, true),
+            ShootFirstAskQuestionsLater.get().action(() -> startCenter, () -> noTrench, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + ShootFirstAskQuestionsLater.get().getDisplayName(startLeft, true),
-            ShootFirstAskQuestionsLater.get().action(startLeft, noTrench, true)
+            ShootFirstAskQuestionsLater.get().getDisplayName(startLeft, true),
+            ShootFirstAskQuestionsLater.get().action(() -> startLeft, () -> noTrench, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + SweepCenter.get().getDisplayName(startRight, right, true),
-            SweepCenter.get().action(startRight, right, true)
+            SweepCenter.get().getDisplayName(startRight, right, true),
+            SweepCenter.get().action(() -> startRight, () -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + SweepCenter.get().getDisplayName(startCenter, right, true),
-            SweepCenter.get().action(startCenter, right, true)
+            SweepCenter.get().getDisplayName(startCenter, right, true),
+            SweepCenter.get().action(() -> startCenter, () -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + SweepCenter.get().getDisplayName(startCenter, left, true),
-            SweepCenter.get().action(startCenter, left, true)
+            SweepCenter.get().getDisplayName(startCenter, left, true),
+            SweepCenter.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + SweepCenter.get().getDisplayName(startLeft, left, true),
-            SweepCenter.get().action(startLeft, left, true)
+            SweepCenter.get().getDisplayName(startLeft, left, true),
+            SweepCenter.get().action(() -> startLeft, () -> left, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + IntakeCenter.get().getDisplayName(startRight, right, true),
-            IntakeCenter.get().action(startRight, right, true)
+            IntakeCenter.get().getDisplayName(startRight, right, true),
+            IntakeCenter.get().action(() -> startRight, () -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + IntakeCenter.get().getDisplayName(startCenter, left, true),
-            IntakeCenter.get().action(startCenter, left, true)
+            IntakeCenter.get().getDisplayName(startCenter, left, true),
+            IntakeCenter.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + IntakeCenter.get().getDisplayName(startCenter, right, true),
-            IntakeCenter.get().action(startCenter, right, true)
+            IntakeCenter.get().getDisplayName(startCenter, right, true),
+            IntakeCenter.get().action(() -> startCenter, () -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + IntakeCenter.get().getDisplayName(startLeft, left, true),
-            IntakeCenter.get().action(startLeft, left, true)
+            IntakeCenter.get().getDisplayName(startLeft, left, true),
+            IntakeCenter.get().action(() -> startLeft, () -> left, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + GrabAndShoot.get().getDisplayName(right, true),
-            GrabAndShoot.get().action(right, true)
+            GrabAndShoot.get().getDisplayName(right, true),
+            GrabAndShoot.get().action(() -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            "BLUE:" + GrabAndShoot.get().getDisplayName(left, true),
-            GrabAndShoot.get().action(left, true)
+            GrabAndShoot.get().getDisplayName(left, true),
+            GrabAndShoot.get().action(() -> left, () -> Alliance.isBlue())
         );
 
-        chooser.addOption(
-            "RED:" + InTheTrenches.get().getDisplayName(startRight, right, true),
-            InTheTrenches.get().action(startRight, right, false)
-        );
-        chooser.addOption(
-            "RED:" + InTheTrenches.get().getDisplayName(startCenter, right, true),
-            InTheTrenches.get().action(startCenter, right, false)
-        );
-        chooser.addOption(
-            "RED:" + InTheTrenches.get().getDisplayName(startLeft, left, true),
-            InTheTrenches.get().action(startLeft, left, false)
-        );
-        chooser.addOption(
-            "RED:" + InTheTrenches.get().getDisplayName(startCenter, left, true),
-            InTheTrenches.get().action(startCenter, left, false)
-        );
-        chooser.addOption(
-            "RED:" + ShootFirstAskQuestionsLater.get().getDisplayName(startRight, true),
-            ShootFirstAskQuestionsLater.get().action(startRight, noTrench, false)
-        );
-        chooser.addOption(
-            "RED:" + ShootFirstAskQuestionsLater.get().getDisplayName(startCenter, true),
-            ShootFirstAskQuestionsLater.get().action(startCenter, noTrench, false)
-        );
-        chooser.addOption(
-            "RED:" + ShootFirstAskQuestionsLater.get().getDisplayName(startLeft, true),
-            ShootFirstAskQuestionsLater.get().action(startLeft, noTrench, false)
-        );
-        chooser.addOption(
-            "RED:" + SweepCenter.get().getDisplayName(startRight, right, true),
-            SweepCenter.get().action(startRight, right, false)
-        );
-        chooser.addOption(
-            "RED:" + SweepCenter.get().getDisplayName(startCenter, right, true),
-            SweepCenter.get().action(startCenter, right, false)
-        );
-        chooser.addOption(
-            "RED:" + SweepCenter.get().getDisplayName(startCenter, left, true),
-            SweepCenter.get().action(startCenter, left, false)
-        );
-        chooser.addOption(
-            "RED:" + SweepCenter.get().getDisplayName(startLeft, left, true),
-            SweepCenter.get().action(startLeft, left, false)
-        );
-        chooser.addOption(
-            "RED:" + IntakeCenter.get().getDisplayName(startRight, right, true),
-            IntakeCenter.get().action(startRight, right, false)
-        );
-        chooser.addOption(
-            "RED:" + IntakeCenter.get().getDisplayName(startCenter, left, true),
-            IntakeCenter.get().action(startCenter, left, false)
-        );
-        chooser.addOption(
-            "RED:" + IntakeCenter.get().getDisplayName(startCenter, right, true),
-            IntakeCenter.get().action(startCenter, right, false)
-        );
-        chooser.addOption(
-            "RED:" + IntakeCenter.get().getDisplayName(startLeft, left, true),
-            IntakeCenter.get().action(startLeft, left, false)
-        );
-        chooser.addOption(
-            "RED:" + GrabAndShoot.get().getDisplayName(right, true),
-            GrabAndShoot.get().action(right, false)
-        );
-        chooser.addOption(
-            "RED:" + GrabAndShoot.get().getDisplayName(left, true),
-            GrabAndShoot.get().action(left, false)
-        );
         // chooser.addOption("Depot", routines.dock());
         // chooser.addOption("Depot", routines.dock());
         SmartDashboard.putData("autos", chooser);

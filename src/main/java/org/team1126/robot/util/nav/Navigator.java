@@ -7,5 +7,7 @@ import org.team1126.robot.util.autos.AutosFlip;
 public interface Navigator {
     public Command driveWaypoint(AutosFlip flip, int index);
     public Command driveWaypoint(WaypointHeading direction, BooleanSupplier left, int index);
+    public Command driveWaypoint(AutosFlip flip, int index, boolean blue);
+    public Command driveWaypoint(WaypointHeading direction, BooleanSupplier left, int index, boolean blue);
     public Command heading(WaypointHeading heading);
 }

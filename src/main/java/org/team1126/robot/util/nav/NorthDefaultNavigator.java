@@ -22,6 +22,10 @@ public abstract class NorthDefaultNavigator implements Navigator {
     protected Waypoint[] waypoints;
 
     public Command driveWaypoint(WaypointHeading direction, BooleanSupplier left, int index) {
+        return driveWaypoint(direction, left, index, Alliance.isBlue());
+    }
+
+    public Command driveWaypoint(WaypointHeading direction, BooleanSupplier left, int index, boolean blue) {
         if (index < waypoints.length) {
             int adj = (direction == WaypointHeading.NORTH) ? index : (waypoints.length - 1) - index;
             Waypoint waypoint = waypoints[adj];
@@ -31,7 +35,7 @@ public abstract class NorthDefaultNavigator implements Navigator {
             }
 
             return swerve.apfDrive(
-                () -> waypoints[adj].asPose(Alliance.isBlue(), left.getAsBoolean()),
+                () -> waypoints[adj].asPose(left, () -> blue),
                 () -> waypoints[adj].decel,
                 () -> DEFAULT_TOL
             );
@@ -47,6 +51,10 @@ public abstract class NorthDefaultNavigator implements Navigator {
     }
 
     public Command driveWaypoint(AutosFlip flip, int index) {
-        return driveWaypoint(direction, () -> flip.shouldFlip(), index);
+        return driveWaypoint(direction, () -> flip.shouldFlip(), index, Alliance.isBlue());
+    }
+
+    public Command driveWaypoint(AutosFlip flip, int index, boolean blue) {
+        return driveWaypoint(direction, () -> flip.shouldFlip(), index, blue);
     }
 }

@@ -5,10 +5,12 @@ import static edu.wpi.first.wpilibj2.command.Commands.*;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.Arrays;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.robot.Robot;
 import org.team1126.robot.util.autos.AutosFlip;
-import org.team1126.robot.util.autos.DefaultAutosRoutine;
+import org.team1126.robot.util.autos.BaseAutosRoutine;
 import org.team1126.robot.util.nav.Waypoint;
 
 /**
@@ -20,7 +22,7 @@ import org.team1126.robot.util.nav.Waypoint;
  * Step 3: Turn toward hub, come back through same side
  * Step 4: Shoot
  */
-public final class GrabAndShoot extends DefaultAutosRoutine {
+public final class GrabAndShoot extends BaseAutosRoutine {
 
     public static final String COMMAND_NAME = "GrabAndShoot.action()";
     public static final String DISPLAY_NAME = "Grab And Shoot";
@@ -47,45 +49,22 @@ public final class GrabAndShoot extends DefaultAutosRoutine {
     private GrabAndShoot(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
-            new Waypoint(
-                7.532,
-                1.2,
-                Math.toRadians(90.0),
-                Math.toRadians(270.0),
-                getDefaultDecel() * intakeFactor.get()
-            ),
-            new Waypoint(
-                7.532,
-                3.594,
-                Math.toRadians(90.0),
-                Math.toRadians(270.0),
-                getDefaultDecel() * intakeFactor.get()
-            ),
-            new Waypoint(
-                7.532,
-                3.594,
-                Math.toRadians(180.0),
-                Math.toRadians(180.0),
-                getDefaultDecel() * intakeFactor.get()
-            ),
-            new Waypoint(
-                6.932,
-                3.594,
-                Math.toRadians(180.0),
-                Math.toRadians(180.0),
-                getDefaultDecel() * intakeFactor.get()
-            ),
-            new Waypoint(6.732, 3.594, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(5.005, 0.625, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(3.14, 0.625, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(2.849, 0.625, Math.toRadians(0.0), Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(2.849, 2.315, Math.toRadians(36.0), Math.toRadians(-36.0), getDefaultDecel())
+            new Waypoint(5.532, 0.625, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 1.2, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 3.594, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.532, 3.594, Math.toRadians(180.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(6.932, 3.594, Math.toRadians(180.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(6.732, 3.594, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(5.005, 0.625, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(3.14, 0.625, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(2.849, 0.625, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(2.849, 2.315, Math.toRadians(36.0), getDefaultDecel())
         ).toArray(new Waypoint[0]);
     }
 
-    public Command action(AutosFlip flip, boolean blue) {
+    public Command action(Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
-            atStartingPoint(START_AT.get(blue, flip.shouldFlip())),
+            atStartingPoint(() -> START_AT.get(blue.getAsBoolean(), flip.get().shouldFlip())),
             robot.intake
                 .extendIntake(false)
                 .withTimeout(intakeTimer.getAsDouble())
@@ -96,13 +75,14 @@ public final class GrabAndShoot extends DefaultAutosRoutine {
                         .andThen(driveWaypoint(flip, 1, blue))
                         .andThen(driveWaypoint(flip, 2, blue))
                         .andThen(driveWaypoint(flip, 3, blue))
+                        .andThen(driveWaypoint(flip, 4, blue))
                 ),
-            driveWaypoint(flip, 4, blue)
-                .andThen(driveWaypoint(flip, 5, blue))
+            driveWaypoint(flip, 5, blue)
+                .andThen(driveWaypoint(flip, 6, blue))
                 .andThen(
-                    driveWaypoint(flip, 6, blue)
-                        .andThen(driveWaypoint(flip, 7, blue))
+                    driveWaypoint(flip, 7, blue)
                         .andThen(driveWaypoint(flip, 8, blue))
+                        .andThen(driveWaypoint(flip, 9, blue))
                         .andThen(driveArchAndShootFuel())
                 )
         ).withName(getCommandName());
