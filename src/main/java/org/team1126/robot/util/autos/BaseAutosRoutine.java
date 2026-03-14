@@ -29,7 +29,7 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
     protected static final TunableDouble simulationDecel = tunables.value("Simulation Default Deceleration", 20.0);
     protected static final TunableDouble defaultDecel = tunables.value("Robot Autos Default Deceleration", 1.3);
     protected static final TunableDouble intakeTimer = tunables.value("Intake extension timer", 1.5);
-    protected static final TunableDouble intakeFactor = tunables.value("Intake factor on set deceleration", 0.25);
+    protected static final TunableDouble intakeFactor = tunables.value("Intake factor on set deceleration", 0.5);
     protected static final TunableBoolean limitedField = tunables.value(
         "Running full field (false at home, true at competitions)",
         true
