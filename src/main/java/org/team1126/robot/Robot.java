@@ -120,6 +120,7 @@ public final class Robot extends LoggedRobot {
         // driver.povLeft().whileTrue(swerve.driveTrench(() -> false));
         // driver.povRight().whileTrue(swerve.driveTrench(() -> true));
         driver.rightStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
+        driver.start().onTrue(swerve.adjustShootingRadius());
 
         // driver
         //     .povRight()

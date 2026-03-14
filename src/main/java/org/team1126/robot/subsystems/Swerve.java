@@ -40,7 +40,7 @@ import org.team1126.robot.Constants.LowerCAN;
 import org.team1126.robot.Constants.RioCAN;
 import org.team1126.robot.util.Field;
 // import org.team1126.robot.util.Vision;
-
+import org.team1126.robot.util.ShootingRadius;
 import org.team1126.robot.util.Vision;
 
 /**
@@ -169,6 +169,7 @@ public final class Swerve extends GRRSubsystem {
     private double angleToHub = 0.0;
 
     private Translation2d shootingArc = new Translation2d(0.0, 0.0);
+    private ShootingRadius currentShootingRadius = ShootingRadius.L1;
 
     // private final Orchestra orchestra;
 
@@ -268,7 +269,7 @@ public final class Swerve extends GRRSubsystem {
         angleToHub = Math.atan2(deltaY, deltaX) + Math.PI;
         // hubAngular = -angularPID.calculate(state.rotation.getRadians(), angleToHub);
 
-        distanceToShootingPoint = distanceToHub - Field.SHOOTING_RANGE_RADIUS;
+        distanceToShootingPoint = distanceToHub - currentShootingRadius.getVal();
         double shootingX = state.pose.getX() + distanceToShootingPoint;
         double shootingY = state.pose.getY() + distanceToShootingPoint;
 
@@ -289,6 +290,8 @@ public final class Swerve extends GRRSubsystem {
         //         Pose2d blueTmp = FieldFlip.overLength(tmp);
         //         shootingArc = new ExtTranslation(blueTmp.getX(), blueTmp.getY());
         //     }
+
+        // SmartDashboard.putNumber("Shooting Radius", currentShootingRadius.getVal());
     }
 
     /**
@@ -586,6 +589,22 @@ public final class Swerve extends GRRSubsystem {
      */
     public Command stop(boolean lock) {
         return commandBuilder("Swerve.stop(" + lock + ")").onExecute(() -> api.applyStop(lock));
+    }
+
+    public Command adjustShootingRadius() {
+        return commandBuilder("Swerve.adjustShootingRadius()").onExecute(() -> {
+            switch (currentShootingRadius) {
+                case L1:
+                    currentShootingRadius = ShootingRadius.L2;
+                    break;
+                case L2:
+                    currentShootingRadius = ShootingRadius.L3;
+                    break;
+                default:
+                    currentShootingRadius = ShootingRadius.L1;
+                    break;
+            }
+        });
     }
 
     /**
