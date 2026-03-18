@@ -18,6 +18,7 @@ import org.team1126.robot.util.autos.routines.GrabAndShoot;
 import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
+import org.team1126.robot.util.autos.routines.ShootIntakeShootAtAlliance;
 import org.team1126.robot.util.autos.routines.SweepCenter;
 
 /**
@@ -59,6 +60,7 @@ public final class Autos {
         GrabAndShoot.init(robot);
         ShootFirstAskQuestionsLater.init(robot);
         InTheTrenches.init(robot);
+        ShootIntakeShootAtAlliance.init(robot);
 
         AutosFlip right = AutosFlip.RIGHT;
         AutosFlip left = AutosFlip.LEFT;
