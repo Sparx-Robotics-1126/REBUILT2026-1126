@@ -167,7 +167,7 @@ public final class Autos {
             ShootIntakeShootAtAlliance.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            ShootIntakeShootAtAlliance.get().getDisplayName(right, true),
+            ShootIntakeShootAtAlliance.get().getDisplayName(left, true),
             ShootIntakeShootAtAlliance.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
         );
 
