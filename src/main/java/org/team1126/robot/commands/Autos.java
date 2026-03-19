@@ -15,6 +15,7 @@ import org.team1126.robot.subsystems.*;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.routines.GrabAndShoot;
+import org.team1126.robot.util.autos.routines.HerdIntoSection;
 import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
@@ -60,7 +61,6 @@ public final class Autos {
         GrabAndShoot.init(robot);
         ShootFirstAskQuestionsLater.init(robot);
         InTheTrenches.init(robot);
-        ShootIntakeShootAtAlliance.init(robot);
 
         AutosFlip right = AutosFlip.RIGHT;
         AutosFlip left = AutosFlip.LEFT;
@@ -174,6 +174,15 @@ public final class Autos {
         // chooser.addOption("Depot", routines.dock());
         // chooser.addOption("Depot", routines.dock());
         SmartDashboard.putData("autos", chooser);
+
+        chooser.addOption(
+            HerdIntoSection.get().getDisplayName(right, true),
+            HerdIntoSection.get().action(() -> right, () -> Alliance.isBlue())
+        );
+        chooser.addOption(
+            HerdIntoSection.get().getDisplayName(left, true),
+            HerdIntoSection.get().action(() -> left, () -> Alliance.isBlue())
+        );
     }
 
     /**
