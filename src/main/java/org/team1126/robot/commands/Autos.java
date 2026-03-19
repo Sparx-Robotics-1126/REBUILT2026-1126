@@ -19,6 +19,7 @@ import org.team1126.robot.util.autos.routines.HerdIntoSection;
 import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
+import org.team1126.robot.util.autos.routines.ShootIntakeShootAtAlliance;
 import org.team1126.robot.util.autos.routines.SweepCenter;
 
 /**
@@ -60,7 +61,6 @@ public final class Autos {
         GrabAndShoot.init(robot);
         ShootFirstAskQuestionsLater.init(robot);
         InTheTrenches.init(robot);
-        HerdIntoSection.init(robot);
 
         AutosFlip right = AutosFlip.RIGHT;
         AutosFlip left = AutosFlip.LEFT;
@@ -151,9 +151,38 @@ public final class Autos {
             GrabAndShoot.get().action(() -> left, () -> Alliance.isBlue())
         );
 
+        //BacknForth
+        // chooser.addOption(
+        //     BacknForth.get().getDisplayName(right, true),
+        //     BacknForth.get().action(() -> right, () -> Alliance.isBlue())
+        // );
+        // chooser.addOption(
+        //     BacknForth.get().getDisplayName(left, true),
+        //     BacknForth.get().action(() -> left, () -> Alliance.isBlue())
+        // );
+
+        //ShootIntakeShootAtAlliance
+        chooser.addOption(
+            ShootIntakeShootAtAlliance.get().getDisplayName(right, true),
+            ShootIntakeShootAtAlliance.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
+        );
+        chooser.addOption(
+            ShootIntakeShootAtAlliance.get().getDisplayName(left, true),
+            ShootIntakeShootAtAlliance.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
+        );
+
         // chooser.addOption("Depot", routines.dock());
         // chooser.addOption("Depot", routines.dock());
         SmartDashboard.putData("autos", chooser);
+
+        chooser.addOption(
+            HerdIntoSection.get().getDisplayName(right, true),
+            HerdIntoSection.get().action(() -> right, () -> Alliance.isBlue())
+        );
+        chooser.addOption(
+            HerdIntoSection.get().getDisplayName(left, true),
+            HerdIntoSection.get().action(() -> left, () -> Alliance.isBlue())
+        );
     }
 
     /**

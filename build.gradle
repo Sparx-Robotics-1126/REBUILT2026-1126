@@ -168,3 +168,4 @@ tasks.withType(JavaCompile) {
 tasks.matching { it.name.startsWith("spotless")}.all {
     dependsOn 'nodeSetup', 'npmSetup'
 }
+ 
