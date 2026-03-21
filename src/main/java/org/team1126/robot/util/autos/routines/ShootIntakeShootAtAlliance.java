@@ -1,10 +1,8 @@
 package org.team1126.robot.util.autos.routines;
 
-import static edu.wpi.first.wpilibj2.command.Commands.parallel;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -37,11 +35,16 @@ public class ShootIntakeShootAtAlliance extends BaseAutosRoutine {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
             new Waypoint(3.028, 2.425, Math.toRadians(40), getDefaultDecel()),
+            new Waypoint(2.975, 0.706, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(3.412, 0.706, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.412, 0.706, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(7.562, 1.263, Math.toRadians(90), getDefaultDecel()),
-            new Waypoint(7.562, 1.628, Math.toRadians(90), getDefaultDecel() * intakeFactor.get()),
-            new Waypoint(7.562, 2.452, Math.toRadians(90), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.562, 1.628, Math.toRadians(90), 0.4),
+            new Waypoint(7.562, 1.750, Math.toRadians(90), 0.4),
+            new Waypoint(7.562, 1.900, Math.toRadians(90), 0.4),
+            new Waypoint(7.562, 2.150, Math.toRadians(90), 0.4),
+            new Waypoint(7.562, 2.452, Math.toRadians(90), 0.4),
+            new Waypoint(7.562, 2.650, Math.toRadians(90), 0.4),
             new Waypoint(6.853, 2.602, Math.toRadians(190), getDefaultDecel())
         ).toArray(new Waypoint[0]);
     }
@@ -55,17 +58,20 @@ public class ShootIntakeShootAtAlliance extends BaseAutosRoutine {
                 .andThen(driveWaypoint(flip, 2, blue))
                 .andThen(driveWaypoint(flip, 3, blue))
                 .andThen(
-                    parallel(
-                        robot.intake
-                            .extendIntake(false)
-                            .withTimeout(1.5)
-                            .andThen(robot.intake.moveIntakeMotorCommand(false)),
-                        Commands.waitSeconds(2.0)
-                            .andThen(driveWaypoint(flip, 4, blue))
-                            .andThen(driveWaypoint(flip, 5, blue))
-                    ).andThen(driveWaypoint(flip, 6, blue)),
-                    shootFuel()
+                    robot.intake
+                        .extendIntake(false)
+                        .withTimeout(intakeTimer.getAsDouble())
+                        .andThen(robot.intake.moveIntakeMotorCommand(false))
+                        .withDeadline(driveWaypoint(flip, 4, blue))
+                        .andThen(driveWaypoint(flip, 5, blue))
+                        .andThen(driveWaypoint(flip, 6, blue))
+                        .andThen(driveWaypoint(flip, 7, blue))
+                        .andThen(driveWaypoint(flip, 8, blue))
+                        .andThen(driveWaypoint(flip, 9, blue))
+                        .andThen(driveWaypoint(flip, 10, blue))
                 )
+                .andThen(driveWaypoint(flip, 11, blue)),
+            shootFuel()
         ).withName(getCommandName());
     }
 }
