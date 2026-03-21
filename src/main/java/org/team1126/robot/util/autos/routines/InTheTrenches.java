@@ -56,7 +56,7 @@ public final class InTheTrenches extends BaseAutosRoutine {
 
     public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return parallel(
-            routines.shootingLights(),
+            // routines.shootingLights(),
             sequence(
                 atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean(), flip.get().shouldFlip())),
                 driveWaypoint(flip, 0, blue),
