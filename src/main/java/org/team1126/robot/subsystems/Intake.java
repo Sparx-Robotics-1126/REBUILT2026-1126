@@ -14,6 +14,7 @@ import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.team1126.lib.tunable.TunableTable;
@@ -132,18 +133,21 @@ public final class Intake extends GRRSubsystem {
         tunables.add("Pivot Motor", pivotMotor);
     }
 
+    @NotLogged
     public Command moveIntakeTest(boolean reverse) {
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(reverse))
             .onEnd(this::stopIntake);
     }
 
+    @NotLogged
     public Command moveIntakeMotorCommand(boolean reverse) {
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(reverse))
             .onEnd(() -> intakeController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl));
     }
 
+    @NotLogged
     public void moveIntakeMotor(boolean reverse) {
         if (reverse) {
             intakeController.setSetpoint(-this.intakeSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
@@ -152,6 +156,7 @@ public final class Intake extends GRRSubsystem {
         }
     }
 
+    @NotLogged
     public Command spill() {
         //toggle(true);
         return commandBuilder()
@@ -159,6 +164,7 @@ public final class Intake extends GRRSubsystem {
             .onEnd(this::stopIntake);
     }
 
+    @NotLogged
     public Command intake() {
         //toggle(true);
         return commandBuilder()
@@ -166,6 +172,7 @@ public final class Intake extends GRRSubsystem {
             .onEnd(() -> intakeMotor.set(0));
     }
 
+    @NotLogged
     private void stopIntake() {
         intakeMotor.setVoltage(0);
     }
@@ -183,8 +190,14 @@ public final class Intake extends GRRSubsystem {
         appliedOutput.add(intakeMotor.getAppliedOutput());
         busVoltage.add(intakeMotor.getBusVoltage());
         intakeTemperature.add(intakeMotor.getMotorTemperature());
+        
+        SmartDashboard.putNumber("Intake Motor Output Current", intakeMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Intake Motor Applied Output", intakeMotor.getAppliedOutput());
+        SmartDashboard.putNumber("Intake Motor Bus Voltage", intakeMotor.getBusVoltage());
+        SmartDashboard.putNumber("Intake Motor Temperature", intakeMotor.getMotorTemperature());
     }
 
+    @NotLogged
     public void moveMotorPosOut(double position, boolean spinIntake) {
         this.pivotController.setSetpoint(
             position,
@@ -196,6 +209,7 @@ public final class Intake extends GRRSubsystem {
         // }
     }
 
+    @NotLogged
     public void moveMotorPosIn(double position) {
         this.pivotController.setSetpoint(
             position,
@@ -204,6 +218,7 @@ public final class Intake extends GRRSubsystem {
         );
     }
 
+    @NotLogged
     public Command extendIntake(boolean spinIntake) {
         return commandBuilder().onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), spinIntake));
         // .onEnd(this::stopPivot);
@@ -223,10 +238,12 @@ public final class Intake extends GRRSubsystem {
     //            });
     //    }
 
+    @NotLogged
     public Command retrackIntakeTest() {
         return commandBuilder().onExecute(() -> this.moveMotorPosIn(0));
     }
 
+    @NotLogged
     public Command retrackIntake() {
         return commandBuilder()
             .onExecute(() -> this.moveMotorPosIn(0))
@@ -241,6 +258,7 @@ public final class Intake extends GRRSubsystem {
             });
     }
 
+    @NotLogged
     private void stopPivot() {
         pivotMotor.setVoltage(0);
     }
