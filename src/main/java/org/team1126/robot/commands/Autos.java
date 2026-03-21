@@ -61,6 +61,8 @@ public final class Autos {
         GrabAndShoot.init(robot);
         ShootFirstAskQuestionsLater.init(robot);
         InTheTrenches.init(robot);
+        ShootIntakeShootAtAlliance.init(robot);
+        HerdIntoSection.init(robot);
 
         AutosFlip right = AutosFlip.RIGHT;
         AutosFlip left = AutosFlip.LEFT;
@@ -163,11 +165,11 @@ public final class Autos {
 
         //ShootIntakeShootAtAlliance
         chooser.addOption(
-            ShootIntakeShootAtAlliance.get().getDisplayName(right, true),
+            ShootIntakeShootAtAlliance.get().getDisplayName(startBump, right, true),
             ShootIntakeShootAtAlliance.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            ShootIntakeShootAtAlliance.get().getDisplayName(left, true),
+            ShootIntakeShootAtAlliance.get().getDisplayName(startBump, left, true),
             ShootIntakeShootAtAlliance.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
         );
 
