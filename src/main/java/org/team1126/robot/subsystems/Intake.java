@@ -3,18 +3,24 @@ package org.team1126.robot.subsystems;
 import static org.team1126.robot.Constants.INTAKE_MOTOR;
 import static org.team1126.robot.Constants.PIVOT_MOTOR;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
+
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.util.command.GRRSubsystem;
 
+@Logged
 public final class Intake extends GRRSubsystem {
 
     private final SparkFlex intakeMotor;
@@ -30,6 +36,12 @@ public final class Intake extends GRRSubsystem {
     // private final SparkAbsoluteEncoder pivotEncoder;
     private SparkClosedLoopController pivotController;
     private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -16.7);
+    
+    private List<Double> outputCurrent = new ArrayList<>();
+    private List<Double> appliedOutput = new ArrayList<>();
+    private List<Double> busVoltage = new ArrayList<>();
+    private List<Double> intakeTemperature = new ArrayList<>();
+
 
     // private final SparkMax moveStorage;
     // private SparkMaxConfig moveStorageConfig;
@@ -167,6 +179,10 @@ public final class Intake extends GRRSubsystem {
         //        if (isOn) {
         //            intakeController.setSetpoint(voltage.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         //        }
+        outputCurrent.add(intakeMotor.getOutputCurrent());
+        appliedOutput.add(intakeMotor.getAppliedOutput());
+        busVoltage.add(intakeMotor.getBusVoltage());
+        intakeTemperature.add(intakeMotor.getMotorTemperature());
     }
 
     public void moveMotorPosOut(double position, boolean spinIntake) {
@@ -227,5 +243,22 @@ public final class Intake extends GRRSubsystem {
 
     private void stopPivot() {
         pivotMotor.setVoltage(0);
+    }
+
+    public List<Double> getOutputCurrent() {
+        return outputCurrent;
+    }
+    
+    public List<Double> getAppliedOutput() {
+        return appliedOutput;
+        
+    }
+
+    public List<Double> getBusVoltage() {
+        return busVoltage;
+    }
+    
+    public List<Double> getIntakeTemperature() {
+        return intakeTemperature;
     }
 }
