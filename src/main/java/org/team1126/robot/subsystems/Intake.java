@@ -188,12 +188,12 @@ public final class Intake extends GRRSubsystem {
         //        }
         outputCurrent.add(intakeMotor.getOutputCurrent());
         appliedOutput.add(intakeMotor.getAppliedOutput());
-        busVoltage.add(intakeMotor.getBusVoltage());
+        busVoltage.add(Math.abs(intakeMotor.getBusVoltage()));
         intakeTemperature.add(intakeMotor.getMotorTemperature());
         
         SmartDashboard.putNumber("Intake Motor Output Current", intakeMotor.getOutputCurrent());
         SmartDashboard.putNumber("Intake Motor Applied Output", intakeMotor.getAppliedOutput());
-        SmartDashboard.putNumber("Intake Motor Bus Voltage", intakeMotor.getBusVoltage());
+        SmartDashboard.putNumber("Intake Motor Bus Voltage", Math.abs(intakeMotor.getBusVoltage()));
         SmartDashboard.putNumber("Intake Motor Temperature", intakeMotor.getMotorTemperature());
     }
 
