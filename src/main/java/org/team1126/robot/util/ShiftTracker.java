@@ -2,12 +2,10 @@ package org.team1126.robot.util;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableBoolean;
 import org.team1126.lib.util.Alliance;
+import org.team1126.robot.Robot;
 
 /**
  * Tracks hub shift data.
@@ -17,11 +15,8 @@ public final class ShiftTracker {
 
     private static final TunableBoolean shiftDefaultWin = Tunables.value("shiftDefaultWin", true);
 
-    private final Timer timer = new Timer();
 
-    public ShiftTracker() {
-        RobotModeTriggers.teleop().or(RobotModeTriggers.autonomous()).onTrue(Commands.runOnce(timer::restart));
-    }
+    public ShiftTracker() {}
 
     /**
      * Returns {@code true} if our alliance's hub is active.
@@ -30,7 +25,8 @@ public final class ShiftTracker {
         if (DriverStation.isDisabled()) return false;
         if (DriverStation.isAutonomous()) return true;
 
-        double time = timer.get();
+        double timeLeft = Robot.matchTime(); // counts down from 140 to 0 in teleop
+        double time = 140.0 - timeLeft; // convert to count-up for shift logic
         if (time < 10.0 || time >= 110.0) return true;
 
         boolean wonAuto = wonAuto();
@@ -49,10 +45,11 @@ public final class ShiftTracker {
      * Returns the number of seconds left in the current shift period.
      */
     public double shiftTimeLeft() {
-        double time = timer.get();
-
         if (DriverStation.isDisabled()) return 0.0;
-        if (DriverStation.isAutonomous()) return 20.0 - time;
+        if (DriverStation.isAutonomous()) return Robot.matchTime(); // counts down from 20 to 0
+
+        double timeLeft = Robot.matchTime(); // counts down from 140 to 0 in teleop
+        double time = 140.0 - timeLeft; // convert to count-up for shift logic
 
         for (int i = SHIFTS.length - 2; i >= 0; i--) {
             if (time >= SHIFTS[i]) return SHIFTS[i + 1] - time;
@@ -65,11 +62,8 @@ public final class ShiftTracker {
      * The amount of time left in the current period of the match (auto, teleop).
      */
     public double matchTimeLeft() {
-        double time = timer.get();
-
         if (DriverStation.isDisabled()) return 0.0;
-        if (DriverStation.isAutonomous()) return Math.max(20.0 - time, 0.0);
-        return Math.max(140.0 - time, 0.0);
+        return Math.max(Robot.matchTime(), 0.0); // counts down in both modes
     }
 
     /**

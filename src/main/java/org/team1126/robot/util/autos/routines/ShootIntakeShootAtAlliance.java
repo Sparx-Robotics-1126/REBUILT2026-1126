@@ -60,7 +60,7 @@ public class ShootIntakeShootAtAlliance extends BaseAutosRoutine {
                 .andThen(
                     robot.intake
                         .extendIntake(false)
-                        .withTimeout(intakeTimer.getAsDouble())
+                        .withTimeout(0.5)
                         .andThen(robot.intake.moveIntakeMotorCommand(false))
                         .withDeadline(driveWaypoint(flip, 4, blue))
                         .andThen(driveWaypoint(flip, 5, blue))
