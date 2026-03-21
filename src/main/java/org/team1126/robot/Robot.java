@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
+import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.DisableWatchdog;
 import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
@@ -46,6 +47,9 @@ public final class Robot extends LoggedRobot {
     private final CommandXboxController coDriver;
     private final Orchestra orchestra;
     private Command autoSelected;
+    // private TunableDouble driverDefaultSpeed;
+    // private TunableDouble driverAfterburnerSpeed;
+    
 
     public Robot() {
         PhoenixUtil.disableDaemons();
