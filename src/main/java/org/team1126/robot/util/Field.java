@@ -91,6 +91,14 @@ public final class Field {
     /** The far right corner of the HUB, from the perspective of the DRIVER STATION. */
     public static final ExtTranslation BARRIER_FAR_RIGHT_CORNER = new ExtTranslation(BARRIER_FAR_X, BARRIER_RIGHT_Y);
 
+    //Right trench
+    public static final ExtTranslation RIGHT_NEAR_TRENCH_CORNER = new ExtTranslation(BARRIER_NEAR_X, BARRIER_RIGHT_Y + Units.inchesToMeters(12.00));
+    public static final ExtTranslation RIGHT_FAR_TRENCH_CORNER = new ExtTranslation(BARRIER_FAR_X, BARRIER_RIGHT_Y + Units.inchesToMeters(12.00));
+
+    //Left trench
+    public static final ExtTranslation LEFT_NEAR_TRENCH_CORNER = new ExtTranslation(BARRIER_NEAR_X, BARRIER_LEFT_Y - Units.inchesToMeters(12.00));
+    public static final ExtTranslation LEFT_FAR_TRENCH_CORNER = new ExtTranslation(BARRIER_FAR_X, BARRIER_LEFT_Y - Units.inchesToMeters(12.00));
+
     ////////////////////////
     // TOWER DEFINITION //
     ////////////////////////
@@ -136,16 +144,18 @@ public final class Field {
         // However we do not want to repulse too far from the trench sides. From the standpoint of tuning, we could
         // also attempt to be attracted to it.
 
-        // Blue No-Go Zone
-        // Near vertext of the barrier
-        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getBlue(), BARRIER_NEAR_RIGHT_CORNER.getBlue(), 10.0, 0.75),
-        // Left vertex of the barrier
-        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getBlue(), BARRIER_FAR_LEFT_CORNER.getBlue(), 5.0, 0.05),
-        // Far vertex of the barrier 
-        new LineObstacle(BARRIER_FAR_LEFT_CORNER.getBlue(), BARRIER_FAR_RIGHT_CORNER.getBlue(), 10.0, 0.75),
-        // Right vertex of the barrier
+        //Blue No-Go Zone
+        //Trench right side
         new LineObstacle(BARRIER_FAR_RIGHT_CORNER.getBlue(), BARRIER_NEAR_RIGHT_CORNER.getBlue(), 5.0, 0.05),
-        
+        new LineObstacle(BARRIER_NEAR_RIGHT_CORNER.getBlue(), RIGHT_NEAR_TRENCH_CORNER.getBlue(), 5.0, 0.05),
+        new LineObstacle(RIGHT_NEAR_TRENCH_CORNER.getBlue(), RIGHT_FAR_TRENCH_CORNER.getBlue(), 5.0, 0.05),
+        new LineObstacle(RIGHT_FAR_TRENCH_CORNER.getBlue(), BARRIER_FAR_RIGHT_CORNER.getBlue(), 5.0, 0.05),
+        //Trench left side
+        new LineObstacle(BARRIER_FAR_LEFT_CORNER.getBlue(), LEFT_FAR_TRENCH_CORNER.getBlue(), 5.0, 0.05),
+        new LineObstacle(LEFT_FAR_TRENCH_CORNER.getBlue(), LEFT_NEAR_TRENCH_CORNER.getBlue(), 5.0, 0.05),
+        new LineObstacle(LEFT_NEAR_TRENCH_CORNER.getBlue(), BARRIER_NEAR_LEFT_CORNER.getBlue(), 5.0, 0.05),
+        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getBlue(), BARRIER_FAR_LEFT_CORNER.getBlue(), 5.0, 0.05),
+
         // Red No-Go Zone
         // Near vertext of the barrier
         new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getRed(), BARRIER_NEAR_RIGHT_CORNER.getRed(), 10.0, 0.75),

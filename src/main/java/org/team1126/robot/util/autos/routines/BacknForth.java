@@ -48,8 +48,8 @@ public final class BacknForth extends BaseAutosRoutine {
             new Waypoint(3.299, 2.611, Math.toRadians(45.0), getDefaultDecel()),
             new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(7.697, 2.611, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
-            new Waypoint(3.299, 2.611, Math.toRadians(45.0), getDefaultDecel(), limitedField.get())
+            new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(3.299, 2.611, Math.toRadians(45.0), getDefaultDecel())
         ).toArray(new Waypoint[0]);
     }
 

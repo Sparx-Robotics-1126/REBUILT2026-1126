@@ -1,23 +1,21 @@
 package org.team1126.robot.util.autos.routines;
+
 import static edu.wpi.first.wpilibj2.command.Commands.parallel;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-
-import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.robot.Robot;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.BaseAutosRoutine;
 import org.team1126.robot.util.nav.Waypoint;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 public class ShootIntakeShootAtAlliance extends BaseAutosRoutine {
-    
+
     public static final String COMMAND_NAME = "AllianceShootAutos.action";
     public static final String DISPLAY_NAME = "Shoot, Intake, Shoot at Alliance";
     public static final String ABBREVIATION = "SISAA";
@@ -65,10 +63,9 @@ public class ShootIntakeShootAtAlliance extends BaseAutosRoutine {
                         Commands.waitSeconds(2.0)
                             .andThen(driveWaypoint(flip, 4, blue))
                             .andThen(driveWaypoint(flip, 5, blue))
-                    )
-                .andThen(driveWaypoint(flip, 6, blue)),
-                driveArchAndShootFuel()
+                    ).andThen(driveWaypoint(flip, 6, blue)),
+                    driveArchAndShootFuel()
                 )
-            ).withName(getCommandName());
+        ).withName(getCommandName());
     }
 }

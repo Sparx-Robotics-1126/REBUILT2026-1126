@@ -153,12 +153,12 @@ public final class Autos {
 
         //BacknForth
         chooser.addOption(
-            BacknForth.get().getDisplayName(right, true),
-            BacknForth.get().action(() -> right, () -> Alliance.isBlue())
+            BacknForth.get().getDisplayName(startBump, left, true),
+            BacknForth.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            BacknForth.get().getDisplayName(left, true),
-            BacknForth.get().action(() -> left, () -> Alliance.isBlue())
+            BacknForth.get().getDisplayName(startBump, right, true),
+            BacknForth.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
         );
 
         // chooser.addOption("Depot", routines.dock());
