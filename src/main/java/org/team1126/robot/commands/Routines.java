@@ -102,7 +102,7 @@ public final class Routines {
         }
     }
 
-    public Command driveOutpost() {
+    public Command driveDepot() {
         // var debot = Field.WAYPOINT_DEPOT.get();
         var goal = new Pose2d(
             Field.WAYPOINT_DEPOT.get().getX(),
