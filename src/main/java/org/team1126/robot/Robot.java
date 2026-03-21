@@ -49,8 +49,8 @@ public final class Robot extends LoggedRobot {
     private final CommandXboxController coDriver;
     private final Orchestra orchestra;
     private Command autoSelected;
-    private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .62);;
-      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", .7);;
+    private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .62);
+      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", .8);
     
 
     public Robot() {
