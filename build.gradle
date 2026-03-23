@@ -1,7 +1,7 @@
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2026.2.1"
-    id "com.diffplug.spotless" version "8.2.1"
+    // id "com.diffplug.spotless" version "8.2.1"
     id 'com.github.node-gradle.node' version '7.1.0'
 }
 
@@ -106,31 +106,31 @@ if (System.properties['os.name'].toLowerCase().contains('windows')) {
 }
 
 // Code formatting via spotless
-spotless {
-    java {
-        target fileTree('.') {
-            include '**/*.java'
-            exclude '**/build/**', '**/build-*/**'
-        }
+// spotless {
+//     java {
+//         target fileTree('.') {
+//             include '**/*.java'
+//             exclude '**/build/**', '**/build-*/**'
+//         }
 
-        toggleOffOn()
-        endWithNewline()
-        removeUnusedImports()
-        trimTrailingWhitespace()
-        prettier(['prettier': '3.7.4', 'prettier-plugin-java': '2.8.1'])
-            .npmExecutable("${tasks.named('npmSetup').get().npmDir.get()}${File.separator}${npmExec}") 
-            .config([
-                parser: 'java',
-                plugins: ['prettier-plugin-java'],
-                arrowParens: 'avoid',
-                experimentalOperatorPosition: 'start',
-                printWidth: 120,
-                tabWidth: 4,
-                useTabs: false,
-                trailingComma: 'none'
-            ])
-    }
-}
+//         toggleOffOn()
+//         endWithNewline()
+//         removeUnusedImports()
+//         trimTrailingWhitespace()
+//         prettier(['prettier': '3.7.4', 'prettier-plugin-java': '2.8.1'])
+//             .npmExecutable("${tasks.named('npmSetup').get().npmDir.get()}${File.separator}${npmExec}") 
+//             .config([
+//                 parser: 'java',
+//                 plugins: ['prettier-plugin-java'],
+//                 arrowParens: 'avoid',
+//                 experimentalOperatorPosition: 'start',
+//                 printWidth: 120,
+//                 tabWidth: 4,
+//                 useTabs: false,
+//                 trailingComma: 'none'
+//             ])
+//     }
+// }
 
 test {
     useJUnitPlatform()
@@ -160,12 +160,12 @@ wpi.java.configureExecutableTasks(jar)
 wpi.java.configureTestTasks(test)
 
 // Configure string concat to always inline compile
-tasks.withType(JavaCompile) {
-    options.compilerArgs.add '-XDstringConcat=inline'
-    dependsOn 'spotlessApply'
-}
+// tasks.withType(JavaCompile) {
+//     options.compilerArgs.add '-XDstringConcat=inline'
+//     dependsOn 'spotlessApply'
+// }
 
-tasks.matching { it.name.startsWith("spotless")}.all {
-    dependsOn 'nodeSetup', 'npmSetup'
-}
+// tasks.matching { it.name.startsWith("spotless")}.all {
+//     dependsOn 'nodeSetup', 'npmSetup'
+// }
  

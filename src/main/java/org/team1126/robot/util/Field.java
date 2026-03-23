@@ -84,20 +84,25 @@ public final class Field {
 
     /** The near left corner of the HUB, from the perspective of the DRIVER STATION. */
     public static final ExtTranslation BARRIER_NEAR_LEFT_CORNER = new ExtTranslation(BARRIER_NEAR_X, BARRIER_LEFT_Y);
-    /** The near right corner of the HUB, from the perspective of the DRIVER STATION. */
-    public static final ExtTranslation BARRIER_NEAR_RIGHT_CORNER = new ExtTranslation(BARRIER_NEAR_X, BARRIER_RIGHT_Y);
     /** The far left corner of the HUB, from the perspective of the DRIVER STATION. */
     public static final ExtTranslation BARRIER_FAR_LEFT_CORNER = new ExtTranslation(BARRIER_FAR_X, BARRIER_LEFT_Y);
+    public static final ExtTranslation TRENCH_FAR_LEFT_BORDER = new ExtTranslation(BARRIER_FAR_X, Units.inchesToMeters(317.69));
+    public static final ExtTranslation TRENCH_NEAR_LEFT_BORDER = new ExtTranslation(BARRIER_NEAR_X, Units.inchesToMeters(317.69));
+    
     /** The far right corner of the HUB, from the perspective of the DRIVER STATION. */
     public static final ExtTranslation BARRIER_FAR_RIGHT_CORNER = new ExtTranslation(BARRIER_FAR_X, BARRIER_RIGHT_Y);
+    public static final ExtTranslation TRENCH_FAR_RIGHT_BORDER = new ExtTranslation(BARRIER_FAR_X, 0);
+    public static final ExtTranslation TRENCH_NEAR_RIGHT_BORDER = new ExtTranslation(BARRIER_NEAR_X, 0);
+    /** The near right corner of the HUB, from the perspective of the DRIVER STATION. */
+    public static final ExtTranslation BARRIER_NEAR_RIGHT_CORNER = new ExtTranslation(BARRIER_NEAR_X, BARRIER_RIGHT_Y);
 
-    //Right trench
-    public static final ExtTranslation RIGHT_NEAR_TRENCH_CORNER = new ExtTranslation(BARRIER_NEAR_X, BARRIER_RIGHT_Y + Units.inchesToMeters(12.00));
-    public static final ExtTranslation RIGHT_FAR_TRENCH_CORNER = new ExtTranslation(BARRIER_FAR_X, BARRIER_RIGHT_Y + Units.inchesToMeters(12.00));
+    
+    //Hub stuff
+    public static final ExtTranslation HUB_NEAR_LEFT_CORNER = new ExtTranslation(Units.inchesToMeters(151.61), Units.inchesToMeters(23.5 + 158.84));
+    public static final ExtTranslation HUB_NEAR_RIGHT_CORNER = new ExtTranslation(Units.inchesToMeters(151.61), Units.inchesToMeters(158.84-23.5));
+    public static final ExtTranslation HUB_FAR_LEFT_CORNER = new ExtTranslation(Units.inchesToMeters(151.61+47.0), Units.inchesToMeters(23.5+158.84));
+    public static final ExtTranslation HUB_FAR_RIGHT_CORNER = new ExtTranslation(Units.inchesToMeters(151.61+47.0), Units.inchesToMeters(158.84-23.5));
 
-    //Left trench
-    public static final ExtTranslation LEFT_NEAR_TRENCH_CORNER = new ExtTranslation(BARRIER_NEAR_X, BARRIER_LEFT_Y - Units.inchesToMeters(12.00));
-    public static final ExtTranslation LEFT_FAR_TRENCH_CORNER = new ExtTranslation(BARRIER_FAR_X, BARRIER_LEFT_Y - Units.inchesToMeters(12.00));
 
     ////////////////////////
     // TOWER DEFINITION //
@@ -146,26 +151,43 @@ public final class Field {
 
         //Blue No-Go Zone
         //Trench right side
-        new LineObstacle(BARRIER_FAR_RIGHT_CORNER.getBlue(), BARRIER_NEAR_RIGHT_CORNER.getBlue(), 5.0, 0.05),
-        new LineObstacle(BARRIER_NEAR_RIGHT_CORNER.getBlue(), RIGHT_NEAR_TRENCH_CORNER.getBlue(), 5.0, 0.05),
-        new LineObstacle(RIGHT_NEAR_TRENCH_CORNER.getBlue(), RIGHT_FAR_TRENCH_CORNER.getBlue(), 5.0, 0.05),
-        new LineObstacle(RIGHT_FAR_TRENCH_CORNER.getBlue(), BARRIER_FAR_RIGHT_CORNER.getBlue(), 5.0, 0.05),
+        new LineObstacle(BARRIER_FAR_RIGHT_CORNER.getBlue(),BARRIER_NEAR_RIGHT_CORNER.getBlue(), 10.0, 0.75),
+        new LineObstacle(BARRIER_NEAR_RIGHT_CORNER.getBlue(), TRENCH_NEAR_RIGHT_BORDER.getBlue(), 5.0, 0.05),
+        new LineObstacle(TRENCH_NEAR_RIGHT_BORDER.getBlue(), TRENCH_FAR_RIGHT_BORDER.getBlue(), 10.0, 0.75),
+        new LineObstacle(TRENCH_FAR_RIGHT_BORDER.getBlue(), BARRIER_FAR_RIGHT_CORNER.getBlue(), 5.0, 0.05),
+        
         //Trench left side
-        new LineObstacle(BARRIER_FAR_LEFT_CORNER.getBlue(), LEFT_FAR_TRENCH_CORNER.getBlue(), 5.0, 0.05),
-        new LineObstacle(LEFT_FAR_TRENCH_CORNER.getBlue(), LEFT_NEAR_TRENCH_CORNER.getBlue(), 5.0, 0.05),
-        new LineObstacle(LEFT_NEAR_TRENCH_CORNER.getBlue(), BARRIER_NEAR_LEFT_CORNER.getBlue(), 5.0, 0.05),
-        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getBlue(), BARRIER_FAR_LEFT_CORNER.getBlue(), 5.0, 0.05),
+        new LineObstacle(BARRIER_FAR_LEFT_CORNER.getBlue(),BARRIER_NEAR_LEFT_CORNER.getBlue(), 10.0, 0.75),
+        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getBlue(), TRENCH_NEAR_LEFT_BORDER.getBlue(), 5.0, 0.05),
+        new LineObstacle(TRENCH_NEAR_LEFT_BORDER.getBlue(), TRENCH_FAR_LEFT_BORDER.getBlue(), 10.0, 0.75),
+        new LineObstacle(TRENCH_FAR_LEFT_BORDER.getBlue(), BARRIER_FAR_LEFT_CORNER.getBlue(), 5.0, 0.05),
+
+        //Hub
+        new LineObstacle(HUB_NEAR_LEFT_CORNER.getBlue(), HUB_NEAR_RIGHT_CORNER.getBlue(), 10.0, 0.75),
+        new LineObstacle(HUB_NEAR_RIGHT_CORNER.getBlue(), HUB_FAR_RIGHT_CORNER.getBlue(), 10.0, 0.75),
+        new LineObstacle(HUB_FAR_RIGHT_CORNER.getBlue(), HUB_FAR_LEFT_CORNER.getBlue(), 10.0, .75),
+        new LineObstacle(HUB_FAR_LEFT_CORNER.getBlue(), HUB_NEAR_LEFT_CORNER.getBlue(), 10.0, .75),
 
         // Red No-Go Zone
-        // Near vertext of the barrier
-        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getRed(), BARRIER_NEAR_RIGHT_CORNER.getRed(), 10.0, 0.75),
-        // Left vertex of the barrier
-        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getRed(), BARRIER_FAR_LEFT_CORNER.getRed(), 5.0, 0.05),
-        // Far vertex of the barrier 
-        new LineObstacle(BARRIER_FAR_LEFT_CORNER.getRed(), BARRIER_FAR_RIGHT_CORNER.getRed(), 10.0, 0.75),
-        // Right vertex of the barrier
-        new LineObstacle(BARRIER_FAR_RIGHT_CORNER.getRed(), BARRIER_NEAR_RIGHT_CORNER.getRed(), 5.0, 0.05),
+       //Trench right side
+        new LineObstacle(BARRIER_FAR_RIGHT_CORNER.getRed(),BARRIER_NEAR_RIGHT_CORNER.getRed(), 10.0, 0.75),
+        new LineObstacle(BARRIER_NEAR_RIGHT_CORNER.getRed(), TRENCH_NEAR_RIGHT_BORDER.getRed(), 5.0, 0.05),
+        new LineObstacle(TRENCH_NEAR_RIGHT_BORDER.getRed(), TRENCH_FAR_RIGHT_BORDER.getRed(), 10.0, 0.75),
+        new LineObstacle(TRENCH_FAR_RIGHT_BORDER.getRed(), BARRIER_FAR_RIGHT_CORNER.getRed(), 5.0, 0.05),
         
+        //Trench left side
+        new LineObstacle(BARRIER_FAR_LEFT_CORNER.getRed(),BARRIER_NEAR_LEFT_CORNER.getRed(), 10.0, 0.75),
+        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getRed(), TRENCH_NEAR_LEFT_BORDER.getRed(), 5.0, 0.05),
+        new LineObstacle(TRENCH_NEAR_LEFT_BORDER.getRed(), TRENCH_FAR_LEFT_BORDER.getRed(), 10.0, 0.75),
+        new LineObstacle(TRENCH_FAR_LEFT_BORDER.getRed(), BARRIER_FAR_LEFT_CORNER.getRed(), 5.0, 0.05),
+        
+        //Hub
+        new LineObstacle(HUB_NEAR_LEFT_CORNER.getRed(), HUB_NEAR_RIGHT_CORNER.getRed(), 10.0, 0.75),
+        new LineObstacle(HUB_NEAR_RIGHT_CORNER.getRed(), HUB_FAR_RIGHT_CORNER.getRed(), 10.0, 0.75),
+        new LineObstacle(HUB_FAR_RIGHT_CORNER.getRed(), HUB_FAR_LEFT_CORNER.getRed(), 10.0, .75),
+        new LineObstacle(HUB_FAR_LEFT_CORNER.getRed(), HUB_NEAR_LEFT_CORNER.getRed(), 10.0, .75),
+
+    
         // Blue Tower
         new LineObstacle(TOWER_DEPOT_NEAR_CORNER.getBlue(), TOWER_DEPOT_FAR_CORNER.getBlue(), 10.0, 0.5),
         new LineObstacle(TOWER_DEPOT_FAR_CORNER.getBlue(), TOWER_OUTPOST_FAR_CORNER.getBlue(), 10.0, 0.5), 
@@ -174,7 +196,7 @@ public final class Field {
         // Red Tower
         new LineObstacle(TOWER_DEPOT_NEAR_CORNER.getRed(), TOWER_DEPOT_FAR_CORNER.getRed(), 10.0, 0.5),
         new LineObstacle(TOWER_DEPOT_FAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5), 
-        new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5),
+        new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5)
         
         // new CircleObstacle(HUB.get(), 3.0, 8.0, 1.0),
         
