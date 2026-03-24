@@ -1,5 +1,7 @@
 package org.team1126.robot.subsystems;
 
+import static org.team1126.robot.util.ShootParams.shooterVelocityMap;
+
 import static org.team1126.robot.Constants.FEEDER_MOTOR;
 import static org.team1126.robot.Constants.SHOOTER_MOTOR;
 
@@ -12,6 +14,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.util.command.GRRSubsystem;
@@ -99,6 +103,29 @@ public final class Shooter extends GRRSubsystem {
         SmartDashboard.putBoolean("Shooter is at speed?", shooterController.isAtSetpoint());
         SmartDashboard.putBoolean("Feeder is at speed?", feederController.isAtSetpoint());
         SmartDashboard.putBoolean("Shooting Field?", this.shootingField);
+    }
+
+    /**
+     * Run the shooter to target a specific distance based on a preset interpolating map.
+     * @param distance The distance to target in meters.
+     */
+    public Command targetDistance(final DoubleSupplier distance) {
+        return runVelocity(() -> shooterVelocityMap.get(distance.getAsDouble())).withName("Shooters.targetDistance()");
+    }
+
+    /**
+     * Internal method to run both shooters at a specified velocity.
+     * @param velocity The velocity in rotations/second at the rotor (gearing not included).
+     */
+    private Command runVelocity(final DoubleSupplier velocity) {
+        return commandBuilder("Shooter.runVelocity()")
+            .onExecute(() -> {
+                // TODO: Add second shooter motor
+                this.shooterController.setSetpoint(velocity.getAsDouble(), SparkBase.ControlType.kMAXMotionVelocityControl);
+            })
+            .onEnd(() -> {
+                this.shooterController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl);
+            });
     }
 
     private void idleShooter() {

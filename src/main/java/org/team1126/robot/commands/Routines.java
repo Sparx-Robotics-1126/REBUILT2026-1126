@@ -18,6 +18,7 @@ import org.team1126.lib.tunable.Tunables.TunableBoolean;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.Alliance;
 import org.team1126.robot.Robot;
+import org.team1126.robot.subsystems.Hood;
 import org.team1126.robot.subsystems.Intake;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
@@ -58,6 +59,7 @@ public final class Routines {
     private final Lights lights;
     private final Swerve swerve;
     private final Shooter shooter;
+    // private final Hood hood;
     private final Storage storage;
     private final Intake intake;
 
@@ -132,6 +134,13 @@ public final class Routines {
             "Routines.score()"
         );
     }
+
+    // TODO: Implement this with setpoints and all that
+    // public Command newShootFuel() {
+    //     return parallel(
+    //         hood.targetDistance(swerve::targetDistance),
+    //         shooter.targetDistance(swerve::targetDistance),)
+    // }
 
     public Command shootFuelAuto() {
         return parallel(
