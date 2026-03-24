@@ -42,6 +42,8 @@ public final class Shooter extends GRRSubsystem {
     private final Tunables.TunableInteger shooterShootFieldSpeed = tunables.value("Shoot Field Speed", 250);
     private final Tunables.TunableInteger shooterUnJamSpeed = tunables.value("Shooter UnJam Speed", 100);
     private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 198);
+    private final Tunables.TunableInteger shooterVelocitySetpoint = tunables.value("Shooter Setpoint", 2830);
+ private final Tunables.TunableInteger feederVelocitySetpoint = tunables.value("Feeder Setpoint", 2600);
 
     private ShooterStates state = ShooterStates.kIdle;
     private boolean shootingField = false;
@@ -101,8 +103,9 @@ public final class Shooter extends GRRSubsystem {
         SmartDashboard.putNumber("Shooter Velocity", shooterEncoder.getVelocity());
         SmartDashboard.putNumber("Feeder Velocity", feederEncoder.getVelocity());
         SmartDashboard.putBoolean("Shooter is at speed?", shooterController.isAtSetpoint());
-        SmartDashboard.putBoolean("Feeder is at speed?", feederController.isAtSetpoint());
+        SmartDashboard.putBoolean("Feeder is at setpoint?", feederIsReady());
         SmartDashboard.putBoolean("Shooting Field?", this.shootingField);
+        SmartDashboard.putBoolean("Shooter is at setpoint?", shooterIsReady());
     }
 
     /**
@@ -141,6 +144,7 @@ public final class Shooter extends GRRSubsystem {
 
     private void stopShooter() {
         this.shooterController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl);
+        this.feederController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl);
     }
 
     private void setState(ShooterStates state) {
@@ -180,7 +184,8 @@ public final class Shooter extends GRRSubsystem {
 
     public Command readyShooter() {
         this.shootingField = false;
-        return commandBuilder().onExecute(() -> getReady());
+        return commandBuilder().onExecute(() -> getReady())
+        .onEnd(this::stopShooter);
     }
 
     public Command readyFieldShooter(BooleanSupplier fieldShooting) {
@@ -198,6 +203,9 @@ public final class Shooter extends GRRSubsystem {
 
     public void getReady() {
         shooterController.setSetpoint(this.shooterShootSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        if (this.shooterIsReady()) {
+            feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        }
         // shooterController.setSetpoint(this.shooterShootSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         // feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
     }
@@ -217,11 +225,20 @@ public final class Shooter extends GRRSubsystem {
      * @return Whether or not the shooter is ready to shoot
      */
     public boolean shooterIsReady() {
-        return this.shooterController.isAtSetpoint();
+        if (this.shooterEncoder.getVelocity() < this.shooterVelocitySetpoint.get()+ 100 
+        && this.shooterEncoder.getVelocity() > this.shooterVelocitySetpoint.get() - 100) {
+            return true;
+        }
+        return false;
     }
 
     public boolean feederIsReady() {
-        return this.feederController.isAtSetpoint();
+           if (this.feederEncoder.getVelocity() < this.feederVelocitySetpoint.get()+ 100 
+        && this.feederEncoder.getVelocity() > this.feederVelocitySetpoint.get() - 100) {
+            return true;
+        }
+        return false;
+        // return this.feederController.isAtSetpoint();
     }
 
     public Command feedShooter() {

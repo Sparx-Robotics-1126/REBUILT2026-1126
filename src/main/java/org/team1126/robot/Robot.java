@@ -50,7 +50,7 @@ public final class Robot extends LoggedRobot {
     private final Orchestra orchestra;
     private Command autoSelected;
     private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .62);
-      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", .8);
+      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", 1.0);
     
 
     public Robot() {
@@ -147,10 +147,11 @@ public final class Robot extends LoggedRobot {
 
         // coDriver.leftTrigger().whileTrue(routines.unJamFeederShooter());
         coDriver.rightBumper().toggleOnTrue(shooter.readyShooter());
-        coDriver.rightTrigger().toggleOnTrue(shooter.readyFieldShooter(() -> true));
+        // coDriver.rightTrigger().toggleOnTrue(shooter.readyFieldShooter(() -> true));
+        coDriver.rightTrigger().whileTrue(routines.shootFuel());
         coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
         coDriver.leftBumper().toggleOnTrue(shooter.haltShooter());
-        coDriver.povRight().whileTrue(routines.shootFuel());
+        // coDriver.povRight().whileTrue(routines.shootFuel());
         coDriver.povLeft().whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightTrigger().and(coDriver.povRight()).whileTrue(routines.shootFuel());
         // coDriver.rightTrigger().and(coDriver.povLeft()).whileTrue(routines.shootFuelReverseStorage());

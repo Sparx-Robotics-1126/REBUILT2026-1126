@@ -155,8 +155,9 @@ public final class Routines {
             // shootingLights(),
             lights.sides.chase(Lights.Color.SHOOTING),
             lights.top.convergeToMiddle(Lights.Color.SHOOTING),
-            storage.feedShooter(shooter::shooterIsReady),
-            shooter.shoot(shooter::feederIsReady)
+            shooter.readyShooter(),
+            storage.feedShooter(shooter::shooterIsReady)
+            // shooter.shoot(shooter::feederIsReady)
         ).withName("Routines.score()");
     }
 
