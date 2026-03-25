@@ -87,58 +87,38 @@ public final class Robot extends LoggedRobot {
 
         lights.sides.setDefaultCommand(routines.lightsTeleopMode());
         // Create triggers
-        // Trigger allowGoosing = coDriver.a().negate();
-        // Trigger changedReference = RobotModeTriggers.teleop().and(swerve::changedReference);
 
         // Driver bindings
         driver.leftTrigger().onTrue(swerve.tareRotation());
 
-        // driver.povLeft().onTrue(swerve.tareRotation());
-        // driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
-        // driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
-
-        driver
-            .povUp()
-            .and(driver.leftBumper())
-            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.NORTH, () -> true));
-        driver
-            .povUp()
-            .and(driver.rightBumper())
-            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.NORTH, () -> false));
-        driver
-            .povDown()
-            .and(driver.leftBumper())
-            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> true));
-        driver
-            .povDown()
-            .and(driver.rightBumper())
-            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> false));
-        // driver.a().whileTrue(routines.aimAtHub(() -> 0.2));
-        // driver.x().whileTrue(routines.driveDepot());
-        driver.a().whileTrue(swerve.driveToShootingArc(() -> 0.8));
-        // driver.b().whileTrue(swerve.drive(this::driverX, this::driverY, () -> swerve.getHubAngular()));
+        // driver
+        //     .povUp()
+        //     .and(driver.leftBumper())
+        //     .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.NORTH, () -> true));
+        // driver
+        //     .povUp()
+        //     .and(driver.rightBumper())
+        //     .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.NORTH, () -> false));
+        // driver
+        //     .povDown()
+        //     .and(driver.leftBumper())
+        //     .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> true));
+        // driver
+        //     .povDown()
+        //     .and(driver.rightBumper())
+        //     .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> false));
+        // driver.a().whileTrue(swerve.driveToShootingArc(() -> 0.8));
         driver.b().whileTrue(swerve.driveFacingHub(this::driverX, this::driverY, this::driverAngular));
         driver.y().whileTrue(swerve.driveFacingZone(this::driverX, this::driverY, this::driverAngular));
         driver.rightTrigger().whileTrue(swerve.drive(this::driverX, this::driverY, this::driverAngular, false));
-        // driver.a().whileTrue(routines.refuelFromDepot());
-        // driver.b().whileTrue(routines.refuelFromNeutral());
-        // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
-        // driver.povLeft().whileTrue(swerve.driveTrench(() -> false));
-        // driver.povRight().whileTrue(swerve.driveTrench(() -> true));
         driver.rightStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
-        driver.start().onTrue(swerve.adjustShootingRadius());
+        // driver.start().onTrue(swerve.adjustShootingRadius());
 
-        // driver
-        //     .povRight()
-        //     .whileTrue(
-        //         (swerve.apfDrive(() -> swerve.getFuelPose(), () -> 0.25)).until(() -> swerve.getFuelPose() == null)
-        //     );
         // driver.rightBumper().whileTrue(swerve.resetOdometry());
 
         // changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
 
         // Co-driver bindings
-        //coDriver.a().onTrue(none()); // Reserved (No goosing around)
         //        coDriver.x().onTrue(storage.moveMotorCommand(true));
         //        coDriver.b().onTrue(storage.moveMotorCommand(false));
 
