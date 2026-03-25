@@ -39,9 +39,9 @@ public class ShootIntakeShootAtAlliance extends BaseAutosRoutine {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
             new Waypoint(3.028, 2.425, Math.toRadians(40), getDefaultDecel()),
-            new Waypoint(2.975, 0.706, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(3.412, 0.706, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(5.412, 0.706, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(3.582, 2.505, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(5.592, 2.505, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(6.357, 1.263, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(7.562, 1.263, Math.toRadians(90), getDefaultDecel()),
             new Waypoint(7.562, 1.628, Math.toRadians(90), 0.4),
             new Waypoint(7.562, 1.750, Math.toRadians(90), 0.4),
