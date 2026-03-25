@@ -151,41 +151,41 @@ public final class Field {
 
         //Blue No-Go Zone
         //Trench right side
-        new LineObstacle(BARRIER_FAR_RIGHT_CORNER.getBlue(),BARRIER_NEAR_RIGHT_CORNER.getBlue(), 10.0, 0.75),
-        new LineObstacle(BARRIER_NEAR_RIGHT_CORNER.getBlue(), TRENCH_NEAR_RIGHT_BORDER.getBlue(), 5.0, 0.05),
-        new LineObstacle(TRENCH_NEAR_RIGHT_BORDER.getBlue(), TRENCH_FAR_RIGHT_BORDER.getBlue(), 10.0, 0.75),
-        new LineObstacle(TRENCH_FAR_RIGHT_BORDER.getBlue(), BARRIER_FAR_RIGHT_CORNER.getBlue(), 5.0, 0.05),
+        new LineObstacle(BARRIER_FAR_RIGHT_CORNER.getBlue(),BARRIER_NEAR_RIGHT_CORNER.getBlue(), 30.0, .90),
+        new LineObstacle(BARRIER_NEAR_RIGHT_CORNER.getBlue(), TRENCH_NEAR_RIGHT_BORDER.getBlue(), 30.0, .90),
+        new LineObstacle(TRENCH_NEAR_RIGHT_BORDER.getBlue(), TRENCH_FAR_RIGHT_BORDER.getBlue(), 30.0, .90),
+        new LineObstacle(TRENCH_FAR_RIGHT_BORDER.getBlue(), BARRIER_FAR_RIGHT_CORNER.getBlue(), 30.0, .90),
         
         //Trench left side
-        new LineObstacle(BARRIER_FAR_LEFT_CORNER.getBlue(),BARRIER_NEAR_LEFT_CORNER.getBlue(), 10.0, 0.75),
-        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getBlue(), TRENCH_NEAR_LEFT_BORDER.getBlue(), 5.0, 0.05),
-        new LineObstacle(TRENCH_NEAR_LEFT_BORDER.getBlue(), TRENCH_FAR_LEFT_BORDER.getBlue(), 10.0, 0.75),
-        new LineObstacle(TRENCH_FAR_LEFT_BORDER.getBlue(), BARRIER_FAR_LEFT_CORNER.getBlue(), 5.0, 0.05),
+        new LineObstacle(BARRIER_FAR_LEFT_CORNER.getBlue(),BARRIER_NEAR_LEFT_CORNER.getBlue(), 30.0, .90),
+        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getBlue(), TRENCH_NEAR_LEFT_BORDER.getBlue(), 30.0, .90),
+        new LineObstacle(TRENCH_NEAR_LEFT_BORDER.getBlue(), TRENCH_FAR_LEFT_BORDER.getBlue(), 30.0, .90),
+        new LineObstacle(TRENCH_FAR_LEFT_BORDER.getBlue(), BARRIER_FAR_LEFT_CORNER.getBlue(), 30.0, .90),
 
         //Hub
-        new LineObstacle(HUB_NEAR_LEFT_CORNER.getBlue(), HUB_NEAR_RIGHT_CORNER.getBlue(), 10.0, 0.75),
-        new LineObstacle(HUB_NEAR_RIGHT_CORNER.getBlue(), HUB_FAR_RIGHT_CORNER.getBlue(), 10.0, 0.75),
-        new LineObstacle(HUB_FAR_RIGHT_CORNER.getBlue(), HUB_FAR_LEFT_CORNER.getBlue(), 10.0, .75),
-        new LineObstacle(HUB_FAR_LEFT_CORNER.getBlue(), HUB_NEAR_LEFT_CORNER.getBlue(), 10.0, .75),
+        new LineObstacle(HUB_NEAR_LEFT_CORNER.getBlue(), HUB_NEAR_RIGHT_CORNER.getBlue(), 30.0, 0.90),
+        new LineObstacle(HUB_NEAR_RIGHT_CORNER.getBlue(), HUB_FAR_RIGHT_CORNER.getBlue(), 30.0, 0.90),
+        new LineObstacle(HUB_FAR_RIGHT_CORNER.getBlue(), HUB_FAR_LEFT_CORNER.getBlue(), 30.0, .90),
+        new LineObstacle(HUB_FAR_LEFT_CORNER.getBlue(), HUB_NEAR_LEFT_CORNER.getBlue(), 30.0, .90),
 
         // Red No-Go Zone
        //Trench right side
-        new LineObstacle(BARRIER_FAR_RIGHT_CORNER.getRed(),BARRIER_NEAR_RIGHT_CORNER.getRed(), 10.0, 0.75),
-        new LineObstacle(BARRIER_NEAR_RIGHT_CORNER.getRed(), TRENCH_NEAR_RIGHT_BORDER.getRed(), 5.0, 0.05),
-        new LineObstacle(TRENCH_NEAR_RIGHT_BORDER.getRed(), TRENCH_FAR_RIGHT_BORDER.getRed(), 10.0, 0.75),
-        new LineObstacle(TRENCH_FAR_RIGHT_BORDER.getRed(), BARRIER_FAR_RIGHT_CORNER.getRed(), 5.0, 0.05),
+        new LineObstacle(BARRIER_FAR_RIGHT_CORNER.getRed(),BARRIER_NEAR_RIGHT_CORNER.getRed(), 30.0, 0.90),
+        new LineObstacle(BARRIER_NEAR_RIGHT_CORNER.getRed(), TRENCH_NEAR_RIGHT_BORDER.getRed(), 30.0, 0.90),
+        new LineObstacle(TRENCH_NEAR_RIGHT_BORDER.getRed(), TRENCH_FAR_RIGHT_BORDER.getRed(), 30.0, 0.90),
+        new LineObstacle(TRENCH_FAR_RIGHT_BORDER.getRed(), BARRIER_FAR_RIGHT_CORNER.getRed(), 30.0, 0.90),
         
         //Trench left side
-        new LineObstacle(BARRIER_FAR_LEFT_CORNER.getRed(),BARRIER_NEAR_LEFT_CORNER.getRed(), 10.0, 0.75),
-        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getRed(), TRENCH_NEAR_LEFT_BORDER.getRed(), 5.0, 0.05),
-        new LineObstacle(TRENCH_NEAR_LEFT_BORDER.getRed(), TRENCH_FAR_LEFT_BORDER.getRed(), 10.0, 0.75),
-        new LineObstacle(TRENCH_FAR_LEFT_BORDER.getRed(), BARRIER_FAR_LEFT_CORNER.getRed(), 5.0, 0.05),
+        new LineObstacle(BARRIER_FAR_LEFT_CORNER.getRed(),BARRIER_NEAR_LEFT_CORNER.getRed(), 30.0, 0.90),
+        new LineObstacle(BARRIER_NEAR_LEFT_CORNER.getRed(), TRENCH_NEAR_LEFT_BORDER.getRed(), 30.0, 0.90),
+        new LineObstacle(TRENCH_NEAR_LEFT_BORDER.getRed(), TRENCH_FAR_LEFT_BORDER.getRed(), 30.0, 0.90),
+        new LineObstacle(TRENCH_FAR_LEFT_BORDER.getRed(), BARRIER_FAR_LEFT_CORNER.getRed(), 30.0, 0.90),
         
         //Hub
-        new LineObstacle(HUB_NEAR_LEFT_CORNER.getRed(), HUB_NEAR_RIGHT_CORNER.getRed(), 10.0, 0.75),
-        new LineObstacle(HUB_NEAR_RIGHT_CORNER.getRed(), HUB_FAR_RIGHT_CORNER.getRed(), 10.0, 0.75),
-        new LineObstacle(HUB_FAR_RIGHT_CORNER.getRed(), HUB_FAR_LEFT_CORNER.getRed(), 10.0, .75),
-        new LineObstacle(HUB_FAR_LEFT_CORNER.getRed(), HUB_NEAR_LEFT_CORNER.getRed(), 10.0, .75),
+        new LineObstacle(HUB_NEAR_LEFT_CORNER.getRed(), HUB_NEAR_RIGHT_CORNER.getRed(), 30.0, 0.90),
+        new LineObstacle(HUB_NEAR_RIGHT_CORNER.getRed(), HUB_FAR_RIGHT_CORNER.getRed(), 30.0, 0.90),
+        new LineObstacle(HUB_FAR_RIGHT_CORNER.getRed(), HUB_FAR_LEFT_CORNER.getRed(), 30.0, .90),
+        new LineObstacle(HUB_FAR_LEFT_CORNER.getRed(), HUB_NEAR_LEFT_CORNER.getRed(), 30.0, .90),
 
     
         // Blue Tower
@@ -196,7 +196,7 @@ public final class Field {
         // Red Tower
         new LineObstacle(TOWER_DEPOT_NEAR_CORNER.getRed(), TOWER_DEPOT_FAR_CORNER.getRed(), 10.0, 0.5),
         new LineObstacle(TOWER_DEPOT_FAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5), 
-        new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5)
+        new LineObstacle(TOWER_OUTPOST_NEAR_CORNER.getRed(), TOWER_OUTPOST_FAR_CORNER.getRed(), 10.0, 0.5),
         
         // new CircleObstacle(HUB.get(), 3.0, 8.0, 1.0),
         
