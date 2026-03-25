@@ -267,31 +267,20 @@ public final class Swerve extends GRRSubsystem {
         distanceToHub = Math.hypot(deltaX, deltaY);
 
         angleToHub = Math.atan2(deltaY, deltaX) + Math.PI;
-        // hubAngular = -angularPID.calculate(state.rotation.getRadians(), angleToHub);
 
-        distanceToShootingPoint = distanceToHub - currentShootingRadius.getVal();
-        double shootingX = state.pose.getX() + distanceToShootingPoint;
-        double shootingY = state.pose.getY() + distanceToShootingPoint;
+        // distanceToShootingPoint = distanceToHub - currentShootingRadius.getVal();
+        // double shootingX = state.pose.getX() + distanceToShootingPoint;
+        // double shootingY = state.pose.getY() + distanceToShootingPoint;
 
-        if (state.pose.getY() > Field.CENTER_Y) {
-            shootingY = state.pose.getY() - distanceToShootingPoint;
-        }
+        // if (state.pose.getY() > Field.CENTER_Y) {
+        //     shootingY = state.pose.getY() - distanceToShootingPoint;
+        // }
 
-        if (Alliance.isRed()) {
-            shootingX = state.pose.getX() - distanceToShootingPoint;
-        }
+        // if (Alliance.isRed()) {
+        //     shootingX = state.pose.getX() - distanceToShootingPoint;
+        // }
 
-        shootingArc = new Translation2d(shootingX, shootingY);
-
-        //     if (Alliance.isBlue()) {
-        //         shootingArc = new ExtTranslation(shootingX, shootingY);
-        //     } else {
-        //         Pose2d tmp = new Pose2d(shootingX, shootingY, state.pose.getRotation());
-        //         Pose2d blueTmp = FieldFlip.overLength(tmp);
-        //         shootingArc = new ExtTranslation(blueTmp.getX(), blueTmp.getY());
-        //     }
-
-        // SmartDashboard.putNumber("Shooting Radius", currentShootingRadius.getVal());
+        // shootingArc = new Translation2d(shootingX, shootingY);
     }
 
     /**
@@ -505,22 +494,22 @@ public final class Swerve extends GRRSubsystem {
             });
     }
 
-    public Command driveToShootingArc(final DoubleSupplier maxDeceleration) {
-        return commandBuilder("Swerve.driveToShootingArc()")
-            .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
-            .onExecute(() -> {
-                var speeds = apf.calculate(
-                    state.pose,
-                    this.shootingArc,
-                    apfHubFacingVel.get(),
-                    maxDeceleration.getAsDouble()
-                );
+    // public Command driveToShootingArc(final DoubleSupplier maxDeceleration) {
+    //     return commandBuilder("Swerve.driveToShootingArc()")
+    //         .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
+    //         .onExecute(() -> {
+    //             var speeds = apf.calculate(
+    //                 state.pose,
+    //                 this.shootingArc,
+    //                 apfHubFacingVel.get(),
+    //                 maxDeceleration.getAsDouble()
+    //             );
 
-                speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
+    //             speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
 
-                api.applySpeeds(speeds, Perspective.BLUE, true, true);
-            });
-    }
+    //             api.applySpeeds(speeds, Perspective.BLUE, true, true);
+    //         });
+    // }
 
     public Command playMusic(String song) {
         return runEnd(
@@ -591,21 +580,21 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.stop(" + lock + ")").onExecute(() -> api.applyStop(lock));
     }
 
-    public Command adjustShootingRadius() {
-        return commandBuilder("Swerve.adjustShootingRadius()").onExecute(() -> {
-            switch (currentShootingRadius) {
-                case L1:
-                    currentShootingRadius = ShootingRadius.L2;
-                    break;
-                case L2:
-                    currentShootingRadius = ShootingRadius.L3;
-                    break;
-                default:
-                    currentShootingRadius = ShootingRadius.L1;
-                    break;
-            }
-        });
-    }
+    // public Command adjustShootingRadius() {
+    //     return commandBuilder("Swerve.adjustShootingRadius()").onExecute(() -> {
+    //         switch (currentShootingRadius) {
+    //             case L1:
+    //                 currentShootingRadius = ShootingRadius.L2;
+    //                 break;
+    //             case L2:
+    //                 currentShootingRadius = ShootingRadius.L3;
+    //                 break;
+    //             default:
+    //                 currentShootingRadius = ShootingRadius.L1;
+    //                 break;
+    //         }
+    //     });
+    // }
 
     /**
      * Checks if the origin of the robot is in the neutral zone (between the blue zone and the red zone).
@@ -616,87 +605,7 @@ public final class Swerve extends GRRSubsystem {
         return Field.BLUE_ZONE <= x && Field.RED_ZONE >= x;
     }
 
-    private void setBestRampAngle() {
-        double currentAngle = state.rotation.getRadians();
-        double angleA, angleB;
-        if (inNeutralZone()) {
-            // Example: angles for neutral zone
-            angleA = defaultRampAngle.getAsDouble() + Math2.HALF_PI;
-            angleB = defaultRampAngle.getAsDouble() + Math.PI;
-        } else {
-            // Example: angles for non-neutral zone
-            angleA = defaultRampAngle.getAsDouble();
-            angleB = defaultRampAngle.getAsDouble() - Math2.HALF_PI;
-        }
-
-        // Helper: wrap difference to [-PI, PI]
-        double diffA = Math.abs(Math.atan2(Math.sin(currentAngle - angleA), Math.cos(currentAngle - angleA)));
-        double diffB = Math.abs(Math.atan2(Math.sin(currentAngle - angleB), Math.cos(currentAngle - angleB)));
-
-        rampAngle = (diffA < diffB) ? angleA : angleB;
-    }
-
-    // public double getHubAngular() {
-    //     return angularPID.calculate(state.rotation.getRadians(), angleToHub);
-    // }
-
     public void applyOrchestra(Orchestra orchestra) {
         this.api.applyOrchestra(orchestra);
     }
-
-    // private PhotonTrackedTarget getBestestTarget() {
-    //     var resultsList = fuelCamera.getAllUnreadResults();
-    //     if (resultsList == null || resultsList.size() > 0) {
-    //         fuelTargetLost = false;
-    //         return null;
-    //     }
-    //     var result = resultsList.get(0);
-    //     PhotonTrackedTarget highestAreaTarget = null;
-    //     if (result != null && result.hasTargets()) {
-    //         List<PhotonTrackedTarget> targets = result.getTargets();
-    //         highestAreaTarget = targets.stream().max(Comparator.comparing(PhotonTrackedTarget::getArea)).orElse(null);
-    //     }
-    //     if (highestAreaTarget == null) {
-    //         fuelTargetLost = true;
-    //     } else {
-    //         fuelTargetLost = false;
-    //     }
-    //     return highestAreaTarget;
-    // }
-
-    // private Transform2d getTransformToFuel() {
-    //     PhotonTrackedTarget bestestTarget = getBestestTarget();
-    //     if (bestestTarget != null) {
-    //         try {
-    //             SmartDashboard.putString("cameraTargetTransform", bestestTarget.getBestCameraToTarget().toString());
-    //         } catch (Exception e) {}
-    //         fuelTargetLost = false;
-    //         Transform2d transformToFuel = new Transform2d(
-    //             bestestTarget.getPitch() + 2.5,
-    //             bestestTarget.getYaw(),
-    //             new Rotation2d(-bestestTarget.getYaw())
-    //         );
-    //         return transformToFuel; // bestestTarget.getBestCameraToTarget();
-    //     } else {
-    //         fuelTargetLost = true;
-    //         return null;
-    //     }
-    // }
-
-    // public Pose2d getFuelPose() {
-    //     Transform2d transform2d = getTransformToFuel();
-    //     if (transform2d != null) {
-    //         Pose2d currentPose = state.pose;
-    //         // Transform2d transform2d = new Transform2d(
-    //         //     transform3d.getTranslation().toTranslation2d(),
-    //         //     transform3d.getRotation().toRotation2d()
-    //         // );
-    //         Pose2d fuelPose = currentPose.plus(transform2d);
-    //         fuelTargetLost = false;
-    //         return fuelPose;
-    //     } else {
-    //         fuelTargetLost = true;
-    //         return null;
-    //     }
-    // }
 }
