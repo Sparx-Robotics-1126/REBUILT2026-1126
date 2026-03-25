@@ -108,8 +108,8 @@ public final class Robot extends LoggedRobot {
         //     .and(driver.rightBumper())
         //     .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> false));
         // driver.a().whileTrue(swerve.driveToShootingArc(() -> 0.8));
-        driver.b().whileTrue(swerve.driveFacingHub(this::driverX, this::driverY, this::driverAngular));
-        driver.y().whileTrue(swerve.driveFacingZone(this::driverX, this::driverY, this::driverAngular));
+        driver.b().whileTrue(swerve.driveFacingTarget(this::driverX, this::driverY, this::driverAngular));
+        // driver.y().whileTrue(swerve.driveFacingZone(this::driverX, this::driverY, this::driverAngular));
         driver.rightTrigger().whileTrue(swerve.drive(this::driverX, this::driverY, this::driverAngular, false));
         driver.rightStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
         // driver.start().onTrue(swerve.adjustShootingRadius());

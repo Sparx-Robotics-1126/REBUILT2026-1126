@@ -11,6 +11,8 @@ import org.team1126.lib.math.PAPFController.LongitudinalObstacle;
 import org.team1126.lib.math.PAPFController.Obstacle;
 import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.lib.math.geometry.ExtTranslation;
+import org.team1126.lib.tunable.TunableTable;
+import org.team1126.lib.tunable.Tunables;
 import org.team1126.robot.subsystems.Swerve;
 
 /**
@@ -65,6 +67,11 @@ public final class Field {
     public static final double L3_SHOOTING_RANGE_RADIUS = 3.14;
     public static final double L2_SHOOTING_RANGE_RADIUS = 3.0;
     public static final double L1_SHOOTING_RANGE_RADIUS = 2.5;
+
+    private static final TunableTable shooterTunables = Tunables.getNested("shooter");
+    public static final TunableTable ferryTargets = shooterTunables.getNested("ferryTargets");
+    public static final ExtTranslation LEFT_FERRY_TARGET = ferryTargets.add("left", new ExtTranslation(2.5, 6.5));
+    public static final ExtTranslation RIGHT_FERRY_TARGET = ferryTargets.add("right", new ExtTranslation(LEFT_FERRY_TARGET.getBlue(true)));
 
     ////////////////////////
     // BARRIER DEFINITION //
