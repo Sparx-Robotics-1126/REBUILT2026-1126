@@ -12,6 +12,9 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
+import org.team1126.lib.tunable.TunableTable;
+import org.team1126.lib.tunable.Tunables;
+import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.DisableWatchdog;
 import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
@@ -30,7 +33,7 @@ import org.team1126.robot.util.nav.WaypointHeading;
 public final class Robot extends LoggedRobot {
 
     private final CommandScheduler scheduler = CommandScheduler.getInstance();
-
+  private static final TunableTable tunables = Tunables.getNested("Robot");
     public final Lights lights;
     public final Swerve swerve;
     public final Storage storage;
@@ -46,6 +49,9 @@ public final class Robot extends LoggedRobot {
     private final CommandXboxController coDriver;
     private final Orchestra orchestra;
     private Command autoSelected;
+    private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .62);
+      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", .8);
+    
 
     public Robot() {
         PhoenixUtil.disableDaemons();
@@ -108,7 +114,7 @@ public final class Robot extends LoggedRobot {
             .and(driver.rightBumper())
             .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> false));
         // driver.a().whileTrue(routines.aimAtHub(() -> 0.2));
-        driver.x().whileTrue(routines.driveOutpost());
+        // driver.x().whileTrue(routines.driveDepot());
         driver.a().whileTrue(swerve.driveToShootingArc(() -> 0.8));
         // driver.b().whileTrue(swerve.drive(this::driverX, this::driverY, () -> swerve.getHubAngular()));
         driver.b().whileTrue(swerve.driveFacingHub(this::driverX, this::driverY, this::driverAngular));
@@ -171,7 +177,7 @@ public final class Robot extends LoggedRobot {
 
         // Setup lights
         // scheduler.schedule(routines.lightsPreMatch(autos.runSelectedAuto()));
-        // RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
+        RobotModeTriggers.autonomous().whileTrue(routines.selfDriveLights());
         RobotModeTriggers.disabled().whileTrue(routines.lightsDisabledMode());
 
         if (rumbleOn) {
@@ -210,12 +216,16 @@ public final class Robot extends LoggedRobot {
 
     @NotLogged
     public double driverX() {
-        return driver.getLeftX();
+        var speed = driver.leftBumper().getAsBoolean() ? driverAfterburnerSpeed.get() : driverDefaultSpeed.get();
+        return driver.getLeftX() * speed;
+        // return driver.getLeftX();
     }
 
     @NotLogged
     public double driverY() {
-        return driver.getLeftY();
+        var speed = driver.leftBumper().getAsBoolean() ? driverAfterburnerSpeed.get() : driverDefaultSpeed.get();
+        return driver.getLeftY() * speed;
+        // return driver.getLeftY();
     }
 
     @NotLogged

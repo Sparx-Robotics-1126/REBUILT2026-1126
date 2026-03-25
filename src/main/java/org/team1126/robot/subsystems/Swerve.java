@@ -130,7 +130,7 @@ public final class Swerve extends GRRSubsystem {
         //             VelDeadband: how much deadband is needed on the controller to start moving.
         //             SlipAccel: the amount of acceleration the robot can do. the higher the number, the snappier the chnage in direction will be
         //             TorqueAccel: the amount to correct for rotating while at full speed. the higher the number, the more correction.
-        .setDriverProfile(2.8, 1.3, 0.15, 5.4, 2.0, 0.05)
+        .setDriverProfile(4.0, 1.3, 0.15, 5.4, 2.0, 0.05)
         //  Vel: the max velocity the HUMAN PLAYER can give to the robot.
         //             velExp: the exponential given to the joystick to allow for more sensitive control
         //             velDeadband: self-explanitory

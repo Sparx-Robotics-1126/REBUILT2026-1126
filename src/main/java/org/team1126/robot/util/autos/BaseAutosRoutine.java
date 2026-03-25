@@ -16,6 +16,7 @@ import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.Alliance;
 import org.team1126.robot.Robot;
 import org.team1126.robot.commands.Routines;
+import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.util.nav.Waypoint;
 
 /**
@@ -230,15 +231,19 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
      *
      * @return the command to do this.
      */
-    protected Command driveArchAndShootFuelStart() {
-        return sequence(
-            parallel(
-                routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
-                driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
-            ),
-            routines.shootFuelAuto().withTimeout(secondsPerBall.getAsDouble() * defaultFuelLoad.getAsDouble())
-        );
-    }
+protected Command driveArchAndShootFuelStart() {
+    return sequence(
+        parallel(
+            routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
+            driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
+        ) .withTimeout(Math.max(flywheelWarmupTimer.getAsDouble(), maxShootingArcTravelTime.getAsDouble())),
+        deadline(
+            routines.shootFuelAuto()
+                .withTimeout(secondsPerBall.getAsDouble() * defaultFuelLoad.getAsDouble())
+            // routines.shootingLights()
+        )
+    );
+}
 
     protected Command atStartingPoint(Supplier<Pose2d> startAt) {
         return atPoint(startAt);

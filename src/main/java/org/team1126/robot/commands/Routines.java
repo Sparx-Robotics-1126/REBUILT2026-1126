@@ -1,6 +1,7 @@
 package org.team1126.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.Commands.parallel;
+import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 
@@ -102,7 +103,7 @@ public final class Routines {
         }
     }
 
-    public Command driveOutpost() {
+    public Command driveDepot() {
         // var debot = Field.WAYPOINT_DEPOT.get();
         var goal = new Pose2d(
             Field.WAYPOINT_DEPOT.get().getX(),
@@ -134,10 +135,10 @@ public final class Routines {
 
     public Command shootFuelAuto() {
         return parallel(
-            // shootingLights(),
+            //    lights.top.setSolidRed()
             shooter.shoot(shooter::feederIsReady),
             storage.feedShooter(shooter::shooterIsReady)
-        ).withName("Routines.score()");
+        ).withName("Routines.scoreAuto()");
     }
 
     public Command shootFuel() {
@@ -196,8 +197,9 @@ public final class Routines {
 
     public Command readyFeederShooter() {
         return parallel(
+            // lights.aiming(),
+             
             shooter.getReadyCommand()
-            //  storage.feedShooter(shooter::shooterIsReady)
         ).withName("Routines.readyFeederShooter()");
     }
 
@@ -218,7 +220,7 @@ public final class Routines {
 
     public Command shootingLights() {
         return parallel(
-            lights.sides.chase(Lights.Color.SHOOTING),
+            // lights.sides.chase(Lights.Color.SHOOTING),
             lights.top.convergeToMiddle(Lights.Color.SHOOTING)
         ).withName("Routines.shootingLights()");
     }

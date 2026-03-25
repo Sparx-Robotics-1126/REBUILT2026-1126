@@ -16,9 +16,12 @@ import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.routines.BacknForth;
 import org.team1126.robot.util.autos.routines.GrabAndShoot;
+import org.team1126.robot.util.autos.routines.HerdIntoSection;
 import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
+import org.team1126.robot.util.autos.routines.PourMeSomeFuel;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
+import org.team1126.robot.util.autos.routines.ShootIntakeShootAtAlliance;
 import org.team1126.robot.util.autos.routines.SweepCenter;
 
 /**
@@ -60,6 +63,9 @@ public final class Autos {
         GrabAndShoot.init(robot);
         ShootFirstAskQuestionsLater.init(robot);
         InTheTrenches.init(robot);
+        ShootIntakeShootAtAlliance.init(robot);
+        HerdIntoSection.init(robot);
+        PourMeSomeFuel.init(robot);
         BacknForth.init(robot);
 
         AutosFlip right = AutosFlip.RIGHT;
@@ -153,17 +159,42 @@ public final class Autos {
 
         //BacknForth
         chooser.addOption(
-            BacknForth.get().getDisplayName(startBump, left, true),
-            BacknForth.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
+            BacknForth.get().getDisplayName(startBump, right, true),
+            BacknForth.get().action(() -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            BacknForth.get().getDisplayName(startBump, right, true),
-            BacknForth.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
+            BacknForth.get().getDisplayName(startBump, left, true),
+            BacknForth.get().action(() -> left, () -> Alliance.isBlue())
+        );
+
+        //ShootIntakeShootAtAlliance
+        chooser.addOption(
+            ShootIntakeShootAtAlliance.get().getDisplayName(startBump, right, true),
+            ShootIntakeShootAtAlliance.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
+        );
+        chooser.addOption(
+            ShootIntakeShootAtAlliance.get().getDisplayName(startBump, left, true),
+            ShootIntakeShootAtAlliance.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
         );
 
         // chooser.addOption("Depot", routines.dock());
         // chooser.addOption("Depot", routines.dock());
         SmartDashboard.putData("autos", chooser);
+
+        chooser.addOption(
+            HerdIntoSection.get().getDisplayName(right, true),
+            HerdIntoSection.get().action(() -> right, () -> Alliance.isBlue())
+        );
+        chooser.addOption(
+            HerdIntoSection.get().getDisplayName(left, true),
+            HerdIntoSection.get().action(() -> left, () -> Alliance.isBlue())
+        );
+
+        //PourMeSomeFuel
+        chooser.addOption(
+            PourMeSomeFuel.get().getDisplayName(startBump, right, true),
+            PourMeSomeFuel.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
+        );
     }
 
     /**

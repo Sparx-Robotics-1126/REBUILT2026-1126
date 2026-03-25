@@ -271,7 +271,6 @@ public final class Lights {
                     }
                 })
                 .onEnd(() -> setBoth(Color.OFF))
-                .ignoringDisable(true)
                 .withName("Lights.Sides.levelSelection()");
         }
 
@@ -1023,5 +1022,22 @@ public final class Lights {
                 .ignoringDisable(true)
                 .withName("Lights.Top.convergeToMiddle()");
         }
+    }
+
+    public Command aiming() {
+        return parallel(
+            sides.chase(Color.GREEN),
+            top.convergeToMiddle(Color.GREEN)
+        )
+            .withName("Lights.aiming()");
+   
+    }
+
+    public Command shooting() {
+      return parallel(
+            sides.chase(Color.LIME_YELLOW),
+            top.convergeToMiddle(Color.LIME_YELLOW)
+        )
+            .withName("Lights.shooting()");
     }
 }
