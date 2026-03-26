@@ -1,7 +1,7 @@
 package org.team1126.robot.subsystems;
 
 import static org.team1126.robot.Constants.INTAKE_MOTOR;
-import static org.team1126.robot.Constants.PIVOT_MOTOR;
+import static org.team1126.robot.Constants.PIVOT_MOTOR_LEAD;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,7 @@ public final class Intake extends GRRSubsystem {
         intakeEncoder = intakeMotor.getEncoder();
         intakeConfig = new SparkFlexConfig();
 
-        pivotMotor = new SparkFlex(PIVOT_MOTOR, SparkLowLevel.MotorType.kBrushless);
+        pivotMotor = new SparkFlex(PIVOT_MOTOR_LEAD, SparkLowLevel.MotorType.kBrushless);
         // pivotEncoder = pivotMotor.getAbsoluteEncoder();
         pivotConfig = new SparkFlexConfig();
         pivotController = pivotMotor.getClosedLoopController();

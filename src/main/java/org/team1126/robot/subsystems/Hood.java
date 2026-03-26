@@ -8,11 +8,11 @@ import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.command.GRRSubsystem;
+import org.team1126.robot.Constants;
 
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -36,7 +36,7 @@ public final class Hood extends GRRSubsystem {
     private boolean isZeroed = false;
 
     public Hood() {
-        this.motor = new TalonFX(0);
+        this.motor = new TalonFX(Constants.HOOD_MOTOR);
 
         this.motorVelocity = tunables.value("velocity", 0.254);
         this.motorPosition = tunables.value("position", .25);

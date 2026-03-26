@@ -48,11 +48,14 @@ public final class Constants {
     //Storage
     public static final int STORAGE_MOTOR = 20;
 
-    public static final int INTAKE_MOTOR = 23;
-    public static final int PIVOT_MOTOR = 24;
+    public static final int INTAKE_MOTOR = 22;
+    public static final int PIVOT_MOTOR_LEAD = 23;
+    public static final int PIVOT_MOTOR_FOLLOW = 24;
     public static final int FEEDER_MOTOR = 25;
     public static final int SHOOTER_MOTOR_LEAD = 26;
+
     public static final int SHOOTER_MOTOR_FOLLOW = 27;
+        public static final int HOOD_MOTOR = 28;
 
     public static final class LowerCAN {
 
