@@ -16,6 +16,7 @@ import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public final class Hood extends GRRSubsystem {
@@ -23,6 +24,7 @@ public final class Hood extends GRRSubsystem {
     private static final TunableDouble stallVelocity = tunables.value("stallVelocity", 0.05);
     private static final TunableDouble homingVelocity = tunables.value("homingVelocity", -30.0);
     private static final TunableDouble zeroZero = tunables.value("zeroZero", 1.0); // In rotations per second
+    private static final TunableDouble positionTolerance = tunables.value("positionTolerance", 0.25); // In rotations at the rotor (gearing not included)
 
     private final TalonFX motor;
 
@@ -52,8 +54,8 @@ public final class Hood extends GRRSubsystem {
     }
 
     public boolean atPosition() {
-        if (this.motor.getPosition().getValueAsDouble() < this.motorPosition.getAsDouble() + 100 
-        && this.motor.getPosition().getValueAsDouble() > this.motorPosition.getAsDouble() - 100) {
+        if (this.motor.getPosition().getValueAsDouble() < this.motorPosition.getAsDouble() + positionTolerance.get() 
+        && this.motor.getPosition().getValueAsDouble() > this.motorPosition.getAsDouble() - positionTolerance.get()) {
             return true;
         }
         return false;
@@ -92,5 +94,11 @@ public final class Hood extends GRRSubsystem {
                 motor.setControl(maxVelocity);
             })
             .onEnd(motor::stopMotor);
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Hood Position", this.motor.getPosition().getValueAsDouble());
+        SmartDashboard.putBoolean("Hood At Position", atPosition());
     }
 }
