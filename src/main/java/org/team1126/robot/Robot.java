@@ -20,6 +20,7 @@ import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
+import org.team1126.robot.subsystems.Feeder;
 import org.team1126.robot.subsystems.Hood;
 import org.team1126.robot.subsystems.Intake;
 import org.team1126.robot.subsystems.Lights;
@@ -41,6 +42,7 @@ public final class Robot extends LoggedRobot {
     public final Shooter shooter;
     public final Hood hood;
     public final Intake intake;
+    public final Feeder feeder;
     public final ShiftTracker shiftTracker;
     private final boolean rumbleOn = true;
 
@@ -70,6 +72,7 @@ public final class Robot extends LoggedRobot {
         shooter = new Shooter();
         hood = new Hood();
         intake = new Intake();
+        feeder = new Feeder();
 
         shiftTracker = new ShiftTracker();
 
@@ -129,11 +132,11 @@ public final class Robot extends LoggedRobot {
         // coDriver.leftTrigger().whileTrue(routines.readyFeederShooter());
 
         // coDriver.leftTrigger().whileTrue(routines.unJamFeederShooter());
-        coDriver.rightBumper().toggleOnTrue(shooter.readyShooter());
+        // coDriver.rightBumper().toggleOnTrue(shooter.readyShooter());
         // coDriver.rightTrigger().toggleOnTrue(shooter.readyFieldShooter(() -> true));
         coDriver.rightTrigger().whileTrue(routines.shootFuel());
         coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
-        coDriver.leftBumper().toggleOnTrue(shooter.haltShooter());
+        // coDriver.leftBumper().toggleOnTrue(shooter.haltShooter());
         // coDriver.povRight().whileTrue(routines.shootFuel());
         coDriver.povLeft().whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightTrigger().and(coDriver.povRight()).whileTrue(routines.shootFuel());
@@ -141,7 +144,7 @@ public final class Robot extends LoggedRobot {
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-        coDriver.a().whileTrue(intake.extendIntake(true));
+        coDriver.a().whileTrue(intake.extendIntake());
         coDriver.y().whileTrue(intake.retrackIntakeTest());
 
         coDriver.x().whileTrue(intake.moveIntakeTest(false));

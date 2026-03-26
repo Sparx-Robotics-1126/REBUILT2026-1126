@@ -64,7 +64,7 @@ public final class BacknForth extends BaseAutosRoutine {
                 .andThen(driveWaypoint(flip, 1, blue))
                 .andThen(
                     robot.intake
-                        .extendIntake(false)
+                        .extendIntake()
                         .withTimeout(1.5)
                         .andThen(robot.intake.moveIntakeTest(false))
                         .withDeadline(driveWaypoint(flip, 2, blue)

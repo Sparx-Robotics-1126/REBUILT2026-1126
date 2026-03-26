@@ -2,7 +2,7 @@ package org.team1126.robot.subsystems;
 
 import static org.team1126.robot.Constants.INTAKE_MOTOR;
 import static org.team1126.robot.Constants.PIVOT_MOTOR;
-
+import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -222,10 +222,25 @@ public final class Intake extends GRRSubsystem {
         );
     }
 
-    @NotLogged
-    public Command extendIntake(boolean spinIntake) {
-        return commandBuilder().onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), spinIntake));
+    // @NotLogged
+    // public Command extendIntake(boolean spinIntake) {
+    //     return commandBuilder().onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), spinIntake));
+    //     // .onEnd(this::stopPivot);
+    // }
+
+       @NotLogged
+    public Command extendIntake() {
+        return commandBuilder().onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), false));
         // .onEnd(this::stopPivot);
+    }
+    /**
+     * Agitates the hopper by jostling the intake up and down while pulling balls inwards.
+     */
+    public Command agitate() {
+        return sequence( extendIntake().withTimeout(0.4),
+                        retrackIntakeTest().withTimeout(0.4))
+            .repeatedly()
+            .withName("Intake.agitate()");
     }
 
     //    public Command extendIntake() {

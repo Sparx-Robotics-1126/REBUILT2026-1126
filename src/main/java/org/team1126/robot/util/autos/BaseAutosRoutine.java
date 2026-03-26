@@ -204,7 +204,7 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
 
     protected Command shootFuel() {
         return sequence(
-            routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
+            // routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
             routines.shootFuelAuto().withTimeout(secondsPerBall.getAsDouble() * defaultFuelLoad.getAsDouble())
         );
     }
@@ -218,7 +218,7 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
     protected Command driveArchAndShootFuel() {
         return sequence(
             parallel(
-                routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
+                // routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
                 driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
             ),
             routines.shootFuelAuto()
@@ -234,7 +234,7 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
 protected Command driveArchAndShootFuelStart() {
     return sequence(
         parallel(
-            routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
+            // routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
             driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
         ) .withTimeout(Math.max(flywheelWarmupTimer.getAsDouble(), maxShootingArcTravelTime.getAsDouble())),
         deadline(

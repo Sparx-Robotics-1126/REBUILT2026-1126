@@ -86,6 +86,7 @@ public final class Swerve extends GRRSubsystem {
 
     private static final TunableTable trenchTunables = tunables.getNested("trench");
     private static final TunableDouble trenchDecel = trenchTunables.value("deceleration", 0.3);
+    private double targetDistance = 0.0;
 
     private static final Orchestra orchestra = new Orchestra();
     // private static final TunableDouble climbFudge = tunables.value("climbFudge", Math.toRadians(5.0));
@@ -157,7 +158,8 @@ public final class Swerve extends GRRSubsystem {
     private boolean changedReference = false;
     private double hubAngular = 0.0;
     private boolean shouldFaceHub = false;
-
+  private static final TunableDouble flatTolerance = tunables.value("flatTolerance", Math.toRadians(5.0));
+    private boolean atAngle = false;
     // private List<ExtPose> waypoints;
 
     // private PhotonCamera fuelCamera;
@@ -169,6 +171,7 @@ public final class Swerve extends GRRSubsystem {
     private double distanceToShootingPoint = 0.0;
     private double angleToTarget = 0.0;
     private boolean aimingAtTarget = false;
+    private int tagsSeen = 0;
 
     private Translation2d shootingArc = new Translation2d(0.0, 0.0);
     private ShootingRadius currentShootingRadius = ShootingRadius.L1;
@@ -259,6 +262,17 @@ public final class Swerve extends GRRSubsystem {
         double dot = Math.cos(angleToTarget) * state.rotation.getCos() + Math.sin(angleToTarget) * state.rotation.getSin();
         aimingAtTarget = Math.acos(MathUtil.clamp(dot, -1.0, 1.0)) < facingHubTol.get();
 
+        // Determine if the robot is at an angle (pitch/roll is non-zero).
+        if (
+            Math.abs(state.pitch.getRadians()) > flatTolerance.get()
+            || Math.abs(state.roll.getRadians()) > flatTolerance.get()
+        ) {
+            atAngle = true;
+            tagsSeen = 0;
+        } else {
+            atAngle = false;
+            tagsSeen += measurements.length;
+        }
         // distanceToShootingPoint = distanceToTarget - currentShootingRadius.getVal();
         // double shootingX = state.pose.getX() + distanceToShootingPoint;
         // double shootingY = state.pose.getY() + distanceToShootingPoint;
@@ -312,6 +326,14 @@ public final class Swerve extends GRRSubsystem {
     @NotLogged
     public boolean seesAprilTag() {
         return seesAprilTag;
+    }
+ /**
+     * Returns the tags seen since the robot was at an angle.
+     * This can be used to determined if the robot's odometry is accurate.
+     */
+    @NotLogged
+    public int tagsSeen() {
+        return tagsSeen;
     }
 
     /**

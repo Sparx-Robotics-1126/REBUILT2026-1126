@@ -70,7 +70,7 @@ public final class IntakeCenter extends BaseAutosRoutine {
                 .andThen(
                     parallel(
                         robot.intake
-                            .extendIntake(false)
+                            .extendIntake()
                             .withTimeout(1.5)
                             .andThen(robot.intake.moveIntakeMotorCommand(false)),
                         Commands.waitSeconds(2.0)
