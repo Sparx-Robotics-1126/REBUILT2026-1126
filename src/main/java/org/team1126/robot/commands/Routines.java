@@ -4,6 +4,7 @@ import static edu.wpi.first.wpilibj2.command.Commands.parallel;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
+import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -59,7 +60,7 @@ public final class Routines {
     private final Lights lights;
     private final Swerve swerve;
     private final Shooter shooter;
-    // private final Hood hood;
+    private final Hood hood;
     private final Storage storage;
     private final Intake intake;
 
@@ -68,6 +69,7 @@ public final class Routines {
         lights = robot.lights;
         swerve = robot.swerve;
         shooter = robot.shooter;
+        hood = robot.hood;
         storage = robot.storage;
         intake = robot.intake;
         //        selection = robot.selection;
@@ -155,9 +157,9 @@ public final class Routines {
             // shootingLights(),
             lights.sides.chase(Lights.Color.SHOOTING),
             lights.top.convergeToMiddle(Lights.Color.SHOOTING),
-            shooter.readyShooter(),
-            storage.feedShooter(shooter::shooterIsReady)
-            // shooter.shoot(shooter::feederIsReady)
+            hood.targetDistance(swerve::distanceToTarget),
+            shooter.targetDistance(swerve::distanceToTarget),
+            sequence(waitUntil(() -> (shooter.shooterIsReady() && hood.atPosition() && swerve.aimingAtTarget())), parallel(shooter.feedShooter(), storage.feedShooter(() -> shooter.feederIsReady())))
         ).withName("Routines.score()");
     }
 

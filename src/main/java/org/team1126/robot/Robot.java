@@ -20,6 +20,7 @@ import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
+import org.team1126.robot.subsystems.Hood;
 import org.team1126.robot.subsystems.Intake;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
@@ -38,6 +39,7 @@ public final class Robot extends LoggedRobot {
     public final Swerve swerve;
     public final Storage storage;
     public final Shooter shooter;
+    public final Hood hood;
     public final Intake intake;
     public final ShiftTracker shiftTracker;
     private final boolean rumbleOn = true;
@@ -66,6 +68,7 @@ public final class Robot extends LoggedRobot {
 
         storage = new Storage();
         shooter = new Shooter();
+        hood = new Hood();
         intake = new Intake();
 
         shiftTracker = new ShiftTracker();

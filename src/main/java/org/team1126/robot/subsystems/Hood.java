@@ -12,6 +12,7 @@ import org.team1126.lib.util.command.GRRSubsystem;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -48,6 +49,14 @@ public final class Hood extends GRRSubsystem {
      */
     public Command targetDistance(final DoubleSupplier distance) {
         return goTo(() -> hoodPositionMap.get(distance.getAsDouble())).withName("Hood.targetDistance()");
+    }
+
+    public boolean atPosition() {
+        if (this.motor.getPosition().getValueAsDouble() < this.motorPosition.getAsDouble() + 100 
+        && this.motor.getPosition().getValueAsDouble() > this.motorPosition.getAsDouble() - 100) {
+            return true;
+        }
+        return false;
     }
 
     /**

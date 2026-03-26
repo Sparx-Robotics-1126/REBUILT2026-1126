@@ -4,6 +4,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.Orchestra;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -54,7 +55,7 @@ public final class Swerve extends GRRSubsystem {
 
     private static final TunableTable tunables = Tunables.getNested("swerve");
     private static final TunableDouble turboSpin = tunables.value("turboSpin", 8.0);
-    private static final TunableDouble facingHubTol = tunables.value("facingHubTol", 1.0);
+    private static final TunableDouble facingHubTol = tunables.value("facingHubTol", 15.0);
 
     private static final TunableTable beachTunables = tunables.getNested("beach");
     private static final TunableDouble beachSpeed = beachTunables.value("speed", 3.0);
@@ -160,13 +161,14 @@ public final class Swerve extends GRRSubsystem {
     // private List<ExtPose> waypoints;
 
     // private PhotonCamera fuelCamera;
-    private boolean fuelTargetLost;
+    // private boolean fuelTargetLost;
 
     private boolean facingHub = false;
 
     private double distanceToTarget = 0.0;
     private double distanceToShootingPoint = 0.0;
     private double angleToTarget = 0.0;
+    private boolean aimingAtTarget = false;
 
     private Translation2d shootingArc = new Translation2d(0.0, 0.0);
     private ShootingRadius currentShootingRadius = ShootingRadius.L1;
@@ -213,7 +215,7 @@ public final class Swerve extends GRRSubsystem {
 
         // fuelCamera = new PhotonCamera(Constants.OBJ_DETECTION_CAMERA_CONFIG.name());
 
-        fuelTargetLost = true;
+        // fuelTargetLost = true;
 
         state = api.state;
 
@@ -254,6 +256,8 @@ public final class Swerve extends GRRSubsystem {
         distanceToTarget = Math.hypot(deltaX, deltaY);
 
         angleToTarget = Math.atan2(deltaY, deltaX) + Math.PI;
+        double dot = Math.cos(angleToTarget) * state.rotation.getCos() + Math.sin(angleToTarget) * state.rotation.getSin();
+        aimingAtTarget = Math.acos(MathUtil.clamp(dot, -1.0, 1.0)) < facingHubTol.get();
 
         // distanceToShootingPoint = distanceToTarget - currentShootingRadius.getVal();
         // double shootingX = state.pose.getX() + distanceToShootingPoint;
@@ -268,6 +272,14 @@ public final class Swerve extends GRRSubsystem {
         // }
 
         // shootingArc = new Translation2d(shootingX, shootingY);
+    }
+
+    public double distanceToTarget() {
+        return distanceToTarget;
+    }
+
+    public boolean aimingAtTarget() {
+        return aimingAtTarget;
     }
 
     /**
