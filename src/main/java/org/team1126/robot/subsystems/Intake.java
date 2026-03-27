@@ -36,7 +36,6 @@ public final class Intake extends GRRSubsystem {
     private static final TunableTable tunables = Tunables.getNested("intake");
 
     private SparkFlexConfig pivotConfig;
-    // private final SparkAbsoluteEncoder pivotEncoder;
     private SparkClosedLoopController pivotController;
     private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -16.7);
     
@@ -45,16 +44,6 @@ public final class Intake extends GRRSubsystem {
     private List<Double> busVoltage = new ArrayList<>();
     private List<Double> intakeTemperature = new ArrayList<>();
 
-
-    // private final SparkMax moveStorage;
-    // private SparkMaxConfig moveStorageConfig;
-    // private final RelativeEncoder moveStorageEncoder;
-    // private SparkClosedLoopController moveStorageController;
-    // private static final TunableTable moveStorageTunables = Tunables.getNested("moveStorage");
-
-    //    private boolean isOn;
-    //    private final Tunables.TunableDouble voltage;
-
     public Intake() {
         intakeMotor = new SparkFlex(INTAKE_MOTOR, SparkLowLevel.MotorType.kBrushless);
         intakeEncoder = intakeMotor.getEncoder();
@@ -62,7 +51,6 @@ public final class Intake extends GRRSubsystem {
 
         pivotMotorLead = new SparkFlex(PIVOT_MOTOR_LEAD, SparkLowLevel.MotorType.kBrushless);
         pivotMotorFollow = new SparkFlex(PIVOT_MOTOR_FOLLOW, SparkLowLevel.MotorType.kBrushless);
-        // pivotEncoder = pivotMotor.getAbsoluteEncoder();
         pivotConfig = new SparkFlexConfig();
         pivotController = pivotMotorLead.getClosedLoopController();
 
@@ -90,7 +78,6 @@ public final class Intake extends GRRSubsystem {
             .allowedProfileError(1, ClosedLoopSlot.kSlot1)
             .cruiseVelocity(650, ClosedLoopSlot.kSlot1) // Changed from 1000 to match test setpoint
             .allowedProfileError(1, ClosedLoopSlot.kSlot1);
-        //   pivotConfig.closedLoop.maxMotion.maxAcceleration(100).cruiseVelocity(100).allowedProfileError(1)
 
         pivotMotorLead.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         
@@ -98,12 +85,6 @@ public final class Intake extends GRRSubsystem {
         followConfig.inverted(true);
         followConfig.follow(PIVOT_MOTOR_LEAD);
         pivotMotorFollow.configure(followConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-        // moveStorage = new SparkMax(MOVE_STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
-        // moveStorageEncoder = moveStorage.getEncoder();
-        // moveStorageConfig = new SparkMaxConfig();
-        // moveStorageController = moveStorage.getClosedLoopController();
-
-        //        isOn = false;
 
         intakeController = intakeMotor.getClosedLoopController();
         intakeConfig
@@ -135,9 +116,9 @@ public final class Intake extends GRRSubsystem {
 
         intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
-        //        shooterController.setSetpoint(this.shooterShootSpeed, SparkBase.ControlType.kMAXMotionVelocityControl);
         tunables.add("Intake Motor", intakeMotor);
-        tunables.add("Pivot Motor", pivotMotorLead);
+        tunables.add("Pivot Motor Lead", pivotMotorLead);
+         tunables.add("Pivot Motor Follower", pivotMotorFollow);
     }
 
     @NotLogged
@@ -165,7 +146,6 @@ public final class Intake extends GRRSubsystem {
 
     @NotLogged
     public Command spill() {
-        //toggle(true);
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(true))
             .onEnd(this::stopIntake);
@@ -173,7 +153,6 @@ public final class Intake extends GRRSubsystem {
 
     @NotLogged
     public Command intake() {
-        //toggle(true);
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(false))
             .onEnd(() -> intakeMotor.set(0));
@@ -190,9 +169,6 @@ public final class Intake extends GRRSubsystem {
         SmartDashboard.putNumber("Velocity", this.intakeEncoder.getVelocity());
         SmartDashboard.putNumber("Position", this.pivotMotorLead.getEncoder().getPosition());
         SmartDashboard.putNumber("Pivot Temp", this.pivotMotorLead.getMotorTemperature());
-        //        if (isOn) {
-        //            intakeController.setSetpoint(voltage.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-        //        }
         outputCurrent.add(intakeMotor.getOutputCurrent());
         appliedOutput.add(intakeMotor.getAppliedOutput());
         busVoltage.add(Math.abs(intakeMotor.getBusVoltage()));
@@ -215,9 +191,6 @@ public final class Intake extends GRRSubsystem {
             SparkBase.ControlType.kMAXMotionPositionControl,
             ClosedLoopSlot.kSlot0
         );
-        // if (spinIntake) {
-        //     moveIntakeMotor(true);
-        // }
     }
 
     @NotLogged
@@ -229,16 +202,10 @@ public final class Intake extends GRRSubsystem {
         );
     }
 
-    // @NotLogged
-    // public Command extendIntake(boolean spinIntake) {
-    //     return commandBuilder().onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), spinIntake));
-    //     // .onEnd(this::stopPivot);
-    // }
 
        @NotLogged
     public Command extendIntake() {
         return commandBuilder().onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), false));
-        // .onEnd(this::stopPivot);
     }
     /**
      * Agitates the hopper by jostling the intake up and down while pulling balls inwards.
@@ -250,19 +217,6 @@ public final class Intake extends GRRSubsystem {
             .withName("Intake.agitate()");
     }
 
-    //    public Command extendIntake() {
-    //        return commandBuilder()
-    //            .onExecute(() -> this.moveMotorPosOut(pivotPosition.get()))
-    //            .onEnd(interrupted -> {
-    //                // Stop driving and let it relax wherever it ended up
-    //                pivotMotor.setVoltage(0.0);
-    //
-    //                // Put the pivot motor into Coast
-    //                var coastCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kCoast);
-    //
-    //                pivotMotor.configure(coastCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-    //            });
-    //    }
 
     @NotLogged
     public Command retrackIntakeTest() {
