@@ -95,6 +95,7 @@ public final class Intake extends GRRSubsystem {
         pivotMotorLead.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         
         SparkFlexConfig followConfig = new SparkFlexConfig();
+        followConfig.inverted(true);
         followConfig.follow(PIVOT_MOTOR_LEAD);
         pivotMotorFollow.configure(followConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         // moveStorage = new SparkMax(MOVE_STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
