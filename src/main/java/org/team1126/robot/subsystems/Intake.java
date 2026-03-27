@@ -2,6 +2,7 @@ package org.team1126.robot.subsystems;
 
 import static org.team1126.robot.Constants.INTAKE_MOTOR;
 import static org.team1126.robot.Constants.PIVOT_MOTOR_LEAD;
+import static org.team1126.robot.Constants.PIVOT_MOTOR_FOLLOW;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,8 @@ import org.team1126.lib.util.command.GRRSubsystem;
 public final class Intake extends GRRSubsystem {
 
     private final SparkFlex intakeMotor;
-    private final SparkFlex pivotMotor;
+    private final SparkFlex pivotMotorLead;
+    private final SparkFlex pivotMotorFollow;
 
     private SparkFlexConfig intakeConfig;
     private final RelativeEncoder intakeEncoder;
@@ -58,10 +60,11 @@ public final class Intake extends GRRSubsystem {
         intakeEncoder = intakeMotor.getEncoder();
         intakeConfig = new SparkFlexConfig();
 
-        pivotMotor = new SparkFlex(PIVOT_MOTOR_LEAD, SparkLowLevel.MotorType.kBrushless);
+        pivotMotorLead = new SparkFlex(PIVOT_MOTOR_LEAD, SparkLowLevel.MotorType.kBrushless);
+        pivotMotorFollow = new SparkFlex(PIVOT_MOTOR_FOLLOW, SparkLowLevel.MotorType.kBrushless);
         // pivotEncoder = pivotMotor.getAbsoluteEncoder();
         pivotConfig = new SparkFlexConfig();
-        pivotController = pivotMotor.getClosedLoopController();
+        pivotController = pivotMotorLead.getClosedLoopController();
 
         pivotConfig.idleMode(SparkBaseConfig.IdleMode.kBrake);
         pivotConfig.closedLoop
@@ -89,8 +92,11 @@ public final class Intake extends GRRSubsystem {
             .allowedProfileError(1, ClosedLoopSlot.kSlot1);
         //   pivotConfig.closedLoop.maxMotion.maxAcceleration(100).cruiseVelocity(100).allowedProfileError(1)
 
-        pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-
+        pivotMotorLead.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        
+        SparkFlexConfig followConfig = new SparkFlexConfig();
+        followConfig.follow(PIVOT_MOTOR_LEAD);
+        pivotMotorFollow.configure(followConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         // moveStorage = new SparkMax(MOVE_STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
         // moveStorageEncoder = moveStorage.getEncoder();
         // moveStorageConfig = new SparkMaxConfig();
@@ -130,7 +136,7 @@ public final class Intake extends GRRSubsystem {
 
         //        shooterController.setSetpoint(this.shooterShootSpeed, SparkBase.ControlType.kMAXMotionVelocityControl);
         tunables.add("Intake Motor", intakeMotor);
-        tunables.add("Pivot Motor", pivotMotor);
+        tunables.add("Pivot Motor", pivotMotorLead);
     }
 
     @NotLogged
@@ -181,8 +187,8 @@ public final class Intake extends GRRSubsystem {
     public void periodic() {
         SmartDashboard.putBoolean("Intake at set point?", intakeController.isAtSetpoint());
         SmartDashboard.putNumber("Velocity", this.intakeEncoder.getVelocity());
-        SmartDashboard.putNumber("Position", this.pivotMotor.getEncoder().getPosition());
-        SmartDashboard.putNumber("Pivot Temp", this.pivotMotor.getMotorTemperature());
+        SmartDashboard.putNumber("Position", this.pivotMotorLead.getEncoder().getPosition());
+        SmartDashboard.putNumber("Pivot Temp", this.pivotMotorLead.getMotorTemperature());
         //        if (isOn) {
         //            intakeController.setSetpoint(voltage.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
         //        }
@@ -195,10 +201,10 @@ public final class Intake extends GRRSubsystem {
         SmartDashboard.putNumber("Intake Motor Applied Output", intakeMotor.getAppliedOutput());
         SmartDashboard.putNumber("Intake Motor Bus Voltage", Math.abs(intakeMotor.getBusVoltage()));
         SmartDashboard.putNumber("Intake Motor Temperature", intakeMotor.getMotorTemperature());
-        SmartDashboard.putNumber("Pivot Motor Output Current", pivotMotor.getOutputCurrent());
-        SmartDashboard.putNumber("Pivot Motor Applied Output", pivotMotor.getAppliedOutput());  
-        SmartDashboard.putNumber("Pivot Motor Bus Voltage", Math.abs(pivotMotor.getBusVoltage()));
-        SmartDashboard.putNumber("Pivot Motor Temperature", pivotMotor.getMotorTemperature());
+        SmartDashboard.putNumber("Pivot Motor Output Current", pivotMotorLead.getOutputCurrent());
+        SmartDashboard.putNumber("Pivot Motor Applied Output", pivotMotorLead.getAppliedOutput());  
+        SmartDashboard.putNumber("Pivot Motor Bus Voltage", Math.abs(pivotMotorLead.getBusVoltage()));
+        SmartDashboard.putNumber("Pivot Motor Temperature", pivotMotorLead.getMotorTemperature());
     }
 
     @NotLogged
@@ -273,13 +279,13 @@ public final class Intake extends GRRSubsystem {
                 // Use Brake to resist drifting away from home
                 var brakeCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kBrake);
 
-                pivotMotor.configure(brakeCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+                pivotMotorLead.configure(brakeCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
             });
     }
 
     @NotLogged
     private void stopPivot() {
-        pivotMotor.setVoltage(0);
+        pivotMotorLead.setVoltage(0);
     }
 
     public List<Double> getOutputCurrent() {
