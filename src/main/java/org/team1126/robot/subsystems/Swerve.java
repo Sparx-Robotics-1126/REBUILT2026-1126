@@ -55,7 +55,7 @@ public final class Swerve extends GRRSubsystem {
 
     private static final TunableTable tunables = Tunables.getNested("swerve");
     private static final TunableDouble turboSpin = tunables.value("turboSpin", 8.0);
-    private static final TunableDouble facingHubTol = tunables.value("facingHubTol", 15.0);
+    private static final TunableDouble facingHubTol = tunables.value("facingHubTol", Math.toRadians(15.0));
 
     private static final TunableTable beachTunables = tunables.getNested("beach");
     private static final TunableDouble beachSpeed = beachTunables.value("speed", 3.0);
@@ -273,19 +273,19 @@ public final class Swerve extends GRRSubsystem {
             atAngle = false;
             tagsSeen += measurements.length;
         }
-        // distanceToShootingPoint = distanceToTarget - currentShootingRadius.getVal();
-        // double shootingX = state.pose.getX() + distanceToShootingPoint;
-        // double shootingY = state.pose.getY() + distanceToShootingPoint;
+        distanceToShootingPoint = distanceToTarget - currentShootingRadius.getVal();
+        double shootingX = state.pose.getX() + distanceToShootingPoint;
+        double shootingY = state.pose.getY() + distanceToShootingPoint;
 
-        // if (state.pose.getY() > Field.CENTER_Y) {
-        //     shootingY = state.pose.getY() - distanceToShootingPoint;
-        // }
+        if (state.pose.getY() > Field.CENTER_Y) {
+            shootingY = state.pose.getY() - distanceToShootingPoint;
+        }
 
-        // if (Alliance.isRed()) {
-        //     shootingX = state.pose.getX() - distanceToShootingPoint;
-        // }
+        if (Alliance.isRed()) {
+            shootingX = state.pose.getX() - distanceToShootingPoint;
+        }
 
-        // shootingArc = new Translation2d(shootingX, shootingY);
+        shootingArc = new Translation2d(shootingX, shootingY);
     }
 
     public double distanceToTarget() {
@@ -600,21 +600,21 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.stop(" + lock + ")").onExecute(() -> api.applyStop(lock));
     }
 
-    // public Command adjustShootingRadius() {
-    //     return commandBuilder("Swerve.adjustShootingRadius()").onExecute(() -> {
-    //         switch (currentShootingRadius) {
-    //             case L1:
-    //                 currentShootingRadius = ShootingRadius.L2;
-    //                 break;
-    //             case L2:
-    //                 currentShootingRadius = ShootingRadius.L3;
-    //                 break;
-    //             default:
-    //                 currentShootingRadius = ShootingRadius.L1;
-    //                 break;
-    //         }
-    //     });
-    // }
+    public Command adjustShootingRadius() {
+        return commandBuilder("Swerve.adjustShootingRadius()").onExecute(() -> {
+            switch (currentShootingRadius) {
+                case L1:
+                    currentShootingRadius = ShootingRadius.L2;
+                    break;
+                case L2:
+                    currentShootingRadius = ShootingRadius.L3;
+                    break;
+                default:
+                    currentShootingRadius = ShootingRadius.L1;
+                    break;
+            }
+        });
+    }
 
     /**
      * Checks if the origin of the robot is in the neutral zone (between the blue zone and the red zone).
