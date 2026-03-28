@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import static edu.wpi.first.wpilibj2.command.Commands.none;
+
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.tunable.TunableTable;
@@ -138,6 +141,7 @@ public final class Robot extends LoggedRobot {
         var shoot = coDriver.rightTrigger();
         // Operator shoots with right trigger, runs intake at the same time with x, forces shooting with left trigger
         shoot.whileTrue(routines.shoot(coDriver.x(), coDriver.leftTrigger()));
+        coDriver.leftTrigger().onTrue(none()); // Reserved for shooting override
         coDriver.leftBumper().whileTrue(routines.staticShoot());
 
         // coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
