@@ -60,11 +60,12 @@ public final class Hood extends GRRSubsystem {
     }
 
     public boolean atPosition() {
-        if (this.motor.getPosition().getValueAsDouble() < this.motorPosition.getAsDouble() + positionTolerance.get() 
-        && this.motor.getPosition().getValueAsDouble() > this.motorPosition.getAsDouble() - positionTolerance.get()) {
-            return true;
-        }
-        return false;
+        return motor.getMotionMagicAtTarget().getValue();
+        // if (this.motor.getPosition().getValueAsDouble() < this.motorPosition.getAsDouble() + positionTolerance.get() 
+        // && this.motor.getPosition().getValueAsDouble() > this.motorPosition.getAsDouble() - positionTolerance.get()) {
+        //     return true;
+        // }
+        // return false;
     }
 
     /**
