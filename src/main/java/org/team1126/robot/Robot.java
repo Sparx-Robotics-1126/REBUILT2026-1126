@@ -134,8 +134,12 @@ public final class Robot extends LoggedRobot {
         // coDriver.leftTrigger().whileTrue(routines.unJamFeederShooter());
         // coDriver.rightBumper().toggleOnTrue(shooter.readyShooter());
         // coDriver.rightTrigger().toggleOnTrue(shooter.readyFieldShooter(() -> true));
-        coDriver.rightTrigger().whileTrue(routines.shootFuel());
-        coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
+
+        // Operator shoots with right trigger, runs intake at the same time with x, forces shooting with left trigger
+        coDriver.rightTrigger().whileTrue(routines.shoot(coDriver.x(), coDriver.leftTrigger()));
+        coDriver.leftTrigger().whileTrue(routines.staticShoot());
+
+        // coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
         // coDriver.leftBumper().toggleOnTrue(shooter.haltShooter());
         // coDriver.povRight().whileTrue(routines.shootFuel());
         coDriver.povLeft().whileTrue(routines.shootFuelReverseStorage());
