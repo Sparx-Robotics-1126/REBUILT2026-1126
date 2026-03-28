@@ -122,7 +122,7 @@ public final class Intake extends GRRSubsystem {
     }
 
     @NotLogged
-    public Command moveIntakeTest(boolean reverse) {
+    public Command moveIntake(boolean reverse) {
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(reverse))
             .onEnd(this::stopIntake);
@@ -212,31 +212,31 @@ public final class Intake extends GRRSubsystem {
      */
     public Command agitate() {
         return sequence( extendIntake().withTimeout(0.4),
-                        retrackIntakeTest().withTimeout(0.4))
+                        retrackIntake().withTimeout(0.4))
             .repeatedly()
             .withName("Intake.agitate()");
     }
 
 
     @NotLogged
-    public Command retrackIntakeTest() {
+    public Command retrackIntake() {
         return commandBuilder().onExecute(() -> this.moveMotorPosIn(0));
     }
 
-    @NotLogged
-    public Command retrackIntake() {
-        return commandBuilder()
-            .onExecute(() -> this.moveMotorPosIn(0))
-            .onEnd(interrupted -> {
-                // Keep actively holding home when the command ends
-                pivotController.setSetpoint(0, SparkBase.ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot1);
+    // @NotLogged
+    // public Command retrackIntake() {
+    //     return commandBuilder()
+    //         .onExecute(() -> this.moveMotorPosIn(0))
+    //         .onEnd(interrupted -> {
+    //             // Keep actively holding home when the command ends
+    //             pivotController.setSetpoint(0, SparkBase.ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot1);
 
-                // Use Brake to resist drifting away from home
-                var brakeCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kBrake);
+    //             // Use Brake to resist drifting away from home
+    //             var brakeCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kBrake);
 
-                pivotMotorLead.configure(brakeCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-            });
-    }
+    //             pivotMotorLead.configure(brakeCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    //         });
+    // }
 
     @NotLogged
     private void stopPivot() {

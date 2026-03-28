@@ -144,11 +144,12 @@ public final class Robot extends LoggedRobot {
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-        coDriver.a().whileTrue(intake.extendIntake());
-        coDriver.y().whileTrue(intake.retrackIntakeTest());
 
-        coDriver.x().whileTrue(intake.moveIntakeTest(false));
-        coDriver.b().whileTrue(intake.moveIntakeTest(true));
+        coDriver.a().whileTrue(intake.extendIntake());
+        coDriver.y().whileTrue(intake.retrackIntake());
+
+        coDriver.x().whileTrue(intake.moveIntake(false));
+        coDriver.b().whileTrue(intake.moveIntake(true));
         // coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
         //        coDriver.x().whileTrue(routines.shootFuel());
         //        coDriver.x().whileTrue(routines.shootFuel());
