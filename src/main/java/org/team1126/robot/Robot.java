@@ -135,9 +135,10 @@ public final class Robot extends LoggedRobot {
         // coDriver.rightBumper().toggleOnTrue(shooter.readyShooter());
         // coDriver.rightTrigger().toggleOnTrue(shooter.readyFieldShooter(() -> true));
 
+        var shoot = coDriver.rightTrigger();
         // Operator shoots with right trigger, runs intake at the same time with x, forces shooting with left trigger
-        coDriver.rightTrigger().whileTrue(routines.shoot(coDriver.x(), coDriver.leftTrigger()));
-        coDriver.leftTrigger().whileTrue(routines.staticShoot());
+        shoot.whileTrue(routines.shoot(coDriver.x(), coDriver.leftTrigger()));
+        coDriver.leftBumper().whileTrue(routines.staticShoot());
 
         // coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
         // coDriver.leftBumper().toggleOnTrue(shooter.haltShooter());
@@ -152,7 +153,7 @@ public final class Robot extends LoggedRobot {
         coDriver.a().whileTrue(intake.extendIntake());
         coDriver.y().whileTrue(intake.retrackIntake());
 
-        coDriver.x().whileTrue(intake.moveIntake(false));
+        coDriver.x().and(shoot.negate()).whileTrue(intake.moveIntake(false));
         coDriver.b().whileTrue(intake.moveIntake(true));
         // coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
         //        coDriver.x().whileTrue(routines.shootFuel());
