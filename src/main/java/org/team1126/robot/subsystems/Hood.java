@@ -8,11 +8,15 @@ import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.command.GRRSubsystem;
+import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.robot.Constants;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -37,6 +41,8 @@ public final class Hood extends GRRSubsystem {
 
     public Hood() {
         this.motor = new TalonFX(Constants.HOOD_MOTOR);
+
+        configureMotor();
 
         this.motorVelocity = tunables.value("velocity", 0.254);
         this.motorPosition = tunables.value("position", .25);
@@ -94,6 +100,46 @@ public final class Hood extends GRRSubsystem {
                 motor.setControl(maxVelocity);
             })
             .onEnd(motor::stopMotor);
+    }
+
+    private void configureMotor() {
+        final TalonFXConfiguration config = new TalonFXConfiguration();
+
+        config.CurrentLimits.StatorCurrentLimit = 80.0;
+        config.CurrentLimits.SupplyCurrentLimit = 40.0;
+
+        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+        // Normal operations
+        config.Slot0.kP = 16.0;
+        config.Slot0.kI = 0.0;
+        config.Slot0.kD = 0.08;
+        config.Slot0.kG = 0.0;
+        config.Slot0.kS = 0.0;
+        config.Slot0.kV = 0.0;
+        config.Slot0.kA = 0.0;
+
+        // Zeroing the hood.
+        config.Slot1.kP = 12.0;
+        config.Slot1.kI = 0.0; // If this is anything other than zero, it should not be.
+        config.Slot1.kD = 0.0;
+        config.Slot1.kG = 0.0;
+        config.Slot1.kS = 0.0;
+        config.Slot1.kV = 0.0;
+        config.Slot1.kA = 0.0;
+
+        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 22.938;
+        config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0;
+        config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
+        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+        config.TorqueCurrent.PeakForwardTorqueCurrent = 10.0;
+        config.TorqueCurrent.PeakReverseTorqueCurrent = -10.0;
+
+        PhoenixUtil.run(() -> motor.clearStickyFaults());
+        PhoenixUtil.run(() -> motor.getConfigurator().apply(config));
     }
 
     @Override
