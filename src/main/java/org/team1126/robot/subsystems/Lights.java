@@ -33,7 +33,16 @@ import org.team1126.robot.Constants.RioIO;
 public final class Lights {
 
     private static final int LENGTH = 21;
-    private static final int COUNT = 3;
+    private static final int COUNT = 4;
+
+    // Segment base indices in the AddressableLEDBuffer (depends on physical daisy-chain order)
+    // 0: Side Left, 1: Top Left, 2: Top Right, 3: Side Right
+    private static final int SIDE_LEFT_BASE = 0 * LENGTH;
+    private static final int TOP_LEFT_BASE = 1 * LENGTH;
+    private static final int TOP_RIGHT_BASE = 2 * LENGTH;
+    private static final int SIDE_RIGHT_BASE = 3 * LENGTH;
+    private static final double ALLIANCE_FADE_PERIOD = 5.0; // seconds for a full fade cycle (slightly quicker)
+    private static final double MOVING_INTAKE_PHASE = 1.0; // seconds per segment (top then sides) - faster
 
     private static final TunableTable tunables = Tunables.getNested("lights");
 
@@ -147,7 +156,8 @@ public final class Lights {
     }
 
     public final Sides sides;
-    public final Top top;
+    public final TopLeft topLeft;
+    public final TopRight topRight;
 
     private final AddressableLED lights;
     private final AddressableLEDBuffer buffer;
@@ -160,7 +170,8 @@ public final class Lights {
         lights.start();
 
         sides = new Sides();
-        top = new Top();
+        topLeft = new TopLeft();
+        topRight = new TopRight();
     }
 
     public void update() {
@@ -174,10 +185,10 @@ public final class Lights {
      * @param defaultAuto If the default auto is selected.
      */
     public Command preMatch(Supplier<Pose2d> robotPose, BooleanSupplier seesAprilTag, BooleanSupplier defaultAuto) {
-        return parallel(
-            sides.preMatch(defaultAuto),
-            DriverStation.getAlliance().get() == DriverStation.Alliance.Blue ? top.setSolidBlue() : top.setSolidRed()
-        ).withName("Lights.disabled()");
+        return parallel(sides.preMatch(defaultAuto), topLeft.preMatch(robotPose, seesAprilTag))
+            .until(DriverStation::isEnabled)
+            .ignoringDisable(true)
+            .withName("Lights.disabled()");
     }
 
     @Logged
@@ -235,8 +246,13 @@ public final class Lights {
          * @param b Blue value from {@code 0} to {@code 255}.
          */
         private void setSingle(boolean left, int i, int r, int g, int b) {
-            if (i >= LENGTH) return;
-            buffer.setRGB(!left ? i : buffer.getLength() - i - 1, r, g, b);
+            if (i < 0 || i >= LENGTH) return;
+
+            // Each side strip is its own segment in the buffer.
+            // Preserve the previous mirroring behavior within each segment.
+            final int base = left ? SIDE_LEFT_BASE : SIDE_RIGHT_BASE;
+            final int idxInSegment = left ? (LENGTH - 1 - i) : i;
+            buffer.setRGB(base + idxInSegment, r, g, b);
         }
 
         public Command setSolidRed() {
@@ -246,6 +262,7 @@ public final class Lights {
                 .ignoringDisable(true)
                 .withName("Lights.Sides.setSolidRed()");
         }
+
 
         public Command setSolidBlue() {
             return commandBuilder()
@@ -271,8 +288,11 @@ public final class Lights {
                     }
                 })
                 .onEnd(() -> setBoth(Color.OFF))
+                .ignoringDisable(true)
                 .withName("Lights.Sides.levelSelection()");
         }
+
+        
 
         /**
          * Displays the percentage of the climber deploy position.
@@ -365,19 +385,18 @@ public final class Lights {
 
             return commandBuilder()
                 .onExecute(() -> {
-                    setBoth(Alliance.isBlue() ? Color.BLUE : Color.RED);
-                    // if (defaultAuto.getAsBoolean()) {
-                    //     timer.stop();
-                    //     timer.reset();
-                    // } else {
-                    //     timer.start();
-                    // }
+                    if (defaultAuto.getAsBoolean()) {
+                        timer.stop();
+                        timer.reset();
+                    } else {
+                        timer.start();
+                    }
 
-                    // if (timer.get() % 0.12 > 0.06 || timer.hasElapsed(1.0)) {
-                    //     setBoth(Alliance.isBlue() ? Color.BLUE : Color.RED);
-                    // } else {
-                    //     setBoth(Color.OFF);
-                    // }
+                    if (timer.get() % 0.12 > 0.06 || timer.hasElapsed(1.0)) {
+                        setBoth(Alliance.isBlue() ? Color.BLUE : Color.RED);
+                    } else {
+                        setBoth(Color.OFF);
+                    }
                 })
                 .onEnd(() -> setBoth(Color.OFF))
                 .ignoringDisable(true)
@@ -536,7 +555,8 @@ public final class Lights {
                             int g = (int) (color.g() * gradientFactor);
                             int b = (int) (color.b() * gradientFactor);
 
-                            setSingle(false, index, r, g, b); // Right side
+                            // Apply gradient to both sides
+                            setBoth(index, r, g, b);
                         }
                     }
 
@@ -640,13 +660,113 @@ public final class Lights {
         }
 
         /**
+         * Lightning McQueen chase: very fast chase using McQueen-esque colors (red, yellow, white).
+         * The blob is a multi-LED "bolt" with a bright white tip; designed to run very fast.
+         */
+        public Command lightningMcQueenChase() {
+            Mutable<Integer> position = new Mutable<>(0);
+            Mutable<Integer> frameCounter = new Mutable<>(0);
+            Mutable<Integer> direction = new Mutable<>(1); // 1 = forward, -1 = backward
+            final int SPEED = 0; // 0 = extremely fast; increase to slow down
+            final int BLOB_WIDTH = 7; // narrower blob to look more like a car
+
+            final List<Color> PATTERN = List.of(
+                Color.RED, // center / main body
+                Color.ORANGE_RED, // lightning stripe
+                Color.GOLD, // small highlight
+                Color.ORANGE_RED,
+                Color.RED
+            );
+
+            final int TOTAL_LEDS = LENGTH * COUNT; // go around sides + top
+
+            return commandBuilder()
+                .onInitialize(() -> {
+                    position.value = 0;
+                    frameCounter.value = 0;
+                    direction.value = 1;
+                })
+                .onExecute(() -> {
+                    // Clear entire buffer (all segments)
+                    for (int i = 0; i < buffer.getLength(); i++) {
+                        buffer.setRGB(i, 0, 0, 0);
+                    }
+
+                    // Helper: map a global index [0, TOTAL_LEDS) to the physical buffer and set color
+                    // Global order: Side Left (0..LENGTH-1) -> Top Left -> Top Right -> Side Right
+                    java.util.function.BiConsumer<Integer, int[]> setGlobal = (gi, rgb) -> {
+                        int g = Math.floorMod(gi, TOTAL_LEDS);
+                        int seg = g / LENGTH;
+                        int idx = g % LENGTH;
+
+                        switch (seg) {
+                            case 0: // Side left
+                                buffer.setRGB(SIDE_LEFT_BASE + idx, rgb[0], rgb[1], rgb[2]);
+                                break;
+                            case 1: // Top left
+                                buffer.setRGB(TOP_LEFT_BASE + idx, rgb[0], rgb[1], rgb[2]);
+                                break;
+                            case 2: // Top right
+                                buffer.setRGB(TOP_RIGHT_BASE + idx, rgb[0], rgb[1], rgb[2]);
+                                break;
+                            case 3: // Side right
+                                buffer.setRGB(SIDE_RIGHT_BASE + idx, rgb[0], rgb[1], rgb[2]);
+                                break;
+                        }
+                    };
+
+                    // Draw blob centered at position across the full loop
+                    for (int offset = 0; offset < BLOB_WIDTH; offset++) {
+                        int globalIndex = Math.floorMod(position.value - offset, TOTAL_LEDS);
+
+                        Color c = PATTERN.get(Math.min(offset, PATTERN.size() - 1));
+                        double fade = 1.0 - (offset / (double) BLOB_WIDTH); // center brightest
+                        fade = fade * fade; // nonlinear falloff
+
+                        int r = (int) (c.r() * fade);
+                        int g = (int) (c.g() * fade);
+                        int b = (int) (c.b() * fade);
+
+                        setGlobal.accept(globalIndex, new int[] { r, g, b });
+                    }
+
+                    // Small orange tip ahead of the blob
+                    int tipIndex = Math.floorMod(position.value + 1, TOTAL_LEDS);
+                    int tipR = (int) (Color.ORANGE.r() * 0.95);
+                    int tipG = (int) (Color.ORANGE.g() * 0.95);
+                    int tipB = (int) (Color.ORANGE.b() * 0.95);
+                    setGlobal.accept(tipIndex, new int[] { tipR, tipG, tipB });
+
+                    // Advance position with bounce-back behavior
+                    if (frameCounter.value++ >= SPEED) {
+                        frameCounter.value = 0;
+                        position.value += direction.value;
+                        
+                        // Bounce back when hitting either end
+                        if (position.value >= TOTAL_LEDS - 1) {
+                            position.value = TOTAL_LEDS - 1;
+                            direction.value = -1;
+                        } else if (position.value <= 0) {
+                            position.value = 0;
+                            direction.value = 1;
+                        }
+                    }
+                })
+                .onEnd(() -> {
+                    for (int i = 0; i < buffer.getLength(); i++) buffer.setRGB(i, 0, 0, 0);
+                })
+                .ignoringDisable(true)
+                .withName("Lights.Sides.lightningMcQueenChase()");
+        }
+
+        /**
          * Fade animation that cycles through: OFF → color1 fades in → color1 fades out → OFF → color2 fades in → color2 fades out → repeat
          * @param color1 The first color to fade in and out.
          * @param color2 The second color to fade in and out.
          */
         public Command fade(Color color1, Color color2) {
             Mutable<Integer> frameCounter = new Mutable<>(0);
-            final int FADE_DURATION = 35; // Frames for fade in or fade out
+            final int FADE_DURATION = 35; // Frames for fade in\ or fade out
             final int OFF_DURATION = 5; // Frames to stay off between fades
             final int CYCLE_DURATION = (FADE_DURATION * 2 + OFF_DURATION) * 2; // Full cycle with both colors
 
@@ -704,12 +824,89 @@ public final class Lights {
                 .ignoringDisable(true)
                 .withName("Lights.Sides.fade()");
         }
+
+        /**
+         * Slow fade to alliance color and back to black, repeated.
+         */
+        public Command fadeAllianceSlow() {
+            // Use a smooth time-based sinusoidal fade to avoid discrete jumps or brief brighten spikes.
+            return commandBuilder()
+                .onExecute(() -> {
+                    double t = Timer.getFPGATimestamp();
+                    double phase = (t % ALLIANCE_FADE_PERIOD) / ALLIANCE_FADE_PERIOD; // [0,1)
+                    // Sinusoid mapped to [0,1], starts at 0, rises to 1, back to 0
+                    double factor = 0.5 * (1.0 + Math.sin(2.0 * Math.PI * phase - Math.PI / 2.0));
+                    factor = MathUtil.clamp(factor, 0.0, 1.0);
+
+                    Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+                    int r = (int) Math.round(alliance.r() * factor);
+                    int g = (int) Math.round(alliance.g() * factor);
+                    int b = (int) Math.round(alliance.b() * factor);
+
+                    for (int i = 0; i < LENGTH; i++) {
+                        setBoth(i, r, g, b);
+                    }
+                })
+                .onEnd(() -> setBoth(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Sides.fadeAllianceSlow()");
+        }
+
+        /**
+         * Moving intake visual for sides with speed scaling.
+         * @param rev direction flag
+         * @param speedScale >1.0 = faster, <1.0 = slower
+         */
+        public Command movingIntake(boolean rev) {
+            final int BLOB = 3;
+
+            return commandBuilder()
+                .onExecute(() -> {
+                    // Editable local speed modifier: change this value to adjust the sides moving intake speed.
+                    // Values > 1.0 = faster, < 1.0 = slower. Example: 1.5 for 50% faster.
+                    double speedScale = 5.0;
+                    double now = Timer.getFPGATimestamp();
+                    double total = (MOVING_INTAKE_PHASE * 2.0) / Math.max(1e-6, speedScale);
+                    double phase = (now % total) / total; // [0,1)
+
+                    boolean sidesActive = rev ? (phase < 0.5) : (phase >= 0.5);
+                    double progress = sidesActive ? ((phase - (rev ? 0.0 : 0.5)) * 2.0) : 0.0; // 0..1
+
+                    // clear
+                    for (int i = 0; i < LENGTH; i++) setBoth(i, Color.OFF);
+
+                    if (sidesActive) {
+                        // For rev==false we want blobs to start at the bottom (index 0) and move toward the top (index LENGTH-1).
+                        // For rev==true the direction is reversed (start at top and move toward bottom).
+                        double rawPos;
+                        if (!rev) {
+                            rawPos = progress * (LENGTH - 1); // 0 -> top
+                        } else {
+                            rawPos = (1.0 - progress) * (LENGTH - 1); // top -> 0
+                        }
+
+                        int center = (int) Math.round(rawPos);
+                        Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+                        for (int off = 0; off < BLOB; off++) {
+                            int idx = center - off;
+                            if (idx >= 0 && idx < LENGTH) {
+                                double fadeFactor = 1.0 - (off / (double) BLOB);
+                                int r = (int) Math.round(alliance.r() * fadeFactor);
+                                int g = (int) Math.round(alliance.g() * fadeFactor);
+                                int b = (int) Math.round(alliance.b() * fadeFactor);
+                                setBoth(idx, r, g, b);
+                            }
+                        }
+                    }
+                })
+                .onEnd(() -> setBoth(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Sides.movingIntake(" + rev + ")");
+        }
     }
-
-    @Logged
-    public final class Top extends GRRSubsystem {
-
-        private Top() {}
+     @Logged
+    public final class TopLeft extends GRRSubsystem {
+        private TopLeft() {}
 
         /**
          * Modifies the entire side LED strips to be a single color.
@@ -720,13 +917,13 @@ public final class Lights {
         }
 
         private void set(int i, Color color) {
-            if (i >= LENGTH) return;
-            buffer.setRGB(LENGTH + i, color.r(), color.g(), color.b());
+            if (i < 0 || i >= LENGTH) return;
+            buffer.setRGB(TOP_LEFT_BASE + i, color.r(), color.g(), color.b());
         }
 
         private void set(int i, int r, int g, int b) {
-            if (i >= LENGTH) return;
-            buffer.setRGB(LENGTH + i, r, g, b);
+            if (i < 0 || i >= LENGTH) return;
+            buffer.setRGB(TOP_LEFT_BASE + i, r, g, b);
         }
 
         public Command setSolidRed() {
@@ -736,19 +933,23 @@ public final class Lights {
                 .ignoringDisable(true)
                 .withName("Lights.Top.setSolidRed()");
         }
-
-        public Command setSolidBlue() {
+         public Command setSolidBlue() {
             return commandBuilder()
                 .onInitialize(() -> set(Color.BLUE))
                 .onEnd(() -> set(Color.OFF))
                 .ignoringDisable(true)
-                .withName("Lights.Top.setSolidBlue()");
+                .withName("Lights.TopLeft.setSolidBlue()");
         }
 
         /**
          * Displays the coral state.
          */
-        public Command coralDisplay(BooleanSupplier hasCoral, BooleanSupplier goosing, DoubleSupplier goosePosition) {
+        public Command coralDisplay(
+            BooleanSupplier hasCoral,
+            BooleanSupplier goosing,
+            DoubleSupplier goosePosition
+            
+        ) {
             final double GOOSE_RANGE = 0.15;
             final double HALF_RANGE = GOOSE_RANGE / 2.0;
 
@@ -1022,22 +1223,490 @@ public final class Lights {
                 .ignoringDisable(true)
                 .withName("Lights.Top.convergeToMiddle()");
         }
-    }
 
-    public Command aiming() {
-        return parallel(
-            sides.chase(Color.GREEN),
-            top.convergeToMiddle(Color.GREEN)
-        )
-            .withName("Lights.aiming()");
-   
-    }
+        /**
+         * Slow fade to alliance color and back to black for the top strip.
+         */
+        public Command fadeAllianceSlow() {
+            return commandBuilder()
+                .onExecute(() -> {
+                    double t = Timer.getFPGATimestamp();
+                    double phase = (t % ALLIANCE_FADE_PERIOD) / ALLIANCE_FADE_PERIOD;
+                    double factor = 0.5 * (1.0 + Math.sin(2.0 * Math.PI * phase - Math.PI / 2.0));
+                    factor = MathUtil.clamp(factor, 0.0, 1.0);
 
-    public Command shooting() {
-      return parallel(
-            sides.chase(Color.LIME_YELLOW),
-            top.convergeToMiddle(Color.LIME_YELLOW)
-        )
-            .withName("Lights.shooting()");
+                    Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+                    int r = (int) Math.round(alliance.r() * factor);
+                    int g = (int) Math.round(alliance.g() * factor);
+                    int b = (int) Math.round(alliance.b() * factor);
+
+                    for (int i = 0; i < LENGTH; i++) set(i, r, g, b);
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.fadeAllianceSlow()");
+        }
+
+        /**
+         * Moving intake visual for top. rev==false: converge to middle; rev==true: expand from middle outward.
+         */
+        public Command movingIntake(boolean rev) {
+            final int WIDTH = 2;
+            final int MIDDLE = LENGTH / 2;
+
+            return commandBuilder()
+                .onExecute(() -> {
+                    // Editable local speed modifier: change this value to adjust the top moving intake speed.
+                    // Values > 1.0 = faster, < 1.0 = slower. Example: 1.2 for 20% faster.
+                    double speedScale = 5.0;
+                    final double total = (MOVING_INTAKE_PHASE * 2.0) / Math.max(1e-6, speedScale);
+                    double now = Timer.getFPGATimestamp();
+                    double phase = (now % total) / total; // [0,1)
+
+                    boolean topActive = rev ? (phase >= 0.5) : (phase < 0.5);
+                    double progress = topActive ? ((phase - (topActive && !rev ? 0.0 : 0.5)) * 2.0) : 0.0;
+
+                    // clear
+                    for (int i = 0; i < LENGTH; i++) set(i, Color.OFF);
+
+                    Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+
+                    if (topActive) {
+                        // When active, progress goes 0->1. For converge (rev==false) we light from edges toward middle.
+                        if (!rev) {
+                            int base = (int) Math.round(progress * MIDDLE);
+                            for (int trail = 0; trail < WIDTH; trail++) {
+                                int leftIdx = base - trail;
+                                int rightIdx = (LENGTH - 1 - base) + trail;
+                                double fadeFactor = 1.0 - (trail / (double) WIDTH);
+                                int r = (int) Math.round(alliance.r() * fadeFactor);
+                                int g = (int) Math.round(alliance.g() * fadeFactor);
+                                int b = (int) Math.round(alliance.b() * fadeFactor);
+                                if (leftIdx >= 0 && leftIdx < LENGTH) set(leftIdx, r, g, b);
+                                if (rightIdx >= 0 && rightIdx < LENGTH) set(rightIdx, r, g, b);
+                            }
+                        } else {
+                            // reverse: expand from middle outward
+                            int base = (int) Math.round(progress * MIDDLE);
+                            for (int trail = 0; trail < WIDTH; trail++) {
+                                int leftIdx = MIDDLE - base - trail;
+                                int rightIdx = MIDDLE + base + trail;
+                                double fadeFactor = 1.0 - (trail / (double) WIDTH);
+                                int r = (int) Math.round(alliance.r() * fadeFactor);
+                                int g = (int) Math.round(alliance.g() * fadeFactor);
+                                int b = (int) Math.round(alliance.b() * fadeFactor);
+                                if (leftIdx >= 0 && leftIdx < LENGTH) set(leftIdx, r, g, b);
+                                if (rightIdx >= 0 && rightIdx < LENGTH) set(rightIdx, r, g, b);
+                            }
+                        }
+                    }
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.movingIntake(" + rev + ")");
+        }
+    }
+    @Logged
+    public final class TopRight extends GRRSubsystem {
+
+        private TopRight() {}
+
+        /**
+         * Modifies the entire side LED strips to be a single color.
+         * @param color The color to apply.
+         */
+        private void set(Color color) {
+            for (int i = 0; i < LENGTH; i++) set(i, color);
+        }
+
+        private void set(int i, Color color) {
+            if (i < 0 || i >= LENGTH) return;
+            buffer.setRGB(TOP_RIGHT_BASE + i, color.r(), color.g(), color.b());
+        }
+
+        private void set(int i, int r, int g, int b) {
+            if (i < 0 || i >= LENGTH) return;
+            buffer.setRGB(TOP_RIGHT_BASE + i, r, g, b);
+        }
+
+        public Command setSolidRed() {
+            return commandBuilder()
+                .onInitialize(() -> set(Color.RED))
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.setSolidRed()");
+        }
+        public Command setSolidBlue() {
+            return commandBuilder()
+                .onInitialize(() -> set(Color.BLUE))
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.TopRight.setSolidBlue()");
+        }
+
+        /**
+         * Displays the coral state.
+         */
+        public Command coralDisplay(
+            BooleanSupplier hasCoral,
+            BooleanSupplier goosing,
+            DoubleSupplier goosePosition
+            
+        ) {
+            final double GOOSE_RANGE = 0.15;
+            final double HALF_RANGE = GOOSE_RANGE / 2.0;
+
+            Timer timer = new Timer();
+
+            return sequence(
+                run(() -> set(Color.OFF)).until(hasCoral::getAsBoolean),
+                run(() -> {
+                    if (!goosing.getAsBoolean()) {
+                        set(RobotController.getRSLState() ? Color.HAS_CORAL : Color.OFF);
+                    } else {
+                        double position = goosePosition.getAsDouble();
+                        double percent =
+                            (MathUtil.clamp(Math.abs(position), 0.5 - HALF_RANGE, 0.5 + HALF_RANGE)
+                                - (0.5 - HALF_RANGE))
+                            * (1.0 / GOOSE_RANGE);
+                        if (position < 0.0) percent = 1.0 - percent;
+                        int closestLED = (int) Math.round(percent * (LENGTH - 1));
+                        for (int i = 0; i < LENGTH; i++) {
+                            if (Math.abs(closestLED - i) <= 1) {
+                                set(i, Color.GOOSE);
+                            } else {
+                                set(i, Color.OFF);
+                            }
+                        }
+                    }
+                }).until(() -> !hasCoral.getAsBoolean()),
+                run(() -> set(timer.get() % 0.2 > 0.1 ? Color.SCORED : Color.OFF))
+                    .beforeStarting(timer::restart)
+                    .withTimeout(1.5)
+            )
+                .repeatedly()
+                .ignoringDisable(true)
+                .withName("Lights.Top.coralDisplay()");
+        }
+
+        /**
+         * Displays the pre-match animation.
+         * @param robotPose The robot's current pose.
+         * @param seesAprilTag If the robot has seen an AprilTag since the last loop.
+         */
+        public Command preMatch(Supplier<Pose2d> robotPose, BooleanSupplier seesAprilTag) {
+            final double LOCATION_TOL = 0.05;
+            final double ROTATION_TOL = Math.toRadians(0.4);
+
+            Debouncer tag = new Debouncer(0.5, DebounceType.kFalling);
+            Debouncer location = new Debouncer(0.5, DebounceType.kFalling);
+            Debouncer rotation = new Debouncer(0.5, DebounceType.kFalling);
+
+            Debouncer sightDebounce = new Debouncer(0.06, DebounceType.kFalling);
+            SlewRateLimiter center = new SlewRateLimiter(ROTATION_TOL * 2.0);
+            Mutable<Pose2d> lastPose = new Mutable<>(Pose2d.kZero);
+            Mutable<Double> errorTime = new Mutable<>(-1.0);
+            List<Color> errors = new ArrayList<>();
+
+            return commandBuilder()
+                .onInitialize(() -> {
+                    Pose2d pose = robotPose.get();
+                    center.reset(pose.getRotation().getRadians());
+                    lastPose.value = pose;
+                    errorTime.value = -1.0;
+                })
+                .onExecute(() -> {
+                    if (!DriverStation.isDSAttached()) {
+                        set(Color.NO_DS);
+                        return;
+                    }
+
+                    errors.clear();
+                    Pose2d pose = robotPose.get();
+
+                    if (tag.calculate(!sightDebounce.calculate(seesAprilTag.getAsBoolean()))) {
+                        errors.add(Color.NO_TAGS);
+                    } else if (
+                        location.calculate(
+                            !Math2.isNear(lastPose.value.getTranslation(), pose.getTranslation(), LOCATION_TOL)
+                        )
+                    ) {
+                        errors.add(Color.BAD_LOCATION);
+                    } else if (
+                        rotation.calculate(
+                            !Math2.isNear(lastPose.value.getRotation(), pose.getRotation(), ROTATION_TOL)
+                        )
+                    ) {
+                        errors.add(Color.BAD_ROTATION);
+                    }
+
+                    lastPose.value = pose;
+                    if (!errors.isEmpty()) {
+                        double now = Timer.getFPGATimestamp();
+                        if (errorTime.value < 0.0) errorTime.value = now;
+
+                        double period = (now - errorTime.value) % 0.2;
+                        if (period < 0.15) {
+                            int i = (int) Math.floor((period / 0.15) * errors.size());
+                            set(errors.get(Math.min(i, errors.size())));
+                        } else {
+                            set(Color.OFF);
+                        }
+                    } else {
+                        double radians = pose.getRotation().getRadians();
+
+                        if (errorTime.value > 0.0) {
+                            errorTime.value = -1.0;
+                            center.reset(radians);
+                        }
+
+                        double view = Math.toRadians(1.0);
+                        double percent = (center.calculate(radians) + (view / 2.0) - radians) / view;
+                        SmartDashboard.putNumber("Lights.Top.preMatch/percent", percent);
+                        int closestLED = (int) Math.round(percent * (LENGTH - 1));
+                        SmartDashboard.putNumber("Lights.Top.preMatch/closestLED", closestLED);
+                        Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+                        for (int i = 0; i < LENGTH; i++) {
+                            if (Math.abs(closestLED - i) <= 1) {
+                                set(i, alliance);
+                            } else {
+                                set(i, Color.OFF);
+                            }
+                        }
+                    }
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.preMatch()");
+        }
+
+        /**
+         * Displays the climbing animation.
+         */
+        public Command climbing(BooleanSupplier isDeployed) {
+            return commandBuilder()
+                .onExecute(() ->
+                    set(
+                        !RobotController.getRSLState() && isDeployed.getAsBoolean()
+                            ? Color.OFF
+                            : (Alliance.isBlue() ? Color.BLUE : Color.RED)
+                    )
+                )
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Sides.climbing()");
+        }
+
+        /**
+         * Turns the lights off.
+         */
+        public Command off() {
+            return commandBuilder()
+                .onInitialize(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.off()");
+        }
+
+        /**
+         * Knight Rider effect: the entire segment is filled with a base color, and a brighter
+         * chase animates back and forth on top of it to create the classic Knight Rider look.
+         * @param baseColor The base color that fills the entire segment.
+         * @param chaseColor The brighter chase color that animates back and forth.
+         */
+        public Command knightRider(Color baseColor, Color chaseColor) {
+            Mutable<Integer> position = new Mutable<>(0);
+            Mutable<Boolean> movingRight = new Mutable<>(true);
+            Mutable<Integer> frameCounter = new Mutable<>(0);
+            final int SPEED = 2; // Increase this number to slow down
+
+            return commandBuilder()
+                .onInitialize(() -> {
+                    position.value = 0;
+                    movingRight.value = true;
+                    frameCounter.value = 0;
+                })
+                .onExecute(() -> {
+                    // Fill entire segment with base color
+                    for (int i = 0; i < LENGTH; i++) {
+                        set(i, baseColor);
+                    }
+
+                    // Draw solid chase blob on top of base color
+                    final int CHASE_WIDTH = 3;
+                    for (int offset = -CHASE_WIDTH; offset <= CHASE_WIDTH; offset++) {
+                        int index = position.value + offset;
+                        if (index >= 0 && index < LENGTH) {
+                            set(index, chaseColor);
+                        }
+                    }
+
+                    // Update position only every SPEED frames
+                    if (frameCounter.value++ >= SPEED) {
+                        frameCounter.value = 0;
+
+                        // Move in current direction
+                        if (movingRight.value) {
+                            position.value++;
+                            // Reached right edge, reverse direction
+                            if (position.value >= LENGTH) {
+                                position.value = LENGTH - 1;
+                                movingRight.value = false;
+                            }
+                        } else {
+                            position.value--;
+                            // Reached left edge, reverse direction
+                            if (position.value < 0) {
+                                position.value = 0;
+                                movingRight.value = true;
+                            }
+                        }
+                    }
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.knightRider()");
+        }
+
+        /**
+         * Converging chase animation where LEDs chase from both ends of the top segment toward the middle.
+         * @param color The color to chase with.
+         */
+        public Command convergeToMiddle(Color color) {
+            Mutable<Integer> position = new Mutable<>(0);
+            Mutable<Integer> frameCounter = new Mutable<>(0);
+            final int MIDDLE = LENGTH / 2;
+            final double SPEED = 2.0; // Increase this number to slow down
+
+            return commandBuilder()
+                .onInitialize(() -> {
+                    position.value = 0;
+                    frameCounter.value = 0;
+                })
+                .onExecute(() -> {
+                    // Clear all LEDs
+                    for (int i = 0; i < LENGTH; i++) {
+                        set(i, Color.OFF);
+                    }
+
+                    // Chase from left edge (0) toward middle
+                    for (int trail = 0; trail < 3; trail++) {
+                        int index = position.value - trail;
+                        if (index >= 0 && index < MIDDLE) {
+                            int fadeR = (trail == 0) ? color.r() : (color.r() * (3 - trail)) / 3;
+                            int fadeG = (trail == 0) ? color.g() : (color.g() * (3 - trail)) / 3;
+                            int fadeB = (trail == 0) ? color.b() : (color.b() * (3 - trail)) / 3;
+                            set(index, fadeR, fadeG, fadeB);
+                        }
+                    }
+
+                    // Chase from right edge (LENGTH-1) toward middle, mirrored
+                    for (int trail = 0; trail < 3; trail++) {
+                        int index = LENGTH - 1 - (position.value - trail);
+                        if (index >= MIDDLE && index < LENGTH) {
+                            int fadeR = (trail == 0) ? color.r() : (color.r() * (3 - trail)) / 3;
+                            int fadeG = (trail == 0) ? color.g() : (color.g() * (3 - trail)) / 3;
+                            int fadeB = (trail == 0) ? color.b() : (color.b() * (3 - trail)) / 3;
+                            set(index, fadeR, fadeG, fadeB);
+                        }
+                    }
+
+                    // Update position only every SPEED frames
+                    if (frameCounter.value++ >= SPEED) {
+                        frameCounter.value = 0;
+
+                        // Loop animation
+                        if (position.value < MIDDLE) {
+                            position.value++;
+                        } else {
+                            position.value = 0;
+                        }
+                    }
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.convergeToMiddle()");
+        }
+
+        /**
+         * Slow fade to alliance color and back to black for the top strip.
+         */
+        public Command fadeAllianceSlow() {
+            return commandBuilder()
+                .onExecute(() -> {
+                    double t = Timer.getFPGATimestamp();
+                    double phase = (t % ALLIANCE_FADE_PERIOD) / ALLIANCE_FADE_PERIOD;
+                    double factor = 0.5 * (1.0 + Math.sin(2.0 * Math.PI * phase - Math.PI / 2.0));
+                    factor = MathUtil.clamp(factor, 0.0, 1.0);
+
+                    Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+                    int r = (int) Math.round(alliance.r() * factor);
+                    int g = (int) Math.round(alliance.g() * factor);
+                    int b = (int) Math.round(alliance.b() * factor);
+
+                    for (int i = 0; i < LENGTH; i++) set(i, r, g, b);
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.fadeAllianceSlow()");
+        }
+
+        /**
+         * Moving intake visual for top. rev==false: converge to middle; rev==true: expand from middle outward.
+         */
+        public Command movingIntake(boolean rev) {
+            final int WIDTH = 2;
+            final int MIDDLE = LENGTH / 2;
+
+            return commandBuilder()
+                .onExecute(() -> {
+                    // Editable local speed modifier: change this value to adjust the top moving intake speed.
+                    // Values > 1.0 = faster, < 1.0 = slower. Example: 1.2 for 20% faster.
+                    double speedScale = 5.0;
+                    final double total = (MOVING_INTAKE_PHASE * 2.0) / Math.max(1e-6, speedScale);
+                    double now = Timer.getFPGATimestamp();
+                    double phase = (now % total) / total; // [0,1)
+
+                    boolean topActive = rev ? (phase >= 0.5) : (phase < 0.5);
+                    double progress = topActive ? ((phase - (topActive && !rev ? 0.0 : 0.5)) * 2.0) : 0.0;
+
+                    // clear
+                    for (int i = 0; i < LENGTH; i++) set(i, Color.OFF);
+
+                    Color alliance = Alliance.isBlue() ? Color.BLUE : Color.RED;
+
+                    if (topActive) {
+                        // When active, progress goes 0->1. For converge (rev==false) we light from edges toward middle.
+                        if (!rev) {
+                            int base = (int) Math.round(progress * MIDDLE);
+                            for (int trail = 0; trail < WIDTH; trail++) {
+                                int leftIdx = base - trail;
+                                int rightIdx = (LENGTH - 1 - base) + trail;
+                                double fadeFactor = 1.0 - (trail / (double) WIDTH);
+                                int r = (int) Math.round(alliance.r() * fadeFactor);
+                                int g = (int) Math.round(alliance.g() * fadeFactor);
+                                int b = (int) Math.round(alliance.b() * fadeFactor);
+                                if (leftIdx >= 0 && leftIdx < LENGTH) set(leftIdx, r, g, b);
+                                if (rightIdx >= 0 && rightIdx < LENGTH) set(rightIdx, r, g, b);
+                            }
+                        } else {
+                            // reverse: expand from middle outward
+                            int base = (int) Math.round(progress * MIDDLE);
+                            for (int trail = 0; trail < WIDTH; trail++) {
+                                int leftIdx = MIDDLE - base - trail;
+                                int rightIdx = MIDDLE + base + trail;
+                                double fadeFactor = 1.0 - (trail / (double) WIDTH);
+                                int r = (int) Math.round(alliance.r() * fadeFactor);
+                                int g = (int) Math.round(alliance.g() * fadeFactor);
+                                int b = (int) Math.round(alliance.b() * fadeFactor);
+                                if (leftIdx >= 0 && leftIdx < LENGTH) set(leftIdx, r, g, b);
+                                if (rightIdx >= 0 && rightIdx < LENGTH) set(rightIdx, r, g, b);
+                            }
+                        }
+                    }
+                })
+                .onEnd(() -> set(Color.OFF))
+                .ignoringDisable(true)
+                .withName("Lights.Top.movingIntake(" + rev + ")");
+        }
     }
 }
