@@ -7,8 +7,10 @@ import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -25,14 +27,12 @@ import org.team1126.lib.util.command.GRRSubsystem;
 @Logged
 public final class Intake extends GRRSubsystem {
 
-    private final SparkFlex intakeMotor;
+    private final TalonFX intakeMotor;
     private final SparkFlex pivotMotorLead;
     private final SparkFlex pivotMotorFollow;
 
-    private SparkFlexConfig intakeConfig;
-    private final RelativeEncoder intakeEncoder;
-    private SparkClosedLoopController intakeController;
-    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 325);
+    private TalonFXConfiguration intakeConfig;
+    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 500);
     private static final TunableTable tunables = Tunables.getNested("intake");
 
     private SparkFlexConfig pivotConfig;
@@ -45,9 +45,8 @@ public final class Intake extends GRRSubsystem {
     private List<Double> intakeTemperature = new ArrayList<>();
 
     public Intake() {
-        intakeMotor = new SparkFlex(INTAKE_MOTOR, SparkLowLevel.MotorType.kBrushless);
-        intakeEncoder = intakeMotor.getEncoder();
-        intakeConfig = new SparkFlexConfig();
+        intakeMotor = new TalonFX(INTAKE_MOTOR);
+        intakeConfig = new TalonFXConfiguration();
 
         pivotMotorLead = new SparkFlex(PIVOT_MOTOR_LEAD, SparkLowLevel.MotorType.kBrushless);
         pivotMotorFollow = new SparkFlex(PIVOT_MOTOR_FOLLOW, SparkLowLevel.MotorType.kBrushless);
@@ -72,7 +71,7 @@ public final class Intake extends GRRSubsystem {
             .p(.9, ClosedLoopSlot.kSlot1)
             .i(0, ClosedLoopSlot.kSlot1)
             .d(0, ClosedLoopSlot.kSlot1)
-            .feedForward.kCos(.5, ClosedLoopSlot.kSlot1);
+            .feedForward.kCos(.9, ClosedLoopSlot.kSlot1);
         pivotConfig.closedLoop.maxMotion
             .maxAcceleration(1000, ClosedLoopSlot.kSlot1) // REDUCED from 200 — slower ramp
             .allowedProfileError(1, ClosedLoopSlot.kSlot1)
@@ -82,39 +81,24 @@ public final class Intake extends GRRSubsystem {
         pivotMotorLead.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         
         SparkFlexConfig followConfig = new SparkFlexConfig();
-        followConfig.inverted(true);
-        followConfig.follow(PIVOT_MOTOR_LEAD);
+        // followConfig.inverted(false);
+        
+        followConfig.follow(PIVOT_MOTOR_LEAD,true);
         pivotMotorFollow.configure(followConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
-        intakeController = intakeMotor.getClosedLoopController();
-        intakeConfig
-            .smartCurrentLimit(40)
-            .idleMode(SparkBaseConfig.IdleMode.kBrake)
-            .inverted(false)
-            .openLoopRampRate(0.1)
-            .closedLoopRampRate(0.1);
+        // Configure TalonFX intake motor
+        intakeConfig.MotorOutput.NeutralMode = com.ctre.phoenix6.signals.NeutralModeValue.Brake;
+        intakeConfig.MotorOutput.Inverted = com.ctre.phoenix6.signals.InvertedValue.CounterClockwise_Positive;
+        intakeConfig.CurrentLimits.SupplyCurrentLimit = 40;
+        intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-        intakeConfig.closedLoop
-            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            // Set PID values for position control. We don't need to pass a closed
-            // loop slot, as it will default to slot 0.
-            .p(0.000)
-            .i(0)
-            .d(0)
-            .outputRange(-1, 1)
-            // Set PID values for velocity control in slot 1
-            .feedForward
-            // kV is now in Volts, so we multiply by the nominal voltage (12V)
-            .kV(.025);
+        // Velocity control PID (slot 0)
+        intakeConfig.Slot0.kP = 0.12;
+        intakeConfig.Slot0.kI = 0.0;
+        intakeConfig.Slot0.kD = 0.0;
+        intakeConfig.Slot0.kV = 0.12; // velocity feedforward
 
-        intakeConfig.closedLoop.maxMotion
-            // Set MAXMotion parameters for position control. We don't need to pass
-            // a closed loop slot, as it will default to slot 0.
-            .cruiseVelocity(350)
-            .maxAcceleration(1750)
-            .allowedProfileError(10);
-
-        intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        intakeMotor.getConfigurator().apply(intakeConfig);
 
         tunables.add("Intake Motor", intakeMotor);
         tunables.add("Pivot Motor Lead", pivotMotorLead);
@@ -132,16 +116,13 @@ public final class Intake extends GRRSubsystem {
     public Command moveIntakeMotorCommand(boolean reverse) {
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(reverse))
-            .onEnd(() -> intakeController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl));
+            .onEnd(() -> intakeMotor.setControl(new VelocityVoltage(0)));
     }
 
     @NotLogged
     public void moveIntakeMotor(boolean reverse) {
-        if (reverse) {
-            intakeController.setSetpoint(-this.intakeSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-        } else {
-            intakeController.setSetpoint(this.intakeSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-        }
+        double speed = reverse ? -this.intakeSpeed.get() : this.intakeSpeed.get();
+        intakeMotor.setControl(new VelocityVoltage(speed));
     }
 
     @NotLogged
@@ -165,19 +146,19 @@ public final class Intake extends GRRSubsystem {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Intake at set point?", intakeController.isAtSetpoint());
-        SmartDashboard.putNumber("Velocity", this.intakeEncoder.getVelocity());
+        SmartDashboard.putBoolean("Intake at set point?", intakeMotor.getClosedLoopError().getValueAsDouble() < 50);
+        SmartDashboard.putNumber("Velocity", intakeMotor.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("Position", this.pivotMotorLead.getEncoder().getPosition());
         SmartDashboard.putNumber("Pivot Temp", this.pivotMotorLead.getMotorTemperature());
-        outputCurrent.add(intakeMotor.getOutputCurrent());
-        appliedOutput.add(intakeMotor.getAppliedOutput());
-        busVoltage.add(Math.abs(intakeMotor.getBusVoltage()));
-        intakeTemperature.add(intakeMotor.getMotorTemperature());
+        outputCurrent.add(intakeMotor.getSupplyCurrent().getValueAsDouble());
+        appliedOutput.add(intakeMotor.getDutyCycle().getValueAsDouble());
+        busVoltage.add(intakeMotor.getSupplyVoltage().getValueAsDouble());
+        intakeTemperature.add(intakeMotor.getDeviceTemp().getValueAsDouble());
         
-        SmartDashboard.putNumber("Intake Motor Output Current", intakeMotor.getOutputCurrent());
-        SmartDashboard.putNumber("Intake Motor Applied Output", intakeMotor.getAppliedOutput());
-        SmartDashboard.putNumber("Intake Motor Bus Voltage", Math.abs(intakeMotor.getBusVoltage()));
-        SmartDashboard.putNumber("Intake Motor Temperature", intakeMotor.getMotorTemperature());
+        SmartDashboard.putNumber("Intake Motor Output Current", intakeMotor.getSupplyCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Intake Motor Applied Output", intakeMotor.getDutyCycle().getValueAsDouble());
+        SmartDashboard.putNumber("Intake Motor Bus Voltage", intakeMotor.getSupplyVoltage().getValueAsDouble());
+        SmartDashboard.putNumber("Intake Motor Temperature", intakeMotor.getDeviceTemp().getValueAsDouble());
         SmartDashboard.putNumber("Pivot Motor Output Current", pivotMotorLead.getOutputCurrent());
         SmartDashboard.putNumber("Pivot Motor Applied Output", pivotMotorLead.getAppliedOutput());  
         SmartDashboard.putNumber("Pivot Motor Bus Voltage", Math.abs(pivotMotorLead.getBusVoltage()));
@@ -220,7 +201,7 @@ public final class Intake extends GRRSubsystem {
 
     @NotLogged
     public Command retrackIntake() {
-        return commandBuilder().onExecute(() -> this.moveMotorPosIn(0));
+        return commandBuilder().onExecute(() -> this.moveMotorPosIn(1));
     }
 
     // @NotLogged
