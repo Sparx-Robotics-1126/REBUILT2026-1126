@@ -142,7 +142,7 @@ public final class Robot extends LoggedRobot {
         // Operator shoots with right trigger, runs intake at the same time with x, forces shooting with left trigger
         shoot.whileTrue(routines.shoot(coDriver.x(), coDriver.leftTrigger()));
         coDriver.leftTrigger().onTrue(none()); // Reserved for shooting override
-        coDriver.leftBumper().whileTrue(routines.staticShoot());
+        coDriver.leftBumper().whileTrue(routines.shootFuelTest());
 
         // coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
         // coDriver.leftBumper().toggleOnTrue(shooter.haltShooter());
@@ -153,7 +153,8 @@ public final class Robot extends LoggedRobot {
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-
+        // coDriver.povRight().whileTrue(feeder.feedShooter());
+        coDriver.povLeft().whileTrue(shooter.readyShooter());
         coDriver.a().whileTrue(intake.extendIntake());
         coDriver.y().whileTrue(intake.retrackIntake());
 
@@ -165,8 +166,11 @@ public final class Robot extends LoggedRobot {
         // coDriver.b().whileTrue(routines.releaseAll());
         //        coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
         //        coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
-        coDriver.povUp().whileTrue(storage.moveMotorCommand(true));
-        coDriver.povDown().whileTrue(storage.moveMotorCommand(false));
+        // coDriver.povUp().whileTrue(storage.moveMotorCommand(true));
+        // coDriver.povDown().whileTrue(storage.moveMotorCommand(false));
+coDriver.b().whileTrue(hood.zeroPositiCommand());
+        coDriver.povUp().whileTrue(hood.moveHoodCommand(()->-7.0        ));
+        coDriver.povDown().whileTrue(hood.moveHoodCommand( ()->0.0));
         // coDriver.rightBumper().onTrue(swerve.playMusic("enemy").ignoringDisable(true));
         //
         // RobotModeTriggers.autonomous().whileTrue(autos.outpost());

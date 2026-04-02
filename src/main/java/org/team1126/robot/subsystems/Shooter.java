@@ -14,6 +14,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkBase;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.DoubleSupplier;
@@ -36,7 +38,7 @@ public final class Shooter extends GRRSubsystem {
     private final Follower motorFollowControl;
 
    
-    private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 198);
+    private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 50);
     private final Tunables.TunableInteger shooterShootFieldSpeed = tunables.value("Shoot Field Speed", 250);
     private final Tunables.TunableInteger shooterUnJamSpeed = tunables.value("Shooter UnJam Speed", 100);
     private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 198);
@@ -54,6 +56,7 @@ public final class Shooter extends GRRSubsystem {
 
         this.motorLead = new TalonFX(SHOOTER_MOTOR_LEAD);
         this.motorFollow = new TalonFX(SHOOTER_MOTOR_FOLLOW);
+      
         configureMotors();
         closedLoopError = motorLead.getClosedLoopError();
 
@@ -61,7 +64,7 @@ public final class Shooter extends GRRSubsystem {
         velocityControl.EnableFOC = true;
         velocityControl.UpdateFreqHz = 0.0;
 
-        motorFollowControl = new Follower(motorLead.getDeviceID(), MotorAlignmentValue.Aligned);
+        motorFollowControl = new Follower(motorLead.getDeviceID(), MotorAlignmentValue.Opposed);
 
         tunables.add("motors", motorLead);
         tunables.add("motors", motorFollow);
@@ -116,9 +119,9 @@ public final class Shooter extends GRRSubsystem {
     //     return commandBuilder().onExecute(this::stopShooter);
     // }
 
-    // private void stopShooter() {
-    //     this.shooterController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl);
-    // }
+    private void stopShooter() {
+        this.motorLead.stopMotor();
+    }
 
     // public Command idleShooterCommand() {
     //     return commandBuilder().onExecute(this::idleShooter);
@@ -130,11 +133,11 @@ public final class Shooter extends GRRSubsystem {
     //     //        this.shooterShootSpeed.set(this.shooterIdleSpeed.get());
     // }
 
-    // public Command readyShooter() {
-    //     this.shootingField = false;
-    //     return commandBuilder().onExecute(() -> getReady())
-    //     .onEnd(this::stopShooter);
-    // }
+    public Command readyShooter() {
+        this.shootingField = false;
+        return commandBuilder().onExecute(() -> getReady())
+        .onEnd(this::stopShooter);
+    }
 
     // public Command readyFieldShooter(BooleanSupplier fieldShooting) {
     //     this.shootingField = true;
@@ -149,14 +152,14 @@ public final class Shooter extends GRRSubsystem {
     //     // feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
     // }
 
-    // public void getReady() {
-    //     shooterController.setSetpoint(this.shooterShootSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-    //     // if (this.shooterIsReady()) {
-    //     //     feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-    //     // }
-    //     // shooterController.setSetpoint(this.shooterShootSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-    //     // feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-    // }
+    public void getReady() {
+           motorLead.setControl(new VelocityVoltage(this.shooterShootSpeed.get()));
+        // if (this.shooterIsReady()) {
+        //     feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        // }
+        // shooterController.setSetpoint(this.shooterShootSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+        // feederController.setSetpoint(this.feederSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+    }
 
     // public Command getReadyCommand() {
     //     return commandBuilder().onExecute(() -> getReady());
@@ -172,14 +175,21 @@ public final class Shooter extends GRRSubsystem {
      * Finds out if the shooter has reached enough speed to shoot
      * @return Whether or not the shooter is ready to shoot
      */
-    public boolean shooterIsReady() {
+    // public boolean shooterIsReady() {
 
-         return motorLead.getMotionMagicAtTarget().getValue();
-        // if (this.shooterEncoder.getVelocity() < this.shooterVelocitySetpoint.get()+ 100 
-        // && this.shooterEncoder.getVelocity() > this.shooterVelocitySetpoint.get() - 100) {
-        //     return true;
-        // }
-        // return false;
+    //      return motorLead.getMotionMagicAtTarget().getValue();
+    //     // if (this.shooterEncoder.getVelocity() < this.shooterVelocitySetpoint.get()+ 100 
+    //     // && this.shooterEncoder.getVelocity() > this.shooterVelocitySetpoint.get() - 100) {
+    //     //     return true;
+    //     // }
+    //     // return false;
+    // }
+ /**
+     * shooter's closeloop error is less than allowed error.
+     * @return true if less
+     */
+    public boolean shooterIsReady() {
+        return (Math.abs(closedLoopError.getValueAsDouble()) <= atVelocityEpsilon.get());
     }
 
     // public boolean feederIsReady() {
@@ -275,7 +285,7 @@ public final class Shooter extends GRRSubsystem {
         config.Slot0.kV = 0.129;
         config.Slot0.kA = 0.0;
 
-        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
         PhoenixUtil.run(() -> motorLead.clearStickyFaults());
         PhoenixUtil.run(() -> motorLead.getConfigurator().apply(config));

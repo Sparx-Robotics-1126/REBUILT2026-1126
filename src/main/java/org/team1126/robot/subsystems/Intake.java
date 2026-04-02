@@ -37,7 +37,7 @@ public final class Intake extends GRRSubsystem {
 
     private SparkFlexConfig pivotConfig;
     private SparkClosedLoopController pivotController;
-    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -16.7);
+    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -1.712);
     
     private List<Double> outputCurrent = new ArrayList<>();
     private List<Double> appliedOutput = new ArrayList<>();
@@ -56,26 +56,26 @@ public final class Intake extends GRRSubsystem {
         pivotConfig.idleMode(SparkBaseConfig.IdleMode.kBrake);
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(.95, ClosedLoopSlot.kSlot0)
+            .p(.1, ClosedLoopSlot.kSlot0)
             .i(0, ClosedLoopSlot.kSlot0)
             .d(0, ClosedLoopSlot.kSlot0)
             .feedForward.kCos(.0, ClosedLoopSlot.kSlot0);
         pivotConfig.closedLoop.maxMotion
-            .maxAcceleration(1500, ClosedLoopSlot.kSlot0) // REDUCED from 200 — slower ramp
+            .maxAcceleration(50, ClosedLoopSlot.kSlot0) // REDUCED from 200 — slower ramp
             .allowedProfileError(1, ClosedLoopSlot.kSlot0)
-            .cruiseVelocity(750, ClosedLoopSlot.kSlot0) // Changed from 1000 to match test setpoint
+            .cruiseVelocity(50, ClosedLoopSlot.kSlot0) // Changed from 1000 to match test setpoint
             .allowedProfileError(1, ClosedLoopSlot.kSlot0);
 
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(.9, ClosedLoopSlot.kSlot1)
+            .p(.1, ClosedLoopSlot.kSlot1)
             .i(0, ClosedLoopSlot.kSlot1)
             .d(0, ClosedLoopSlot.kSlot1)
-            .feedForward.kCos(.9, ClosedLoopSlot.kSlot1);
+            .feedForward.kCos(.5, ClosedLoopSlot.kSlot1);
         pivotConfig.closedLoop.maxMotion
-            .maxAcceleration(1000, ClosedLoopSlot.kSlot1) // REDUCED from 200 — slower ramp
+            .maxAcceleration(50, ClosedLoopSlot.kSlot1) // REDUCED from 200 — slower ramp
             .allowedProfileError(1, ClosedLoopSlot.kSlot1)
-            .cruiseVelocity(650, ClosedLoopSlot.kSlot1) // Changed from 1000 to match test setpoint
+            .cruiseVelocity(50, ClosedLoopSlot.kSlot1) // Changed from 1000 to match test setpoint
             .allowedProfileError(1, ClosedLoopSlot.kSlot1);
 
         pivotMotorLead.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -201,7 +201,7 @@ public final class Intake extends GRRSubsystem {
 
     @NotLogged
     public Command retrackIntake() {
-        return commandBuilder().onExecute(() -> this.moveMotorPosIn(1));
+        return commandBuilder().onExecute(() -> this.moveMotorPosIn(0));
     }
 
     // @NotLogged

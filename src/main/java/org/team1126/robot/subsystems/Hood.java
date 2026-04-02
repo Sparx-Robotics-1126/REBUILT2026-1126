@@ -13,6 +13,7 @@ import org.team1126.robot.Constants;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -32,7 +33,8 @@ public final class Hood extends GRRSubsystem {
 
     private final TalonFX motor;
 
-    private final VelocityTorqueCurrentFOC motorVelocityControl;
+    private final PositionTorqueCurrentFOC motorPositionControl;
+    // private final VelocityTorqueCurrentFOC motorVelocityControl;
     private final TunableDouble motorVelocity;
     private final TunableDouble motorPosition;
     
@@ -47,8 +49,8 @@ public final class Hood extends GRRSubsystem {
         this.motorVelocity = tunables.value("velocity", 0.254);
         this.motorPosition = tunables.value("position", .25);
 
-        motorVelocityControl = new VelocityTorqueCurrentFOC(0.0);
-        motorVelocityControl.UpdateFreqHz = 0.0;
+        motorPositionControl = new PositionTorqueCurrentFOC(0.0);
+        motorPositionControl.UpdateFreqHz = 0.0;
     }
 
     /**
@@ -68,6 +70,11 @@ public final class Hood extends GRRSubsystem {
         // return false;
     }
 
+    public Command zeroPositiCommand() {
+        motor.setPosition(0);
+        return commandBuilder("Hood.zero()")
+        .onExecute(() -> motor.setPosition(0));
+    }
     /**
      * Moves the hood to zero.
      * @param reZero If the zeroing sequence should also be ran.
@@ -78,26 +85,36 @@ public final class Hood extends GRRSubsystem {
         return goTo;
     }
 
+public Command moveHoodCommand(DoubleSupplier position) {
+  
+    return commandBuilder("Hood.moveHoodCommand()")
+        .onExecute(() -> {
+            motorPositionControl.withPosition(position.getAsDouble());
+            motor.setControl(motorPositionControl);
+        })
+        .onEnd(() -> motor.stopMotor());
+}
+
     /**
      * Internal method to target a specified position.
      * @param position The hood's position in rotations at the rotor (gearing not included).
      */
-    private Command goTo(final DoubleSupplier position) {
+    public Command goTo( DoubleSupplier position) {
         Debouncer debouncer = new Debouncer(0.1, DebounceType.kRising);
 
         return commandBuilder("Hood.goTo()")
             .onInitialize(() -> debouncer.calculate(false))
             .onExecute(() -> {
                 if (!isZeroed) {
-                    motorVelocityControl.withVelocity(homingVelocity.get());
-                    motor.setControl(motorVelocityControl);
-                    if (!debouncer.calculate(Math.abs(motorVelocity.getAsDouble()) < stallVelocity.get())) return;
+                    motorPositionControl.withPosition(homingVelocity.get());
+                    motor.setControl(motorPositionControl);
+                    if (!debouncer.calculate(Math.abs(motorPositionControl.getPositionMeasure().abs(null)) < stallVelocity.get())) return;
 
                     isZeroed = true;
                     motor.setPosition(0.0);
                 }
 
-                var maxVelocity = new MotionMagicVoltage(motorPosition.get());
+                var maxVelocity = new MotionMagicVoltage(position.getAsDouble());
                 motor.setControl(maxVelocity);
             })
             .onEnd(motor::stopMotor);
@@ -112,35 +129,36 @@ public final class Hood extends GRRSubsystem {
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
         // Normal operations
-        config.Slot0.kP = 16.0;
+        config.Slot0.kP = .10;
         config.Slot0.kI = 0.0;
         config.Slot0.kD = 0.08;
         config.Slot0.kG = 0.0;
-        config.Slot0.kS = 0.0;
+        config.Slot0.kS = .1;
         config.Slot0.kV = 0.0;
         config.Slot0.kA = 0.0;
 
         // Zeroing the hood.
-        config.Slot1.kP = 12.0;
-        config.Slot1.kI = 0.0; // If this is anything other than zero, it should not be.
-        config.Slot1.kD = 0.0;
-        config.Slot1.kG = 0.0;
-        config.Slot1.kS = 0.0;
-        config.Slot1.kV = 0.0;
-        config.Slot1.kA = 0.0;
+        // config.Slot1.kP = 12.0;
+        // config.Slot1.kI = 0.0; // If this is anything other than zero, it should not be.
+        // config.Slot1.kD = 0.0;
+        // config.Slot1.kG = 0.0;
+        // config.Slot1.kS = 1;
+        // config.Slot1.kV = 0.0;
+        // config.Slot1.kA = 0.0;
 
-        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 22.938;
-        config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0;
-        config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        // config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 22.938;
+        // config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        // config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0;
+        // config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-        config.TorqueCurrent.PeakForwardTorqueCurrent = 10.0;
-        config.TorqueCurrent.PeakReverseTorqueCurrent = -10.0;
+        // config.TorqueCurrent.PeakForwardTorqueCurrent = 10.0;
+        // config.TorqueCurrent.PeakReverseTorqueCurrent = -10.0;
 
         PhoenixUtil.run(() -> motor.clearStickyFaults());
         PhoenixUtil.run(() -> motor.getConfigurator().apply(config));
+        Tunables.add("Hood Motor", motor);
     }
 
     @Override

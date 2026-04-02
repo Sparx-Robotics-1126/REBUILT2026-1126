@@ -126,25 +126,25 @@ public final class Routines {
         return sequence(swerve.apfDrive(() -> goal, () -> 0.3)).withName("Routines.driveOutpost()");
     }
 
-    public Command outpost() {
-        return sequence(
-            selfDriveLights(),
-            // readyFeederShooter(),
-            shootFuel(),
-            waitSeconds(3),
-            swerve.apfDrive(() -> new Pose2d(1.388, 5.717, Rotation2d.fromDegrees(0)), () -> 0.3)
-        ).withName("Routines.outpost()");
-    }
+    // public Command outpost() {
+    //     return sequence(
+    //         selfDriveLights(),
+    //         // readyFeederShooter(),
+    //         shootFuel(),
+    //         waitSeconds(3),
+    //         swerve.apfDrive(() -> new Pose2d(1.388, 5.717, Rotation2d.fromDegrees(0)), () -> 0.3)
+    //     ).withName("Routines.outpost()");
+    // }
 
     // public Command prepareForShooting() {
     //     return parallel(shooter.getReadyCommand()).withName("Routines.prepareForShooting()");
     // }
 
-    public Command feedShooter() {
-        return parallel(shootingLights(), storage.feedShooter(shooter::shooterIsReady), feeder.feedShooter()).withName(
-            "Routines.score()"
-        );
-    }
+    // public Command feedShooter() {
+    //     return parallel(shootingLights(), storage.feedShooter(shooter::shooterIsReady), feeder.feedShooter()).withName(
+    //         "Routines.score()"
+    //     );
+    // }
 
     // TODO: Implement this with setpoints and all that
     // public Command newShootFuel() {
@@ -203,16 +203,31 @@ public final class Routines {
         ).withName("Routines.scoreAuto()");
     }
 
-    public Command shootFuel() {
-        return parallel(
-            // shootingLights(),
-            lights.sides.chase(Lights.Color.SHOOTING),
-            lights.top.convergeToMiddle(Lights.Color.SHOOTING),
-            hood.targetDistance(swerve::distanceToTarget),
-            shooter.targetDistance(swerve::distanceToTarget),
-            sequence(waitUntil(() -> (shooter.shooterIsReady() && hood.atPosition() && swerve.aimingAtTarget())), parallel(feeder.feedShooter(), storage.feedShooter(() -> feeder.isReady())))
-        ).withName("Routines.score()");
-    }
+public Command shootFuelTest(){
+    return parallel(
+        storage.feedShooter(() -> feeder.isReady()),
+        feeder.feedShooter(shooter::shooterIsReady  ),
+         shooter.readyShooter()
+        // shootingLights(),
+        // lights.sides.chase(Lights.Color.SHOOTING),
+        // lights.top.convergeToMiddle(Lights.Color.SHOOTING),
+        // hood.targetDistance(swerve::distanceToTarget),
+        // shooter.targetDistance(swerve::distanceToTarget),
+        // sequence(waitUntil(() -> (shooter.shooterIsReady() && hood.atPosition() && swerve.aimingAtTarget())), parallel(feeder.feedShooter(), storage.feedShooter(() -> feeder.isReady())))
+    ).withName("Routines.score()");
+}
+
+    // public Command shootFuel() {
+    //     return parallel(
+    //         // shootingLights(),
+    //         lights.sides.chase(Lights.Color.SHOOTING),
+    //         lights.top.convergeToMiddle(Lights.Color.SHOOTING),
+    //         hood.targetDistance(swerve::distanceToTarget),
+    //         shooter.targetDistance(swerve::distanceToTarget),
+    //         sequence(waitUntil(() -> (shooter.shooterIsReady() && hood.atPosition() && swerve.aimingAtTarget())), parallel(feeder.feedShooter(), storage.feedShooter(() -> feeder.isReady())))
+    //     ).withName("Routines.score()");
+    // }
+
 
     public Command shootFuelRev() {
         return parallel(
