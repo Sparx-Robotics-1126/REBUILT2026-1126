@@ -38,7 +38,7 @@ public final class Shooter extends GRRSubsystem {
     private final Follower motorFollowControl;
 
    
-    private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 50);
+    private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 60);
     private final Tunables.TunableInteger shooterShootFieldSpeed = tunables.value("Shoot Field Speed", 250);
     private final Tunables.TunableInteger shooterUnJamSpeed = tunables.value("Shooter UnJam Speed", 100);
     private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 198);

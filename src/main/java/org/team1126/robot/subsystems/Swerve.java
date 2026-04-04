@@ -257,7 +257,7 @@ public final class Swerve extends GRRSubsystem {
         final double deltaY = state.pose.getY() - target.getY();
 
         distanceToTarget = Math.hypot(deltaX, deltaY);
-
+SmartDashboard.putNumber("Distance to Target", distanceToTarget);
         angleToTarget = Math.atan2(deltaY, deltaX) + Math.PI;
         double dot = Math.cos(angleToTarget) * state.rotation.getCos() + Math.sin(angleToTarget) * state.rotation.getSin();
         aimingAtTarget = Math.acos(MathUtil.clamp(dot, -1.0, 1.0)) < facingHubTol.get();

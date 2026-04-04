@@ -168,9 +168,9 @@ public final class Robot extends LoggedRobot {
         //        coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
         // coDriver.povUp().whileTrue(storage.moveMotorCommand(true));
         // coDriver.povDown().whileTrue(storage.moveMotorCommand(false));
-coDriver.b().whileTrue(hood.zeroPositiCommand());
-        coDriver.povUp().whileTrue(hood.moveHoodCommand(()->-7.0        ));
-        coDriver.povDown().whileTrue(hood.moveHoodCommand( ()->0.0));
+// coDriver.b().whileTrue(hood.zeroPositiCommand().ignoringDisable(true));
+        coDriver.povUp().whileTrue(hood.targetDistanceCommand(       ));
+        coDriver.povDown().whileTrue(hood.goToZero(true ));
         // coDriver.rightBumper().onTrue(swerve.playMusic("enemy").ignoringDisable(true));
         //
         // RobotModeTriggers.autonomous().whileTrue(autos.outpost());

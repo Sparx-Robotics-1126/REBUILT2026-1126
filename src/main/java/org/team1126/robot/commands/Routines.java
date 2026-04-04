@@ -205,7 +205,7 @@ public final class Routines {
 
 public Command shootFuelTest(){
     return parallel(
-        storage.feedShooter(() -> feeder.isReady()),
+        storage.feedShooter(() -> true),
         feeder.feedShooter(shooter::shooterIsReady  ),
          shooter.readyShooter()
         // shootingLights(),

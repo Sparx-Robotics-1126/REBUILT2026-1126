@@ -8,7 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -23,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.util.command.GRRSubsystem;
+import org.team1126.lib.util.vendors.PhoenixUtil;
 
 @Logged
 public final class Intake extends GRRSubsystem {
@@ -32,12 +37,14 @@ public final class Intake extends GRRSubsystem {
     private final SparkFlex pivotMotorFollow;
 
     private TalonFXConfiguration intakeConfig;
-    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 500);
+        private final VelocityTorqueCurrentFOC intakeVelocityControl;
+    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 100);
+        private final Tunables.TunableInteger intakeAcceleration = tunables.value("Intake Acceleration", 800);
     private static final TunableTable tunables = Tunables.getNested("intake");
 
     private SparkFlexConfig pivotConfig;
     private SparkClosedLoopController pivotController;
-    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -1.712);
+    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -1.78);
     
     private List<Double> outputCurrent = new ArrayList<>();
     private List<Double> appliedOutput = new ArrayList<>();
@@ -56,26 +63,26 @@ public final class Intake extends GRRSubsystem {
         pivotConfig.idleMode(SparkBaseConfig.IdleMode.kBrake);
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(.1, ClosedLoopSlot.kSlot0)
+            .p(1, ClosedLoopSlot.kSlot0)
             .i(0, ClosedLoopSlot.kSlot0)
             .d(0, ClosedLoopSlot.kSlot0)
-            .feedForward.kCos(.0, ClosedLoopSlot.kSlot0);
+            .feedForward.kCos(1, ClosedLoopSlot.kSlot0);
         pivotConfig.closedLoop.maxMotion
-            .maxAcceleration(50, ClosedLoopSlot.kSlot0) // REDUCED from 200 — slower ramp
-            .allowedProfileError(1, ClosedLoopSlot.kSlot0)
-            .cruiseVelocity(50, ClosedLoopSlot.kSlot0) // Changed from 1000 to match test setpoint
-            .allowedProfileError(1, ClosedLoopSlot.kSlot0);
+            .maxAcceleration(250, ClosedLoopSlot.kSlot0) // REDUCED from 200 — slower ramp
+            .allowedProfileError(5, ClosedLoopSlot.kSlot0)
+            .cruiseVelocity(250, ClosedLoopSlot.kSlot0) // Changed from 1000 to match test setpoint
+            .allowedProfileError(5, ClosedLoopSlot.kSlot0);
 
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(.1, ClosedLoopSlot.kSlot1)
+            .p(1, ClosedLoopSlot.kSlot1)
             .i(0, ClosedLoopSlot.kSlot1)
             .d(0, ClosedLoopSlot.kSlot1)
-            .feedForward.kCos(.5, ClosedLoopSlot.kSlot1);
+            .feedForward.kCos(1, ClosedLoopSlot.kSlot1);
         pivotConfig.closedLoop.maxMotion
-            .maxAcceleration(50, ClosedLoopSlot.kSlot1) // REDUCED from 200 — slower ramp
+            .maxAcceleration(300, ClosedLoopSlot.kSlot1) // REDUCED from 200 — slower ramp
             .allowedProfileError(1, ClosedLoopSlot.kSlot1)
-            .cruiseVelocity(50, ClosedLoopSlot.kSlot1) // Changed from 1000 to match test setpoint
+            .cruiseVelocity(300, ClosedLoopSlot.kSlot1) // Changed from 1000 to match test setpoint
             .allowedProfileError(1, ClosedLoopSlot.kSlot1);
 
         pivotMotorLead.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -85,20 +92,27 @@ public final class Intake extends GRRSubsystem {
         
         followConfig.follow(PIVOT_MOTOR_LEAD,true);
         pivotMotorFollow.configure(followConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        intakeVelocityControl = new VelocityTorqueCurrentFOC(0.0);
+        intakeVelocityControl.UpdateFreqHz = 0.0;
 
         // Configure TalonFX intake motor
-        intakeConfig.MotorOutput.NeutralMode = com.ctre.phoenix6.signals.NeutralModeValue.Brake;
-        intakeConfig.MotorOutput.Inverted = com.ctre.phoenix6.signals.InvertedValue.CounterClockwise_Positive;
-        intakeConfig.CurrentLimits.SupplyCurrentLimit = 40;
-        intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        configureRollers();
 
-        // Velocity control PID (slot 0)
-        intakeConfig.Slot0.kP = 0.12;
-        intakeConfig.Slot0.kI = 0.0;
-        intakeConfig.Slot0.kD = 0.0;
-        intakeConfig.Slot0.kV = 0.12; // velocity feedforward
+    //     intakeConfig.MotorOutput.NeutralMode = com.ctre.phoenix6.signals.NeutralModeValue.Brake;
+    //     intakeConfig.MotorOutput.Inverted = com.ctre.phoenix6.signals.InvertedValue.CounterClockwise_Positive;
+    //     intakeConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    //     intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-        intakeMotor.getConfigurator().apply(intakeConfig);
+    //     // Velocity control PID (slot 0)
+    //     intakeConfig.Slot0.kP = 0.12;
+    //     intakeConfig.Slot0.kI = 0.0;
+    //     intakeConfig.Slot0.kD = 0.0;
+    //     intakeConfig.Slot0.kS = 0.5;
+    //     intakeConfig.Slot0.kV = 0.12; // velocity feedforward
+
+    //     intakeMotor.getConfigurator().apply(intakeConfig);
+    //    PhoenixUtil.run(() -> intakeMotor.clearStickyFaults());
+    //     PhoenixUtil.run(() -> intakeMotor.getConfigurator().apply(intakeConfig));
 
         tunables.add("Intake Motor", intakeMotor);
         tunables.add("Pivot Motor Lead", pivotMotorLead);
@@ -108,7 +122,12 @@ public final class Intake extends GRRSubsystem {
     @NotLogged
     public Command moveIntake(boolean reverse) {
         return commandBuilder()
-            .onExecute(() -> moveIntakeMotor(reverse))
+            .onExecute(() ->{
+ var maxVelocity = new MotionMagicVelocityVoltage(intakeSpeed.get())
+               .withAcceleration(intakeAcceleration.getAsInt());
+
+               intakeMotor.setControl(maxVelocity);
+            } )
             .onEnd(this::stopIntake);
     }
 
@@ -122,7 +141,13 @@ public final class Intake extends GRRSubsystem {
     @NotLogged
     public void moveIntakeMotor(boolean reverse) {
         double speed = reverse ? -this.intakeSpeed.get() : this.intakeSpeed.get();
-        intakeMotor.setControl(new VelocityVoltage(speed));
+           intakeVelocityControl.withVelocity( this.intakeSpeed.get());
+        // intakeMotor.setControl(intakeVelocityControl);
+           if (Math.abs(intakeVelocityControl.Velocity) > 1e-6) {
+                    intakeMotor.setControl(intakeVelocityControl);
+                } else {
+                    intakeMotor.stopMotor();
+                }
     }
 
     @NotLogged
@@ -239,5 +264,30 @@ public final class Intake extends GRRSubsystem {
     
     public List<Double> getIntakeTemperature() {
         return intakeTemperature;
+    }
+
+      private void configureRollers() {
+        final TalonFXConfiguration config = new TalonFXConfiguration();
+
+        config.CurrentLimits.StatorCurrentLimit = 170.0;
+        config.CurrentLimits.SupplyCurrentLimit = 60.0;
+        config.CurrentLimits.SupplyCurrentLowerTime = 0.0;
+
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+
+        config.Slot0.kP = .5;
+        config.Slot0.kI = 0.0;
+        config.Slot0.kD = 0.0;
+        config.Slot0.kG = 0.0;
+        config.Slot0.kS = 10.0;
+        config.Slot0.kV = 0.0;
+        config.Slot0.kA = 0.0;
+
+        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+        PhoenixUtil.run(() -> intakeMotor.clearStickyFaults());
+        PhoenixUtil.run(() -> intakeMotor.getConfigurator().apply(config));
+
+      
     }
 }
