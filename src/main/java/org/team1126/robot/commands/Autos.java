@@ -15,6 +15,7 @@ import org.team1126.robot.subsystems.*;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.routines.BacknForth;
+import org.team1126.robot.util.autos.routines.DepotPlaceholder;
 import org.team1126.robot.util.autos.routines.GrabAndShoot;
 import org.team1126.robot.util.autos.routines.HerdIntoSection;
 import org.team1126.robot.util.autos.routines.InTheTrenches;
@@ -67,6 +68,7 @@ public final class Autos {
         HerdIntoSection.init(robot);
         PourMeSomeFuel.init(robot);
         BacknForth.init(robot);
+        DepotPlaceholder.init(robot);
 
         AutosFlip right = AutosFlip.RIGHT;
         AutosFlip left = AutosFlip.LEFT;
@@ -194,6 +196,12 @@ public final class Autos {
         chooser.addOption(
             PourMeSomeFuel.get().getDisplayName(startBump, right, true),
             PourMeSomeFuel.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
+        );
+
+        //DepotPlaceholder
+        chooser.addOption(
+            DepotPlaceholder.get().getDisplayName(startBump, left, true),
+            DepotPlaceholder.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
         );
     }
 

@@ -19,7 +19,7 @@ public class PourMeSomeFuel extends BaseAutosRoutine {
     
     public static final String COMMAND_NAME = "ShootOutpostFuel.action";
     public static final String DISPLAY_NAME = "Pour Me Some Fuel";
-    public static final String ABBREVIATION = "PMSA";
+    public static final String ABBREVIATION = "PMSF";
 
     private static PourMeSomeFuel instance;
 
@@ -37,13 +37,13 @@ public class PourMeSomeFuel extends BaseAutosRoutine {
     private PourMeSomeFuel(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = Arrays.asList(
-            new Waypoint(3.028, 2.425, Math.toRadians(40), getDefaultDecel()),
-            new Waypoint(1.994, 1.651, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(1.215, 0.453, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(0.500, 0.453, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(1.215, 0.453, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(1.994, 1.651, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(3.028, 2.425, Math.toRadians(40), getDefaultDecel())
+            new Waypoint(3.028, 2.425, Math.toRadians(40.0), getDefaultDecel()),
+            new Waypoint(1.994, 1.651, Math.toRadians(270.0), getDefaultDecel()),
+            new Waypoint(1.215, 0.453, Math.toRadians(180.0), getDefaultDecel()),
+            new Waypoint(0.500, 0.453, Math.toRadians(180.0), getDefaultDecel()),
+            new Waypoint(1.215, 0.453, Math.toRadians(180.0), getDefaultDecel()),
+            new Waypoint(1.994, 1.651, Math.toRadians(90.0), getDefaultDecel()),
+            new Waypoint(3.028, 2.425, Math.toRadians(40.0), getDefaultDecel())
         ).toArray(new Waypoint[0]);
     }
 
