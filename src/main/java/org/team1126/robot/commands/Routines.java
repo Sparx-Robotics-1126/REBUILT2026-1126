@@ -94,11 +94,11 @@ public final class Routines {
 
     public Command lightsDisabledMode() {
         if (Alliance.isBlue()) {
-            return parallel(lights.top.setSolidBlue(), lights.sides.setSolidBlue()).withName(
+            return parallel(lights.topLeft.setSolidBlue(), lights.topRight.setSolidBlue(), lights.sides.setSolidBlue()).withName(
                 "Routines.lightsDisabledMode()"
             );
         } else {
-            return parallel(lights.top.setSolidRed(), lights.sides.setSolidRed()).withName(
+            return parallel(lights.topLeft.setSolidRed(), lights.topRight.setSolidRed(), lights.sides.setSolidRed()).withName(
                 "Routines.lightsDisabledMode()"
             );
         }
@@ -106,11 +106,11 @@ public final class Routines {
 
     public Command lightsTeleopMode() {
         if (Alliance.isBlue()) {
-            return parallel(lights.top.setSolidBlue(), lights.sides.setSolidBlue()).withName(
+            return parallel(lights.topLeft.setSolidBlue(), lights.topRight.setSolidBlue(), lights.sides.setSolidBlue()).withName(
                 "Routines.lightsDisabledMode()"
             );
         } else {
-            return parallel(lights.top.setSolidRed(), lights.sides.setSolidRed()).withName(
+            return parallel(lights.topLeft.setSolidRed(), lights.topRight.setSolidRed(), lights.sides.setSolidRed()).withName(
                 "Routines.lightsDisabledMode()"
             );
         }
@@ -292,21 +292,23 @@ public Command shootFuelTest(){
     }
 
     public Command lightsSolidRed() {
-        return lights.top.setSolidRed().withName("Routines.lightsSolidRed()");
+        return parallel(lights.topLeft.setSolidRed(), lights.topRight.setSolidRed()).withName("Routines.lightsSolidRed()");
         // return lights.top.setSolidRed();
     }
 
     public Command shootingLights() {
         return parallel(
             // lights.sides.chase(Lights.Color.SHOOTING),
-            lights.top.convergeToMiddle(Lights.Color.SHOOTING)
+            lights.topLeft.convergeToMiddle(Lights.Color.SHOOTING),
+            lights.topRight.convergeToMiddle(Lights.Color.SHOOTING)
         ).withName("Routines.shootingLights()");
     }
 
     public Command selfDriveLights() {
         return parallel(
             lights.sides.fade(Lights.Color.BLUE, Lights.Color.RED),
-            lights.top.knightRider(Lights.Color.BLUE, Lights.Color.RED)
+            lights.topLeft.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+            lights.topRight.knightRider(Lights.Color.BLUE, Lights.Color.RED)
         ).withName("Routines.selfDriveLights()");
     }
 
