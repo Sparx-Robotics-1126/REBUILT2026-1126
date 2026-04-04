@@ -22,17 +22,17 @@ public final class Constants {
     public static final CameraConfig[] AT_CAMERAS = {
         new CameraConfig(
             "center",
-            new Translation3d(.195, .0, Z_HEIGHT_FLOOR_TO_ROBOT + 0.49),
+            new Translation3d(.18, .0, Z_HEIGHT_FLOOR_TO_ROBOT + 0.58),
             new Rotation3d(0.0, Math.toRadians(5), Math.toRadians(0.0))
         ),
         new CameraConfig(
             "left",
-            new Translation3d(.175, 0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.49),
+            new Translation3d(.16, 0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.58),
             new Rotation3d(0.0, Math.toRadians(10), Math.toRadians(45.0))
         ),
         new CameraConfig(
             "right",
-            new Translation3d(.175, -0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.49),
+            new Translation3d(.16, -0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.58),
             new Rotation3d(0.0, Math.toRadians(5), Math.toRadians(-45.0))
         )
     };
