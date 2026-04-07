@@ -58,8 +58,8 @@ public final class Routines {
     private static final TunableDouble waypointTol = tunables.value("waypointTol", 0.25);
 
     private static final TunableBoolean autoDrive = tunables.value("autoDrive", true);
-    private static final TunableDouble staticShootDistance = tunables.value("staticShootDistance", 2.0);
-    private static final TunableDouble staticShootHoodPosition = tunables.value("staticShootHoodPosition", 3.0);
+    private static final TunableDouble staticShootDistance = tunables.value("staticShootDistance", 2.49);
+    private static final TunableDouble staticShootHoodPosition = tunables.value("staticShootHoodPosition", 6.0);
 
     private static final TunableInteger shootingMinRqTagsSeen = tunables.value("shootingMinRqTagsSeen", 25);
     private final Robot robot;
