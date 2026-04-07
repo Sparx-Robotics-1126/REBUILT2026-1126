@@ -46,12 +46,18 @@ public final class BacknForth extends BaseAutosRoutine {
         waypoints = Arrays.asList(
             new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(6.329, 2.611, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(6.829, 2.611, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
             new Waypoint(7.697, 2.611, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.697, 3.225, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(6.829, 2.611, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(3.299, 2.611, Math.toRadians(45.0), getDefaultDecel()),
             new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(6.329, 2.611, Math.toRadians(0.0), getDefaultDecel()),
+            new Waypoint(6.829, 2.611, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
             new Waypoint(7.697, 2.611, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(7.697, 1.992, Math.toRadians(270.0), getDefaultDecel() * intakeFactor.get()),
+            new Waypoint(6.829, 2.611, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel()),
             new Waypoint(3.299, 2.611, Math.toRadians(45.0), getDefaultDecel())
         ).toArray(new Waypoint[0]);
@@ -68,18 +74,21 @@ public final class BacknForth extends BaseAutosRoutine {
                         .withTimeout(1.5)
                         .andThen(robot.intake.moveIntakeTest(false))
                         .withDeadline(driveWaypoint(flip, 2, blue)
-                        .andThen(Commands.waitSeconds(1.0)))
+                        .andThen(driveWaypoint(flip, 3, blue))
+                        .andThen(driveWaypoint(flip, 4, blue)))
                 )
-                .andThen(driveWaypoint(flip, 3, blue))
-                .andThen(driveWaypoint(flip, 4, blue)),
-                driveArchAndShootFuel()
                 .andThen(driveWaypoint(flip, 5, blue))
-                .andThen(driveWaypoint(flip, 6, blue))
-                .andThen(robot.intake.moveIntakeTest(false))
-                .withDeadline(driveWaypoint(flip, 7, blue)
-                .andThen(Commands.waitSeconds(1.0)))
+                .andThen(driveWaypoint(flip, 6, blue)),
+                driveArchAndShootFuel()
+                .andThen(driveWaypoint(flip, 7, blue))
                 .andThen(driveWaypoint(flip, 8, blue))
-                .andThen(driveWaypoint(flip, 9, blue)),
+                .andThen(driveWaypoint(flip, 9, blue))
+                .andThen(robot.intake.moveIntakeTest(false))
+                .withDeadline(driveWaypoint(flip, 10, blue)
+                .andThen(driveWaypoint(flip, 11, blue))
+                .andThen(driveWaypoint(flip, 12)))
+                .andThen(driveWaypoint(flip, 13, blue))
+                .andThen(driveWaypoint(flip, 14, blue)),
                 driveArchAndShootFuel()
         ).withName(getCommandName());
     }
