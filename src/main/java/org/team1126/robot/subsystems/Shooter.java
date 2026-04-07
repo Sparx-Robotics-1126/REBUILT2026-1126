@@ -82,6 +82,7 @@ public final class Shooter extends GRRSubsystem {
         SmartDashboard.putBoolean("Shooter is at speed?", shooterIsReady());
         SmartDashboard.putBoolean("Shooting Field?", this.shootingField);
         SmartDashboard.putBoolean("Shooter is at setpoint?", shooterIsReady());
+        SmartDashboard.putNumber("Shooter closed loop error", closedLoopError.getValueAsDouble());
     }
 
     /**

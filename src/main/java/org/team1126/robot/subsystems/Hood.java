@@ -107,6 +107,10 @@ private static final TunableDouble hoodPosition = tunables.value("Hood Position"
   public Command homeCommand() {
         return goTo(() -> 0).withName("Hood.homeCommand()");
     }
+    public Command zeroPositionCommand() {
+        return commandBuilder("Hood.zeroPositionCommand()")
+        .onExecute(() -> motor.setPosition(0));
+    }
 
     /**
      * Moves the hood to zero.

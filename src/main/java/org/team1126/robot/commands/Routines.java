@@ -175,11 +175,12 @@ public final class Routines {
                     )
                 ).deadlineFor(storage.spill().withTimeout(0.25)),
                 storage.feedShooter(feeder::isReady)
-            ),
-            sequence(
-                race(waitUntil(runIntake), waitSeconds(0.75)),
-                either(intake.intake().onlyWhile(runIntake), intake.agitate().until(runIntake), runIntake)
-            ).repeatedly()
+            )
+            // Still needs testing
+            // sequence(
+            //     race(waitUntil(runIntake), waitSeconds(0.75)),
+            //     either(intake.intake().onlyWhile(runIntake), intake.agitate().until(runIntake), runIntake)
+            // ).repeatedly()
         ).withName("Routines.shoot()");
     }
 
