@@ -20,8 +20,11 @@ public final class ShootParams {
         final DataPoint[] dataPoints = {
             new DataPoint(5.979, 6.8, 88.0),
             new DataPoint(4.22, 6.5, 78.0),
+            new DataPoint(3.85, 6.3, 73.0),
             new DataPoint(3.33, 6.2, 70.0),
+            new DataPoint(3.20, 6.1, 62.0),
             new DataPoint(2.49, 6.0, 58.0),
+            new DataPoint(2.40, 4.5, 53.0),
             new DataPoint(1.80, 4.0, 50.0),
             // Far points, not measured yet
             new DataPoint(7.0, 6.8, 98.0),

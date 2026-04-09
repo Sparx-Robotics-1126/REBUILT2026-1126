@@ -217,8 +217,8 @@ public final class Intake extends GRRSubsystem {
      * Agitates the hopper by jostling the intake up and down while pulling balls inwards.
      */
     public Command agitate() {
-        return sequence( extendIntake().withTimeout(0.4),
-                        retrackIntake().withTimeout(0.4))
+        return sequence( extendIntake().withTimeout(0.6),
+                        retrackIntake().withTimeout(0.6))
             .repeatedly()
             .withName("Intake.agitate()");
     }
