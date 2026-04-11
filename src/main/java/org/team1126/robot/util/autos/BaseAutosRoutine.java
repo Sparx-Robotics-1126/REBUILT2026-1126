@@ -217,11 +217,8 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
      */
     protected Command driveArchAndShootFuel() {
         return sequence(
-            parallel(
-                // routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
-                driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
-            ),
-            routines.shootFuelAuto()
+            driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
+            .andThen(routines.shoot(() -> false, () -> false))
         );
     }
 
@@ -275,6 +272,18 @@ protected Command driveArchAndShootFuelStart() {
         } else {
             return Commands.none();
         }
+    }
+
+    public Command driveWaypoint(Supplier<AutosFlip> flip, Waypoint waypoint, BooleanSupplier blue) {
+        if (waypoint.limitField) {
+            return Commands.none();
+        }
+
+        return robot.swerve.apfDrive(
+            () -> waypoint.asPose(() -> flip.get().shouldFlip(), blue),
+            () -> waypoint.decel,
+            () -> defaultTolerance.getAsDouble()
+        );
     }
 
     public Command driveWaypoint(Supplier<AutosFlip> flip, int index) {

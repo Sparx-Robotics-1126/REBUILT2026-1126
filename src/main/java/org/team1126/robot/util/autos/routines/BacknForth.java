@@ -25,10 +25,15 @@ public final class BacknForth extends BaseAutosRoutine {
     public static final String COMMAND_NAME = "BacknForthAutos.action()";
     public static final String DISPLAY_NAME = "Back and Forth";
     public static final String ABBREVIATION = "BNF";
-
+    
     private static BacknForth instance;
+    
+    public static final ExtPose START_AT = new ExtPose(AutosStart.BUMP.getStartingPoint(true, false));
+    public static final Waypoint bumpPivot = new Waypoint(5.712, 2.5, Math.toRadians(0.0),getDefaultDecel());
+    public static final Waypoint centerLinePivot = new Waypoint(7.692, 0.685, Math.toRadians(90.0), getDefaultDecel());
+    public static final Waypoint middlePivot = new Waypoint(7.692, 3.46, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get());
+    public static final Waypoint shootingPoint = new Waypoint(2.74, 1.8, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get());
 
-    public static final ExtPose START_AT = new ExtPose(AutosStart.BUMP.getStartingPoint(false, true));
     public static void init(Robot robot) {
         instance = new BacknForth(COMMAND_NAME, DISPLAY_NAME, ABBREVIATION, robot);
     }
@@ -46,48 +51,56 @@ public final class BacknForth extends BaseAutosRoutine {
      */
     private BacknForth(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
-        waypoints = Arrays.asList(
-            new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(6.329, 2.611, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(6.829, 2.611, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
-            new Waypoint(7.697, 2.611, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
-            new Waypoint(7.697, 3.225, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get()),
-            new Waypoint(6.829, 2.611, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(3.299, 2.611, Math.toRadians(45.0), getDefaultDecel()),
-            new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(6.329, 2.611, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(6.829, 2.611, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
-            new Waypoint(7.697, 2.611, Math.toRadians(0.0), getDefaultDecel() * intakeFactor.get()),
-            new Waypoint(7.697, 1.992, Math.toRadians(270.0), getDefaultDecel() * intakeFactor.get()),
-            new Waypoint(6.829, 2.611, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(5.64, 2.611, Math.toRadians(0.0), getDefaultDecel()),
-            new Waypoint(3.299, 2.611, Math.toRadians(45.0), getDefaultDecel())
-        ).toArray(new Waypoint[0]);
+        waypoints = new Waypoint[0];
     }
 
     public Command action(Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
             atStartingPoint(() -> START_AT.get(blue.getAsBoolean(), flip.get().shouldFlip())),
+
             driveWaypoint(flip, 0, blue)
-                .andThen(driveWaypoint(flip, 1, blue))
+            .andThen(driveWaypoint(flip, bumpPivot, blue))
+            .andThen(driveWaypoint(flip, centerLinePivot, blue))
+            .andThen(
+                robot.intake
+                    .extendIntake()
+                    .withTimeout(1.5)
+                    .andThen(robot.intake.moveIntake(false))
+                    .withDeadline(driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue)))
+            )
+            .andThen(driveWaypoint(flip, shootingPoint, blue),
+            driveArchAndShootFuel().withDeadline(Commands.waitSeconds(1.5)))
+            
+            .andThen(
+                driveWaypoint(flip, 0, blue)
+                .andThen(driveWaypoint(flip, bumpPivot, blue))
+                .andThen(driveWaypoint(flip, centerLinePivot, blue))
                 .andThen(
                     robot.intake
                         .extendIntake()
                         .withTimeout(1.5)
                         .andThen(robot.intake.moveIntake(false))
-                        .withDeadline(driveWaypoint(flip, 2, blue)
-                        .andThen(driveWaypoint(flip, 3, blue))
-                        .andThen(driveWaypoint(flip, 4, blue)))
+                        .withDeadline(driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue)))
                 )
-                .andThen(driveWaypoint(flip, 5, blue))
-                .andThen(driveWaypoint(flip, 6, blue))
-                .andThen(robot.intake.moveIntake(false))
-                .withDeadline(driveWaypoint(flip, 7, blue)
-                .andThen(Commands.waitSeconds(1.0)))
-                .andThen(driveWaypoint(flip, 8, blue))
-                .andThen(driveWaypoint(flip, 9, blue)),
-                driveArchAndShootFuel()
+                .andThen(driveWaypoint(flip, shootingPoint, blue),
+                driveArchAndShootFuel().withDeadline(Commands.waitSeconds(1.5)))
+            )
         ).withName(getCommandName());
+    }
+    
+    private Command routine(Supplier<AutosFlip> flip, BooleanSupplier blue) {
+        return driveWaypoint(flip, 0, blue)
+            .andThen(driveWaypoint(flip, bumpPivot, blue))
+            .andThen(driveWaypoint(flip, centerLinePivot, blue))
+            .andThen(
+                robot.intake
+                    .extendIntake()
+                    .withTimeout(1.5)
+                    .andThen(robot.intake.moveIntake(false))
+                    .withDeadline(driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue)))
+            )
+            .andThen(robot.intake.moveIntake(false))
+            .andThen(driveWaypoint(flip, shootingPoint, blue),
+            driveArchAndShootFuel().withDeadline(Commands.waitSeconds(1.5)));
     }
 }

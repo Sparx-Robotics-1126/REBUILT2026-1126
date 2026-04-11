@@ -161,11 +161,11 @@ public final class Autos {
 
         //BacknForth
         chooser.addOption(
-            BacknForth.get().getDisplayName(startBump, right, true),
+            BacknForth.get().getDisplayName(right, true),
             BacknForth.get().action(() -> right, () -> Alliance.isBlue())
         );
         chooser.addOption(
-            BacknForth.get().getDisplayName(startBump, left, true),
+            BacknForth.get().getDisplayName(left, true),
             BacknForth.get().action(() -> left, () -> Alliance.isBlue())
         );
 
