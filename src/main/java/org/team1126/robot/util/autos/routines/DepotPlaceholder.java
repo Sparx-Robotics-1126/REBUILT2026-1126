@@ -69,9 +69,9 @@ public class DepotPlaceholder extends BaseAutosRoutine {
                 .andThen(driveWaypoint(invertedFlip, 2, blue))
                 .andThen(
                     robot.intake
-                        .extendIntake(false)
+                        .extendIntake()
                         .withTimeout(0.5)
-                        .andThen(robot.intake.moveIntakeTest(false))
+                        .andThen(robot.intake.moveIntake(false))
                         .withDeadline(driveWaypoint(invertedFlip, 3, blue)
                         .andThen(driveWaypoint(invertedFlip, 4, blue))
                         .andThen(driveWaypoint(invertedFlip, 5, blue)))
