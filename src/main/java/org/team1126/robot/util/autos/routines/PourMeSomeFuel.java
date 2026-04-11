@@ -55,7 +55,8 @@ public class PourMeSomeFuel extends BaseAutosRoutine {
             driveWaypoint(flip, 1, blue)
                 .andThen(driveWaypoint(flip, 2, blue))
                 .andThen(driveWaypoint(flip, 3, blue))
-                .andThen(Commands.waitSeconds(2.0))
+                .andThen(robot.intake.extendIntake())
+                .andThen(Commands.waitSeconds(4.0))
                 .andThen(driveWaypoint(flip, 4, blue))
                 .andThen(driveWaypoint(flip, 5, blue))
                 .andThen(driveWaypoint(flip, 6, blue)),
