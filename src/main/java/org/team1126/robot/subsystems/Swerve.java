@@ -318,6 +318,7 @@ SmartDashboard.putNumber("Distance to Target", distanceToTarget);
     /**
      * Remove @NotLogged for debugging
      */
+    @NotLogged
     public List<Pose2d> apfVisualization() {
         return apf.visualizeField(40, 1.0, FieldInfo.length(), FieldInfo.width());
     }
