@@ -163,6 +163,7 @@ public final class Routines {
             hood.targetDistance(swerve::distanceToTarget),
             shooter.targetDistance(swerve::distanceToTarget),
             // feeder.readyFeeder(),
+            storage.feedShooter(()-> true),
             sequence(
                 sequence(
                     waitSeconds(0.05),
