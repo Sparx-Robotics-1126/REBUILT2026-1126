@@ -177,7 +177,7 @@ public final class Robot extends LoggedRobot {
 
         // Setup lights
         // scheduler.schedule(routines.lightsPreMatch(autos.runSelectedAuto()));
-        RobotModeTriggers.autonomous().whileTrue(   lights.topLeftTop.knightRider(Lights.Color.BLUE, Lights.Color.RED));
+        // RobotModeTriggers.autonomous().whileTrue(   lights.topLeftTop.knightRider(Lights.Color.BLUE, Lights.Color.RED));
         RobotModeTriggers.disabled().whileTrue(routines.lightsDisabledMode());
 
         if (rumbleOn) {
