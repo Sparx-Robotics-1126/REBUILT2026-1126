@@ -217,11 +217,8 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
      */
     protected Command driveArchAndShootFuel() {
         return sequence(
-            parallel(
-                routines.readyFeederShooter().withTimeout(flywheelWarmupTimer.getAsDouble()),
-                driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
-            ),
-            routines.shootFuelAuto()
+            driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
+            .andThen(routines.shootFuel())
         );
     }
 

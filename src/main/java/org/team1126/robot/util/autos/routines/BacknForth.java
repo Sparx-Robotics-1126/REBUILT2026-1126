@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+
+import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.robot.Robot;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
@@ -26,6 +28,7 @@ public final class BacknForth extends BaseAutosRoutine {
 
     private static BacknForth instance;
 
+    public static final ExtPose START_AT = new ExtPose(AutosStart.BUMP.getStartingPoint(false, true));
     public static void init(Robot robot) {
         instance = new BacknForth(COMMAND_NAME, DISPLAY_NAME, ABBREVIATION, robot);
     }
@@ -63,9 +66,9 @@ public final class BacknForth extends BaseAutosRoutine {
         ).toArray(new Waypoint[0]);
     }
 
-    public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue) {
+    public Command action(Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
-            atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean(), flip.get().shouldFlip())),
+            atStartingPoint(() -> START_AT.get(blue.getAsBoolean(), flip.get().shouldFlip())),
             driveWaypoint(flip, 0, blue)
                 .andThen(driveWaypoint(flip, 1, blue))
                 .andThen(
@@ -79,8 +82,8 @@ public final class BacknForth extends BaseAutosRoutine {
                 )
                 .andThen(driveWaypoint(flip, 5, blue))
                 .andThen(driveWaypoint(flip, 6, blue)),
-                driveArchAndShootFuel()
-                .andThen(driveWaypoint(flip, 7, blue))
+                driveArchAndShootFuel(),
+                driveWaypoint(flip, 7, blue))
                 .andThen(driveWaypoint(flip, 8, blue))
                 .andThen(driveWaypoint(flip, 9, blue))
                 .andThen(robot.intake.moveIntakeTest(false))
@@ -88,7 +91,7 @@ public final class BacknForth extends BaseAutosRoutine {
                 .andThen(driveWaypoint(flip, 11, blue))
                 .andThen(driveWaypoint(flip, 12)))
                 .andThen(driveWaypoint(flip, 13, blue))
-                .andThen(driveWaypoint(flip, 14, blue)),
+                .andThen(driveWaypoint(flip, 14, blue),
                 driveArchAndShootFuel()
         ).withName(getCommandName());
     }
