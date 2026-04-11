@@ -94,11 +94,11 @@ public final class Routines {
 
     public Command lightsDisabledMode() {
         if (Alliance.isBlue()) {
-            return parallel(lights.topLeft.setSolidBlue(), lights.topRight.setSolidBlue(), lights.sides.setSolidBlue()).withName(
+            return parallel(lights.topLeftTop.setSolidBlue(), lights.topLeftBottom.setSolidBlue(), lights.sides.setSolidBlue(), lights.topRightBottom.setSolidBlue(), lights.topRightTop.setSolidBlue()).withName(
                 "Routines.lightsDisabledMode()"
             );
         } else {
-            return parallel(lights.topLeft.setSolidRed(), lights.topRight.setSolidRed(), lights.sides.setSolidRed()).withName(
+            return parallel(lights.topLeftTop.setSolidRed(), lights.topLeftBottom.setSolidRed(), lights.sides.setSolidRed(), lights.topRightBottom.setSolidRed(), lights.topRightTop.setSolidRed()).withName(
                 "Routines.lightsDisabledMode()"
             );
         }
@@ -106,11 +106,11 @@ public final class Routines {
 
     public Command lightsTeleopMode() {
         if (Alliance.isBlue()) {
-            return parallel(lights.topLeft.setSolidBlue(), lights.topRight.setSolidBlue(), lights.sides.setSolidBlue()).withName(
+            return parallel(lights.topLeftTop.setSolidBlue(), lights.topLeftBottom.setSolidBlue(), lights.sides.setSolidBlue(), lights.topRightBottom.setSolidBlue(), lights.topRightTop.setSolidBlue()).withName(
                 "Routines.lightsDisabledMode()"
             );
         } else {
-            return parallel(lights.topLeft.setSolidRed(), lights.topRight.setSolidRed(), lights.sides.setSolidRed()).withName(
+            return parallel(lights.topLeftTop.setSolidRed(), lights.topLeftBottom.setSolidRed(), lights.sides.setSolidRed(), lights.topRightBottom.setSolidRed(), lights.topRightTop.setSolidRed()).withName(
                 "Routines.lightsDisabledMode()"
             );
         }
@@ -294,23 +294,28 @@ public Command shootFuelTest(){
     }
 
     public Command lightsSolidRed() {
-        return parallel(lights.topLeft.setSolidRed(), lights.topRight.setSolidRed()).withName("Routines.lightsSolidRed()");
+        return parallel(lights.topLeftTop.setSolidRed(), lights.topLeftBottom.setSolidRed(), lights.sides.setSolidRed(), lights.topRightBottom.setSolidRed(), lights.topRightTop.setSolidRed()).withName("Routines.lightsSolidRed()");
         // return lights.top.setSolidRed();
     }
 
     public Command shootingLights() {
         return parallel(
             // lights.sides.chase(Lights.Color.SHOOTING),
-            lights.topLeft.convergeToMiddle(Lights.Color.SHOOTING),
-            lights.topRight.convergeToMiddle(Lights.Color.SHOOTING)
+            lights.topLeftTop.convergeToMiddle(Lights.Color.SHOOTING),
+            lights.topLeftBottom.convergeToMiddle(Lights.Color.SHOOTING),
+            lights.topRightBottom.convergeToMiddle(Lights.Color.SHOOTING),
+            lights.topRightTop.convergeToMiddle(Lights.Color.SHOOTING),
+            lights.sides.chase(Lights.Color.SHOOTING)
         ).withName("Routines.shootingLights()");
     }
 
     public Command selfDriveLights() {
         return parallel(
             lights.sides.fade(Lights.Color.BLUE, Lights.Color.RED),
-            lights.topLeft.knightRider(Lights.Color.BLUE, Lights.Color.RED),
-            lights.topRight.knightRider(Lights.Color.BLUE, Lights.Color.RED)
+            lights.topLeftTop.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+            lights.topLeftBottom.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+            lights.topRightBottom.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+            lights.topRightTop.knightRider(Lights.Color.BLUE, Lights.Color.RED)
         ).withName("Routines.selfDriveLights()");
     }
 
