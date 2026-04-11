@@ -17,7 +17,6 @@ import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
-import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.DisableWatchdog;
 import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
@@ -32,7 +31,6 @@ import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.ShiftTracker;
 import org.team1126.robot.util.nav.TrenchNavigator;
-import org.team1126.robot.util.nav.WaypointHeading;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -245,10 +243,10 @@ public final class Robot extends LoggedRobot {
         // } catch (Exception ignored) {}
     }
 
-    private void playSong(String filename) {
-        orchestra.loadMusic(filename);
-        orchestra.play();
-    }
+    // private void playSong(String filename) {
+    //     orchestra.loadMusic(filename);
+    //     orchestra.play();
+    // }
 
     @Override
     public void autonomousInit() {

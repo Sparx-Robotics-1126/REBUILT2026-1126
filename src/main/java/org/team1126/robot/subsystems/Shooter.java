@@ -14,8 +14,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.spark.SparkBase;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.DoubleSupplier;
@@ -39,10 +37,10 @@ public final class Shooter extends GRRSubsystem {
 
    
     private final Tunables.TunableInteger shooterShootSpeed = tunables.value("Shoot Speed", 60);
-    private final Tunables.TunableInteger shooterShootFieldSpeed = tunables.value("Shoot Field Speed", 250);
-    private final Tunables.TunableInteger shooterUnJamSpeed = tunables.value("Shooter UnJam Speed", 100);
-    private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 198);
-    private final Tunables.TunableInteger shooterVelocitySetpoint = tunables.value("Shooter Setpoint", 2830);
+    // private final Tunables.TunableInteger shooterShootFieldSpeed = tunables.value("Shoot Field Speed", 250);
+    // private final Tunables.TunableInteger shooterUnJamSpeed = tunables.value("Shooter UnJam Speed", 100);
+    // private final Tunables.TunableInteger shooterIdleSpeed = tunables.value("Idle Speed", 198);
+    // private final Tunables.TunableInteger shooterVelocitySetpoint = tunables.value("Shooter Setpoint", 2830);
 
     private boolean shootingField = false;
 
@@ -245,9 +243,9 @@ public final class Shooter extends GRRSubsystem {
     //     shooterController.setSetpoint(-this.shooterUnJamSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
     // }
 
-    private void feederUnJam() {
-        // feederController.setSetpoint(-this.feederUnJamSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-    }
+    // private void feederUnJam() {
+    //     // feederController.setSetpoint(-this.feederUnJamSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
+    // }
 
     // public Command feederStop() {
     //     return commandBuilder().onExecute(this::stopFeeder);

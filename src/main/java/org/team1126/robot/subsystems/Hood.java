@@ -7,17 +7,12 @@ import java.util.function.DoubleSupplier;
 
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
-import org.team1126.lib.tunable.Tunables.Tunable;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.lib.util.vendors.PhoenixUtil;
-import org.team1126.robot.Constants;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.ParentDevice;

@@ -67,26 +67,26 @@ public final class Swerve extends GRRSubsystem {
     private double rampAngle = defaultRampAngle.getAsDouble();
 
     private static final TunableTable apfTunables = tunables.getNested("apf");
-    private static final TunableDouble apfX = apfTunables.value("x", 1.14);
+    // private static final TunableDouble apfX = apfTunables.value("x", 1.14);
     private static final TunableDouble apfVel = apfTunables.value("velocity", 4.5);
-    private static final TunableDouble apfLead = apfTunables.value("lead", 0.45);
-    private static final TunableDouble apfLeadMult = apfTunables.value("leadMult", 0.15);
-    private static final TunableDouble apfLeadAccel = apfTunables.value("leadAccel", 7.7);
-    private static final TunableDouble apfLeadAccelL4 = apfTunables.value("leadAccelL4", 6.95);
-    private static final TunableDouble apfScoreAccel = apfTunables.value("scoreAccel", 6.0);
-    private static final TunableDouble apfScoreAccelL4 = apfTunables.value("scoreAccelL4", 3.5);
-    private static final TunableDouble apfL4Ta = apfTunables.value("apfL4Ta", 4.0);
-    private static final TunableDouble apfAngTolerance = apfTunables.value("angTolerance", 0.4);
-    private static final TunableDouble apfSafeTolerance = apfTunables.value("safeTolerance", 0.2);
-    private static final TunableDouble apfAttractStrength = apfTunables.value("attractStrength", -9.0);
-    private static final TunableDouble apfAttractRange = apfTunables.value("attractRange", 2.5);
+    // private static final TunableDouble apfLead = apfTunables.value("lead", 0.45);
+    // private static final TunableDouble apfLeadMult = apfTunables.value("leadMult", 0.15);
+    // private static final TunableDouble apfLeadAccel = apfTunables.value("leadAccel", 7.7);
+    // private static final TunableDouble apfLeadAccelL4 = apfTunables.value("leadAccelL4", 6.95);
+    // private static final TunableDouble apfScoreAccel = apfTunables.value("scoreAccel", 6.0);
+    // private static final TunableDouble apfScoreAccelL4 = apfTunables.value("scoreAccelL4", 3.5);
+    // private static final TunableDouble apfL4Ta = apfTunables.value("apfL4Ta", 4.0);
+    // private static final TunableDouble apfAngTolerance = apfTunables.value("angTolerance", 0.4);
+    // private static final TunableDouble apfSafeTolerance = apfTunables.value("safeTolerance", 0.2);
+    // private static final TunableDouble apfAttractStrength = apfTunables.value("attractStrength", -9.0);
+    // private static final TunableDouble apfAttractRange = apfTunables.value("attractRange", 2.5);
 
     private static final TunableDouble apfHubFacingDecel = apfTunables.value("apfHubFacingDecel", 0.3);
     private static final TunableDouble apfHubFacingVel = apfTunables.value("apfHubFacingVel", 4.5);
 
-    private static final TunableTable trenchTunables = tunables.getNested("trench");
-    private static final TunableDouble trenchDecel = trenchTunables.value("deceleration", 0.3);
-    private double targetDistance = 0.0;
+    // private static final TunableTable trenchTunables = tunables.getNested("trench");
+    // private static final TunableDouble trenchDecel = trenchTunables.value("deceleration", 0.3);
+    // private double targetDistance = 0.0;
 
     private static final Orchestra orchestra = new Orchestra();
     // private static final TunableDouble climbFudge = tunables.value("climbFudge", Math.toRadians(5.0));
@@ -153,11 +153,11 @@ public final class Swerve extends GRRSubsystem {
     private final PAPFController apf;
     private final ProfiledPIDController angularPID;
     // private boolean visionEnabled = true;
-    private Pose2d hubReference = Pose2d.kZero;
+    // private Pose2d hubReference = Pose2d.kZero;
     private boolean seesAprilTag = false;
     private boolean changedReference = false;
-    private double hubAngular = 0.0;
-    private boolean shouldFaceHub = false;
+    // private double hubAngular = 0.0;
+    // private boolean shouldFaceHub = false;
   private static final TunableDouble flatTolerance = tunables.value("flatTolerance", Math.toRadians(5.0));
     private boolean atAngle = false;
     // private List<ExtPose> waypoints;
@@ -165,7 +165,7 @@ public final class Swerve extends GRRSubsystem {
     // private PhotonCamera fuelCamera;
     // private boolean fuelTargetLost;
 
-    private boolean facingHub = false;
+    // private boolean facingHub = false;
 
     private double distanceToTarget = 0.0;
     private double distanceToShootingPoint = 0.0;
@@ -180,6 +180,7 @@ public final class Swerve extends GRRSubsystem {
 
     public Swerve() {
         api = new SwerveAPI(config);
+        atAngle = false;
         // // Get all swerve modules
         //         var modules = api.getSwerveModules();
 
@@ -258,6 +259,7 @@ public final class Swerve extends GRRSubsystem {
 
         distanceToTarget = Math.hypot(deltaX, deltaY);
 SmartDashboard.putNumber("Distance to Target", distanceToTarget);
+
         angleToTarget = Math.atan2(deltaY, deltaX) + Math.PI;
         double dot = Math.cos(angleToTarget) * state.rotation.getCos() + Math.sin(angleToTarget) * state.rotation.getSin();
         aimingAtTarget = Math.acos(MathUtil.clamp(dot, -1.0, 1.0)) < facingHubTol.get();
@@ -273,6 +275,7 @@ SmartDashboard.putNumber("Distance to Target", distanceToTarget);
             atAngle = false;
             tagsSeen += measurements.length;
         }
+        SmartDashboard.putBoolean("At Angle?", atAngle);
         distanceToShootingPoint = distanceToTarget - currentShootingRadius.getVal();
         double shootingX = state.pose.getX() + distanceToShootingPoint;
         double shootingY = state.pose.getY() + distanceToShootingPoint;

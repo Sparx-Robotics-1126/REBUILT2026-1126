@@ -36,7 +36,7 @@ public final class Intake extends GRRSubsystem {
     private final SparkFlex pivotMotorLead;
     private final SparkFlex pivotMotorFollow;
 
-    private TalonFXConfiguration intakeConfig;
+    // private TalonFXConfiguration intakeConfig;
         private final VelocityTorqueCurrentFOC intakeVelocityControl;
     private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 100);
         private final Tunables.TunableInteger intakeAcceleration = tunables.value("Intake Acceleration", 800);
@@ -53,7 +53,7 @@ public final class Intake extends GRRSubsystem {
 
     public Intake() {
         intakeMotor = new TalonFX(INTAKE_MOTOR);
-        intakeConfig = new TalonFXConfiguration();
+        // intakeConfig = new TalonFXConfiguration();
 
         pivotMotorLead = new SparkFlex(PIVOT_MOTOR_LEAD, SparkLowLevel.MotorType.kBrushless);
         pivotMotorFollow = new SparkFlex(PIVOT_MOTOR_FOLLOW, SparkLowLevel.MotorType.kBrushless);
@@ -140,7 +140,7 @@ public final class Intake extends GRRSubsystem {
 
     @NotLogged
     public void moveIntakeMotor(boolean reverse) {
-        double speed = reverse ? -this.intakeSpeed.get() : this.intakeSpeed.get();
+        // double speed = reverse ? -this.intakeSpeed.get() : this.intakeSpeed.get();
            intakeVelocityControl.withVelocity( this.intakeSpeed.get());
         // intakeMotor.setControl(intakeVelocityControl);
            if (Math.abs(intakeVelocityControl.Velocity) > 1e-6) {

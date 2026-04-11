@@ -29,7 +29,7 @@ public final class Feeder extends GRRSubsystem {
   
     private final Tunables.TunableInteger feederSpeed = tunables.value("Feeder Speed", 200);
     private final Tunables.TunableInteger feederUnJamSpeed = tunables.value("Feeder UnJam Speed", 85);
-    private final Tunables.TunableInteger feederVelocitySetpoint = tunables.value("Feeder Setpoint", 2600);
+    // private final Tunables.TunableInteger feederVelocitySetpoint = tunables.value("Feeder Setpoint", 2600);
 
     public Feeder() {
         feederMotor = new TalonFX(FEEDER_MOTOR);
