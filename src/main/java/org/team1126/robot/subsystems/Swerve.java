@@ -4,6 +4,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.Orchestra;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -54,7 +55,7 @@ public final class Swerve extends GRRSubsystem {
 
     private static final TunableTable tunables = Tunables.getNested("swerve");
     private static final TunableDouble turboSpin = tunables.value("turboSpin", 8.0);
-    private static final TunableDouble facingHubTol = tunables.value("facingHubTol", 1.0);
+    private static final TunableDouble facingHubTol = tunables.value("facingHubTol", Math.toRadians(15.0));
 
     private static final TunableTable beachTunables = tunables.getNested("beach");
     private static final TunableDouble beachSpeed = beachTunables.value("speed", 3.0);
@@ -66,25 +67,26 @@ public final class Swerve extends GRRSubsystem {
     private double rampAngle = defaultRampAngle.getAsDouble();
 
     private static final TunableTable apfTunables = tunables.getNested("apf");
-    private static final TunableDouble apfX = apfTunables.value("x", 1.14);
+    // private static final TunableDouble apfX = apfTunables.value("x", 1.14);
     private static final TunableDouble apfVel = apfTunables.value("velocity", 4.5);
-    private static final TunableDouble apfLead = apfTunables.value("lead", 0.45);
-    private static final TunableDouble apfLeadMult = apfTunables.value("leadMult", 0.15);
-    private static final TunableDouble apfLeadAccel = apfTunables.value("leadAccel", 7.7);
-    private static final TunableDouble apfLeadAccelL4 = apfTunables.value("leadAccelL4", 6.95);
-    private static final TunableDouble apfScoreAccel = apfTunables.value("scoreAccel", 6.0);
-    private static final TunableDouble apfScoreAccelL4 = apfTunables.value("scoreAccelL4", 3.5);
-    private static final TunableDouble apfL4Ta = apfTunables.value("apfL4Ta", 4.0);
-    private static final TunableDouble apfAngTolerance = apfTunables.value("angTolerance", 0.4);
-    private static final TunableDouble apfSafeTolerance = apfTunables.value("safeTolerance", 0.2);
-    private static final TunableDouble apfAttractStrength = apfTunables.value("attractStrength", -9.0);
-    private static final TunableDouble apfAttractRange = apfTunables.value("attractRange", 2.5);
+    // private static final TunableDouble apfLead = apfTunables.value("lead", 0.45);
+    // private static final TunableDouble apfLeadMult = apfTunables.value("leadMult", 0.15);
+    // private static final TunableDouble apfLeadAccel = apfTunables.value("leadAccel", 7.7);
+    // private static final TunableDouble apfLeadAccelL4 = apfTunables.value("leadAccelL4", 6.95);
+    // private static final TunableDouble apfScoreAccel = apfTunables.value("scoreAccel", 6.0);
+    // private static final TunableDouble apfScoreAccelL4 = apfTunables.value("scoreAccelL4", 3.5);
+    // private static final TunableDouble apfL4Ta = apfTunables.value("apfL4Ta", 4.0);
+    // private static final TunableDouble apfAngTolerance = apfTunables.value("angTolerance", 0.4);
+    // private static final TunableDouble apfSafeTolerance = apfTunables.value("safeTolerance", 0.2);
+    // private static final TunableDouble apfAttractStrength = apfTunables.value("attractStrength", -9.0);
+    // private static final TunableDouble apfAttractRange = apfTunables.value("attractRange", 2.5);
 
     private static final TunableDouble apfHubFacingDecel = apfTunables.value("apfHubFacingDecel", 0.3);
     private static final TunableDouble apfHubFacingVel = apfTunables.value("apfHubFacingVel", 4.5);
 
-    private static final TunableTable trenchTunables = tunables.getNested("trench");
-    private static final TunableDouble trenchDecel = trenchTunables.value("deceleration", 0.3);
+    // private static final TunableTable trenchTunables = tunables.getNested("trench");
+    // private static final TunableDouble trenchDecel = trenchTunables.value("deceleration", 0.3);
+    // private double targetDistance = 0.0;
 
     private static final Orchestra orchestra = new Orchestra();
     // private static final TunableDouble climbFudge = tunables.value("climbFudge", Math.toRadians(5.0));
@@ -151,22 +153,25 @@ public final class Swerve extends GRRSubsystem {
     private final PAPFController apf;
     private final ProfiledPIDController angularPID;
     // private boolean visionEnabled = true;
-    private Pose2d hubReference = Pose2d.kZero;
+    // private Pose2d hubReference = Pose2d.kZero;
     private boolean seesAprilTag = false;
     private boolean changedReference = false;
-    private double hubAngular = 0.0;
-    private boolean shouldFaceHub = false;
-
+    // private double hubAngular = 0.0;
+    // private boolean shouldFaceHub = false;
+  private static final TunableDouble flatTolerance = tunables.value("flatTolerance", Math.toRadians(5.0));
+    private boolean atAngle = false;
     // private List<ExtPose> waypoints;
 
     // private PhotonCamera fuelCamera;
-    private boolean fuelTargetLost;
+    // private boolean fuelTargetLost;
 
-    private boolean facingHub = false;
+    // private boolean facingHub = false;
 
-    private double distanceToHub = 0.0;
+    private double distanceToTarget = 0.0;
     private double distanceToShootingPoint = 0.0;
-    private double angleToHub = 0.0;
+    private double angleToTarget = 0.0;
+    private boolean aimingAtTarget = false;
+    private int tagsSeen = 0;
 
     private Translation2d shootingArc = new Translation2d(0.0, 0.0);
     private ShootingRadius currentShootingRadius = ShootingRadius.L1;
@@ -175,6 +180,7 @@ public final class Swerve extends GRRSubsystem {
 
     public Swerve() {
         api = new SwerveAPI(config);
+        atAngle = false;
         // // Get all swerve modules
         //         var modules = api.getSwerveModules();
 
@@ -213,7 +219,7 @@ public final class Swerve extends GRRSubsystem {
 
         // fuelCamera = new PhotonCamera(Constants.OBJ_DETECTION_CAMERA_CONFIG.name());
 
-        fuelTargetLost = true;
+        // fuelTargetLost = true;
 
         state = api.state;
 
@@ -245,31 +251,32 @@ public final class Swerve extends GRRSubsystem {
         SmartDashboard.putNumber("Goal X", apf.getGoal().getX());
         SmartDashboard.putNumber("Goal Y", apf.getGoal().getY());
 
-        Translation2d hubCenter = Field.HUB.get();
+        // The target is where we want to shoot fuel when the shoot button is pressed. 
+        // If we're in the neutral zone, we want to shoot at one of the ferry points; otherwise, we want to shoot at the hub
+        Translation2d target = !inNeutralZone() ? Field.HUB.get() : (isLeftOfCenter() ? Field.LEFT_FERRY_TARGET.get() : Field.RIGHT_FERRY_TARGET.get());
+        final double deltaX = state.pose.getX() - target.getX();
+        final double deltaY = state.pose.getY() - target.getY();
 
-        Rotation2d hubAngle = new Rotation2d(
-            Math.floor(
-                    hubCenter.minus(state.translation).getAngle().plus(new Rotation2d(Math2.SIXTH_PI)).getRadians()
-                        / Math2.THIRD_PI
-                )
-                * Math2.THIRD_PI
-        );
+        distanceToTarget = Math.hypot(deltaX, deltaY);
+SmartDashboard.putNumber("Distance to Target", distanceToTarget);
 
-        changedReference = !Math2.isNear(hubReference.getRotation(), hubAngle, 1e-6);
+        angleToTarget = Math.atan2(deltaY, deltaX) + Math.PI;
+        double dot = Math.cos(angleToTarget) * state.rotation.getCos() + Math.sin(angleToTarget) * state.rotation.getSin();
+        aimingAtTarget = Math.acos(MathUtil.clamp(dot, -1.0, 1.0)) < facingHubTol.get();
 
-        hubReference = new Pose2d(hubCenter, hubAngle);
-
-        facingHub = Math2.isNear(hubAngle, state.rotation, facingHubTol.get());
-
-        final double deltaX = state.pose.getX() - Field.HUB.get().getX();
-        final double deltaY = state.pose.getY() - Field.HUB.get().getY();
-
-        distanceToHub = Math.hypot(deltaX, deltaY);
-
-        angleToHub = Math.atan2(deltaY, deltaX) + Math.PI;
-        // hubAngular = -angularPID.calculate(state.rotation.getRadians(), angleToHub);
-
-        distanceToShootingPoint = distanceToHub - currentShootingRadius.getVal();
+        // Determine if the robot is at an angle (pitch/roll is non-zero).
+        if (
+            Math.abs(state.pitch.getRadians()) > flatTolerance.get()
+            || Math.abs(state.roll.getRadians()) > flatTolerance.get()
+        ) {
+            atAngle = true;
+            tagsSeen = 0;
+        } else {
+            atAngle = false;
+            tagsSeen += measurements.length;
+        }
+        SmartDashboard.putBoolean("At Angle?", atAngle);
+        distanceToShootingPoint = distanceToTarget - currentShootingRadius.getVal();
         double shootingX = state.pose.getX() + distanceToShootingPoint;
         double shootingY = state.pose.getY() + distanceToShootingPoint;
 
@@ -282,16 +289,14 @@ public final class Swerve extends GRRSubsystem {
         }
 
         shootingArc = new Translation2d(shootingX, shootingY);
+    }
 
-        //     if (Alliance.isBlue()) {
-        //         shootingArc = new ExtTranslation(shootingX, shootingY);
-        //     } else {
-        //         Pose2d tmp = new Pose2d(shootingX, shootingY, state.pose.getRotation());
-        //         Pose2d blueTmp = FieldFlip.overLength(tmp);
-        //         shootingArc = new ExtTranslation(blueTmp.getX(), blueTmp.getY());
-        //     }
+    public double distanceToTarget() {
+        return distanceToTarget;
+    }
 
-        // SmartDashboard.putNumber("Shooting Radius", currentShootingRadius.getVal());
+    public boolean aimingAtTarget() {
+        return aimingAtTarget;
     }
 
     /**
@@ -323,6 +328,14 @@ public final class Swerve extends GRRSubsystem {
     @NotLogged
     public boolean seesAprilTag() {
         return seesAprilTag;
+    }
+ /**
+     * Returns the tags seen since the robot was at an angle.
+     * This can be used to determined if the robot's odometry is accurate.
+     */
+    @NotLogged
+    public int tagsSeen() {
+        return tagsSeen;
     }
 
     /**
@@ -427,10 +440,10 @@ public final class Swerve extends GRRSubsystem {
             });
     }
 
-    public Command driveFacingHub(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
+    public Command driveFacingTarget(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
         return commandBuilder("Swerve.drive()").onExecute(() -> {
-            var faceHub = Perspective.OPERATOR.toPerspectiveSpeeds(
-                new ChassisSpeeds(0.0, 0.0, angularPID.calculate(state.rotation.getRadians(), angleToHub)),
+            var faceTarget = Perspective.OPERATOR.toPerspectiveSpeeds(
+                new ChassisSpeeds(0.0, 0.0, angularPID.calculate(state.rotation.getRadians(), angleToTarget)),
                 state.rotation
             );
 
@@ -438,7 +451,7 @@ public final class Swerve extends GRRSubsystem {
                 x.getAsDouble(),
                 y.getAsDouble(),
                 angular.getAsDouble(),
-                faceHub,
+                faceTarget,
                 Perspective.OPERATOR,
                 true,
                 true
@@ -456,7 +469,6 @@ public final class Swerve extends GRRSubsystem {
                 ),
                 state.rotation
             );
-            // angularPID.calculate(state.rotation.getRadians(), Alliance.isBlue() ? Math.PI : 0.0);
 
             api.applyAssistedDriverInput(
                 x.getAsDouble(),
@@ -490,7 +502,7 @@ public final class Swerve extends GRRSubsystem {
         return commandBuilder("Swerve.aimAtHub()")
             .onInitialize(() -> angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond))
             .onExecute(() -> {
-                Pose2d goal = new Pose2d(state.pose.getX(), state.pose.getY(), new Rotation2d(angleToHub));
+                Pose2d goal = new Pose2d(state.pose.getX(), state.pose.getY(), new Rotation2d(angleToTarget));
                 var speeds = apf.calculate(
                     state.pose,
                     goal.getTranslation(),
@@ -498,7 +510,7 @@ public final class Swerve extends GRRSubsystem {
                     apfHubFacingDecel.get()
                 );
 
-                speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
+                speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToTarget);
 
                 api.applySpeeds(speeds, Perspective.BLUE, true, true);
             });
@@ -515,7 +527,7 @@ public final class Swerve extends GRRSubsystem {
                     maxDeceleration.getAsDouble()
                 );
 
-                speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToHub);
+                speeds.omegaRadiansPerSecond = angularPID.calculate(state.rotation.getRadians(), angleToTarget);
 
                 api.applySpeeds(speeds, Perspective.BLUE, true, true);
             });
@@ -615,87 +627,11 @@ public final class Swerve extends GRRSubsystem {
         return Field.BLUE_ZONE <= x && Field.RED_ZONE >= x;
     }
 
-    private void setBestRampAngle() {
-        double currentAngle = state.rotation.getRadians();
-        double angleA, angleB;
-        if (inNeutralZone()) {
-            // Example: angles for neutral zone
-            angleA = defaultRampAngle.getAsDouble() + Math2.HALF_PI;
-            angleB = defaultRampAngle.getAsDouble() + Math.PI;
-        } else {
-            // Example: angles for non-neutral zone
-            angleA = defaultRampAngle.getAsDouble();
-            angleB = defaultRampAngle.getAsDouble() - Math2.HALF_PI;
-        }
-
-        // Helper: wrap difference to [-PI, PI]
-        double diffA = Math.abs(Math.atan2(Math.sin(currentAngle - angleA), Math.cos(currentAngle - angleA)));
-        double diffB = Math.abs(Math.atan2(Math.sin(currentAngle - angleB), Math.cos(currentAngle - angleB)));
-
-        rampAngle = (diffA < diffB) ? angleA : angleB;
+    public boolean isLeftOfCenter() {
+        return Alliance.isBlue() ^ (state.pose.getY() < Field.CENTER_Y);
     }
-
-    // public double getHubAngular() {
-    //     return angularPID.calculate(state.rotation.getRadians(), angleToHub);
-    // }
 
     public void applyOrchestra(Orchestra orchestra) {
         this.api.applyOrchestra(orchestra);
     }
-
-    // private PhotonTrackedTarget getBestestTarget() {
-    //     var resultsList = fuelCamera.getAllUnreadResults();
-    //     if (resultsList == null || resultsList.size() > 0) {
-    //         fuelTargetLost = false;
-    //         return null;
-    //     }
-    //     var result = resultsList.get(0);
-    //     PhotonTrackedTarget highestAreaTarget = null;
-    //     if (result != null && result.hasTargets()) {
-    //         List<PhotonTrackedTarget> targets = result.getTargets();
-    //         highestAreaTarget = targets.stream().max(Comparator.comparing(PhotonTrackedTarget::getArea)).orElse(null);
-    //     }
-    //     if (highestAreaTarget == null) {
-    //         fuelTargetLost = true;
-    //     } else {
-    //         fuelTargetLost = false;
-    //     }
-    //     return highestAreaTarget;
-    // }
-
-    // private Transform2d getTransformToFuel() {
-    //     PhotonTrackedTarget bestestTarget = getBestestTarget();
-    //     if (bestestTarget != null) {
-    //         try {
-    //             SmartDashboard.putString("cameraTargetTransform", bestestTarget.getBestCameraToTarget().toString());
-    //         } catch (Exception e) {}
-    //         fuelTargetLost = false;
-    //         Transform2d transformToFuel = new Transform2d(
-    //             bestestTarget.getPitch() + 2.5,
-    //             bestestTarget.getYaw(),
-    //             new Rotation2d(-bestestTarget.getYaw())
-    //         );
-    //         return transformToFuel; // bestestTarget.getBestCameraToTarget();
-    //     } else {
-    //         fuelTargetLost = true;
-    //         return null;
-    //     }
-    // }
-
-    // public Pose2d getFuelPose() {
-    //     Transform2d transform2d = getTransformToFuel();
-    //     if (transform2d != null) {
-    //         Pose2d currentPose = state.pose;
-    //         // Transform2d transform2d = new Transform2d(
-    //         //     transform3d.getTranslation().toTranslation2d(),
-    //         //     transform3d.getRotation().toRotation2d()
-    //         // );
-    //         Pose2d fuelPose = currentPose.plus(transform2d);
-    //         fuelTargetLost = false;
-    //         return fuelPose;
-    //     } else {
-    //         fuelTargetLost = true;
-    //         return null;
-    //     }
-    // }
 }

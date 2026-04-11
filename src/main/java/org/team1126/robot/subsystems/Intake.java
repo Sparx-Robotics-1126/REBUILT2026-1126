@@ -1,13 +1,20 @@
 package org.team1126.robot.subsystems;
 
 import static org.team1126.robot.Constants.INTAKE_MOTOR;
-import static org.team1126.robot.Constants.PIVOT_MOTOR;
-
+import static org.team1126.robot.Constants.PIVOT_MOTOR_LEAD;
+import static org.team1126.robot.Constants.PIVOT_MOTOR_FOLLOW;
+import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.*;
 import com.revrobotics.spark.config.SparkBaseConfig;
@@ -20,123 +27,107 @@ import edu.wpi.first.wpilibj2.command.Command;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.util.command.GRRSubsystem;
+import org.team1126.lib.util.vendors.PhoenixUtil;
 
 @Logged
 public final class Intake extends GRRSubsystem {
 
-    private final SparkFlex intakeMotor;
-    private final SparkFlex pivotMotor;
+    private final TalonFX intakeMotor;
+    private final SparkFlex pivotMotorLead;
+    private final SparkFlex pivotMotorFollow;
 
-    private SparkFlexConfig intakeConfig;
-    private final RelativeEncoder intakeEncoder;
-    private SparkClosedLoopController intakeController;
-    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 325);
+    // private TalonFXConfiguration intakeConfig;
+        private final VelocityTorqueCurrentFOC intakeVelocityControl;
+    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 100);
+        private final Tunables.TunableInteger intakeAcceleration = tunables.value("Intake Acceleration", 800);
     private static final TunableTable tunables = Tunables.getNested("intake");
 
     private SparkFlexConfig pivotConfig;
-    // private final SparkAbsoluteEncoder pivotEncoder;
     private SparkClosedLoopController pivotController;
-    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -16.7);
+    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -1.78);
     
     private List<Double> outputCurrent = new ArrayList<>();
     private List<Double> appliedOutput = new ArrayList<>();
     private List<Double> busVoltage = new ArrayList<>();
     private List<Double> intakeTemperature = new ArrayList<>();
 
-
-    // private final SparkMax moveStorage;
-    // private SparkMaxConfig moveStorageConfig;
-    // private final RelativeEncoder moveStorageEncoder;
-    // private SparkClosedLoopController moveStorageController;
-    // private static final TunableTable moveStorageTunables = Tunables.getNested("moveStorage");
-
-    //    private boolean isOn;
-    //    private final Tunables.TunableDouble voltage;
-
     public Intake() {
-        intakeMotor = new SparkFlex(INTAKE_MOTOR, SparkLowLevel.MotorType.kBrushless);
-        intakeEncoder = intakeMotor.getEncoder();
-        intakeConfig = new SparkFlexConfig();
+        intakeMotor = new TalonFX(INTAKE_MOTOR);
+        // intakeConfig = new TalonFXConfiguration();
 
-        pivotMotor = new SparkFlex(PIVOT_MOTOR, SparkLowLevel.MotorType.kBrushless);
-        // pivotEncoder = pivotMotor.getAbsoluteEncoder();
+        pivotMotorLead = new SparkFlex(PIVOT_MOTOR_LEAD, SparkLowLevel.MotorType.kBrushless);
+        pivotMotorFollow = new SparkFlex(PIVOT_MOTOR_FOLLOW, SparkLowLevel.MotorType.kBrushless);
         pivotConfig = new SparkFlexConfig();
-        pivotController = pivotMotor.getClosedLoopController();
+        pivotController = pivotMotorLead.getClosedLoopController();
 
         pivotConfig.idleMode(SparkBaseConfig.IdleMode.kBrake);
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(.95, ClosedLoopSlot.kSlot0)
+            .p(1, ClosedLoopSlot.kSlot0)
             .i(0, ClosedLoopSlot.kSlot0)
             .d(0, ClosedLoopSlot.kSlot0)
-            .feedForward.kCos(.0, ClosedLoopSlot.kSlot0);
+            .feedForward.kCos(1, ClosedLoopSlot.kSlot0);
         pivotConfig.closedLoop.maxMotion
-            .maxAcceleration(1500, ClosedLoopSlot.kSlot0) // REDUCED from 200 — slower ramp
-            .allowedProfileError(1, ClosedLoopSlot.kSlot0)
-            .cruiseVelocity(750, ClosedLoopSlot.kSlot0) // Changed from 1000 to match test setpoint
-            .allowedProfileError(1, ClosedLoopSlot.kSlot0);
+            .maxAcceleration(250, ClosedLoopSlot.kSlot0) // REDUCED from 200 — slower ramp
+            .allowedProfileError(5, ClosedLoopSlot.kSlot0)
+            .cruiseVelocity(250, ClosedLoopSlot.kSlot0) // Changed from 1000 to match test setpoint
+            .allowedProfileError(5, ClosedLoopSlot.kSlot0);
 
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(.9, ClosedLoopSlot.kSlot1)
+            .p(1, ClosedLoopSlot.kSlot1)
             .i(0, ClosedLoopSlot.kSlot1)
             .d(0, ClosedLoopSlot.kSlot1)
-            .feedForward.kCos(.5, ClosedLoopSlot.kSlot1);
+            .feedForward.kCos(1, ClosedLoopSlot.kSlot1);
         pivotConfig.closedLoop.maxMotion
-            .maxAcceleration(1000, ClosedLoopSlot.kSlot1) // REDUCED from 200 — slower ramp
+            .maxAcceleration(300, ClosedLoopSlot.kSlot1) // REDUCED from 200 — slower ramp
             .allowedProfileError(1, ClosedLoopSlot.kSlot1)
-            .cruiseVelocity(650, ClosedLoopSlot.kSlot1) // Changed from 1000 to match test setpoint
+            .cruiseVelocity(300, ClosedLoopSlot.kSlot1) // Changed from 1000 to match test setpoint
             .allowedProfileError(1, ClosedLoopSlot.kSlot1);
-        //   pivotConfig.closedLoop.maxMotion.maxAcceleration(100).cruiseVelocity(100).allowedProfileError(1)
 
-        pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        pivotMotorLead.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        
+        SparkFlexConfig followConfig = new SparkFlexConfig();
+        // followConfig.inverted(false);
+        
+        followConfig.follow(PIVOT_MOTOR_LEAD,true);
+        pivotMotorFollow.configure(followConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        intakeVelocityControl = new VelocityTorqueCurrentFOC(0.0);
+        intakeVelocityControl.UpdateFreqHz = 0.0;
 
-        // moveStorage = new SparkMax(MOVE_STORAGE_MOTOR, SparkLowLevel.MotorType.kBrushless);
-        // moveStorageEncoder = moveStorage.getEncoder();
-        // moveStorageConfig = new SparkMaxConfig();
-        // moveStorageController = moveStorage.getClosedLoopController();
+        // Configure TalonFX intake motor
+        configureRollers();
 
-        //        isOn = false;
+    //     intakeConfig.MotorOutput.NeutralMode = com.ctre.phoenix6.signals.NeutralModeValue.Brake;
+    //     intakeConfig.MotorOutput.Inverted = com.ctre.phoenix6.signals.InvertedValue.CounterClockwise_Positive;
+    //     intakeConfig.CurrentLimits.SupplyCurrentLimit = 40;
+    //     intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-        intakeController = intakeMotor.getClosedLoopController();
-        intakeConfig
-            .smartCurrentLimit(40)
-            .idleMode(SparkBaseConfig.IdleMode.kBrake)
-            .inverted(false)
-            .openLoopRampRate(0.1)
-            .closedLoopRampRate(0.1);
+    //     // Velocity control PID (slot 0)
+    //     intakeConfig.Slot0.kP = 0.12;
+    //     intakeConfig.Slot0.kI = 0.0;
+    //     intakeConfig.Slot0.kD = 0.0;
+    //     intakeConfig.Slot0.kS = 0.5;
+    //     intakeConfig.Slot0.kV = 0.12; // velocity feedforward
 
-        intakeConfig.closedLoop
-            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            // Set PID values for position control. We don't need to pass a closed
-            // loop slot, as it will default to slot 0.
-            .p(0.000)
-            .i(0)
-            .d(0)
-            .outputRange(-1, 1)
-            // Set PID values for velocity control in slot 1
-            .feedForward
-            // kV is now in Volts, so we multiply by the nominal voltage (12V)
-            .kV(.025);
+    //     intakeMotor.getConfigurator().apply(intakeConfig);
+    //    PhoenixUtil.run(() -> intakeMotor.clearStickyFaults());
+    //     PhoenixUtil.run(() -> intakeMotor.getConfigurator().apply(intakeConfig));
 
-        intakeConfig.closedLoop.maxMotion
-            // Set MAXMotion parameters for position control. We don't need to pass
-            // a closed loop slot, as it will default to slot 0.
-            .cruiseVelocity(350)
-            .maxAcceleration(1750)
-            .allowedProfileError(10);
-
-        intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-
-        //        shooterController.setSetpoint(this.shooterShootSpeed, SparkBase.ControlType.kMAXMotionVelocityControl);
         tunables.add("Intake Motor", intakeMotor);
-        tunables.add("Pivot Motor", pivotMotor);
+        tunables.add("Pivot Motor Lead", pivotMotorLead);
+         tunables.add("Pivot Motor Follower", pivotMotorFollow);
     }
 
     @NotLogged
-    public Command moveIntakeTest(boolean reverse) {
+    public Command moveIntake(boolean reverse) {
         return commandBuilder()
-            .onExecute(() -> moveIntakeMotor(reverse))
+            .onExecute(() ->{
+ var maxVelocity = new MotionMagicVelocityVoltage(intakeSpeed.get())
+               .withAcceleration(intakeAcceleration.getAsInt());
+
+               intakeMotor.setControl(maxVelocity);
+            } )
             .onEnd(this::stopIntake);
     }
 
@@ -144,21 +135,23 @@ public final class Intake extends GRRSubsystem {
     public Command moveIntakeMotorCommand(boolean reverse) {
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(reverse))
-            .onEnd(() -> intakeController.setSetpoint(0, SparkBase.ControlType.kMAXMotionVelocityControl));
+            .onEnd(() -> intakeMotor.setControl(new VelocityVoltage(0)));
     }
 
     @NotLogged
     public void moveIntakeMotor(boolean reverse) {
-        if (reverse) {
-            intakeController.setSetpoint(-this.intakeSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-        } else {
-            intakeController.setSetpoint(this.intakeSpeed.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-        }
+        // double speed = reverse ? -this.intakeSpeed.get() : this.intakeSpeed.get();
+           intakeVelocityControl.withVelocity( this.intakeSpeed.get());
+        // intakeMotor.setControl(intakeVelocityControl);
+           if (Math.abs(intakeVelocityControl.Velocity) > 1e-6) {
+                    intakeMotor.setControl(intakeVelocityControl);
+                } else {
+                    intakeMotor.stopMotor();
+                }
     }
 
     @NotLogged
     public Command spill() {
-        //toggle(true);
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(true))
             .onEnd(this::stopIntake);
@@ -166,7 +159,6 @@ public final class Intake extends GRRSubsystem {
 
     @NotLogged
     public Command intake() {
-        //toggle(true);
         return commandBuilder()
             .onExecute(() -> moveIntakeMotor(false))
             .onEnd(() -> intakeMotor.set(0));
@@ -179,29 +171,23 @@ public final class Intake extends GRRSubsystem {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Intake at set point?", intakeController.isAtSetpoint());
-        SmartDashboard.putNumber("Velocity", this.intakeEncoder.getVelocity());
-        SmartDashboard.putNumber("Position", this.pivotMotor.getEncoder().getPosition());
-        SmartDashboard.putNumber("Pivot Temp", this.pivotMotor.getMotorTemperature());
-        //        if (isOn) {
-        //            intakeController.setSetpoint(voltage.get(), SparkBase.ControlType.kMAXMotionVelocityControl);
-        //        }
-        outputCurrent.add(intakeMotor.getOutputCurrent());
-        appliedOutput.add(intakeMotor.getAppliedOutput());
-        busVoltage.add(Math.abs(intakeMotor.getBusVoltage()));
-        intakeTemperature.add(intakeMotor.getMotorTemperature());
+        SmartDashboard.putBoolean("Intake at set point?", intakeMotor.getClosedLoopError().getValueAsDouble() < 50);
+        SmartDashboard.putNumber("Velocity", intakeMotor.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Position", this.pivotMotorLead.getEncoder().getPosition());
+        SmartDashboard.putNumber("Pivot Temp", this.pivotMotorLead.getMotorTemperature());
+        outputCurrent.add(intakeMotor.getSupplyCurrent().getValueAsDouble());
+        appliedOutput.add(intakeMotor.getDutyCycle().getValueAsDouble());
+        busVoltage.add(intakeMotor.getSupplyVoltage().getValueAsDouble());
+        intakeTemperature.add(intakeMotor.getDeviceTemp().getValueAsDouble());
         
-        SmartDashboard.putNumber("Intake Motor Output Current", intakeMotor.getOutputCurrent());
-        SmartDashboard.putNumber("Intake Motor Applied Output", intakeMotor.getAppliedOutput());
-        SmartDashboard.putNumber("Intake Motor Bus Voltage", Math.abs(intakeMotor.getBusVoltage()));
-        SmartDashboard.putNumber("Intake Motor Temperature", intakeMotor.getMotorTemperature());
-        SmartDashboard.putNumber("Pivot Motor Output Current", pivotMotor.getOutputCurrent());
-        SmartDashboard.putNumber("Pivot Motor Applied Output", pivotMotor.getAppliedOutput());  
-        SmartDashboard.putNumber("Pivot Motor Bus Voltage", Math.abs(pivotMotor.getBusVoltage()));
-        SmartDashboard.putNumber("Pivot Motor Temperature", pivotMotor.getMotorTemperature());
-
-        SmartDashboard.putNumber("PMOutputCurrent", pivotMotor.getOutputCurrent());
-        SmartDashboard.putNumber("PMBusVoltage", Math.abs(pivotMotor.getBusVoltage()));
+        SmartDashboard.putNumber("Intake Motor Output Current", intakeMotor.getSupplyCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("Intake Motor Applied Output", intakeMotor.getDutyCycle().getValueAsDouble());
+        SmartDashboard.putNumber("Intake Motor Bus Voltage", intakeMotor.getSupplyVoltage().getValueAsDouble());
+        SmartDashboard.putNumber("Intake Motor Temperature", intakeMotor.getDeviceTemp().getValueAsDouble());
+        SmartDashboard.putNumber("Pivot Motor Output Current", pivotMotorLead.getOutputCurrent());
+        SmartDashboard.putNumber("Pivot Motor Applied Output", pivotMotorLead.getAppliedOutput());  
+        SmartDashboard.putNumber("Pivot Motor Bus Voltage", Math.abs(pivotMotorLead.getBusVoltage()));
+        SmartDashboard.putNumber("Pivot Motor Temperature", pivotMotorLead.getMotorTemperature());
     }
 
     @NotLogged
@@ -211,9 +197,6 @@ public final class Intake extends GRRSubsystem {
             SparkBase.ControlType.kMAXMotionPositionControl,
             ClosedLoopSlot.kSlot0
         );
-        // if (spinIntake) {
-        //     moveIntakeMotor(true);
-        // }
     }
 
     @NotLogged
@@ -225,49 +208,45 @@ public final class Intake extends GRRSubsystem {
         );
     }
 
-    @NotLogged
-    public Command extendIntake(boolean spinIntake) {
-        return commandBuilder().onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), spinIntake));
-        // .onEnd(this::stopPivot);
+
+       @NotLogged
+    public Command extendIntake() {
+        return commandBuilder().onExecute(() -> this.moveMotorPosOut(pivotPosition.get(), false));
+    }
+    /**
+     * Agitates the hopper by jostling the intake up and down while pulling balls inwards.
+     */
+    public Command agitate() {
+        return sequence( extendIntake().withTimeout(0.6),
+                        retrackIntake().withTimeout(0.6))
+            .repeatedly()
+            .withName("Intake.agitate()");
     }
 
-    //    public Command extendIntake() {
-    //        return commandBuilder()
-    //            .onExecute(() -> this.moveMotorPosOut(pivotPosition.get()))
-    //            .onEnd(interrupted -> {
-    //                // Stop driving and let it relax wherever it ended up
-    //                pivotMotor.setVoltage(0.0);
-    //
-    //                // Put the pivot motor into Coast
-    //                var coastCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kCoast);
-    //
-    //                pivotMotor.configure(coastCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-    //            });
-    //    }
-
-    @NotLogged
-    public Command retrackIntakeTest() {
-        return commandBuilder().onExecute(() -> this.moveMotorPosIn(0));
-    }
 
     @NotLogged
     public Command retrackIntake() {
-        return commandBuilder()
-            .onExecute(() -> this.moveMotorPosIn(0))
-            .onEnd(interrupted -> {
-                // Keep actively holding home when the command ends
-                pivotController.setSetpoint(0, SparkBase.ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot1);
-
-                // Use Brake to resist drifting away from home
-                var brakeCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kBrake);
-
-                pivotMotor.configure(brakeCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-            });
+        return commandBuilder().onExecute(() -> this.moveMotorPosIn(0));
     }
+
+    // @NotLogged
+    // public Command retrackIntake() {
+    //     return commandBuilder()
+    //         .onExecute(() -> this.moveMotorPosIn(0))
+    //         .onEnd(interrupted -> {
+    //             // Keep actively holding home when the command ends
+    //             pivotController.setSetpoint(0, SparkBase.ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot1);
+
+    //             // Use Brake to resist drifting away from home
+    //             var brakeCfg = new SparkFlexConfig().idleMode(SparkBaseConfig.IdleMode.kBrake);
+
+    //             pivotMotorLead.configure(brakeCfg, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+    //         });
+    // }
 
     @NotLogged
     private void stopPivot() {
-        pivotMotor.setVoltage(0);
+        pivotMotorLead.setVoltage(0);
     }
 
     public List<Double> getOutputCurrent() {
@@ -285,5 +264,30 @@ public final class Intake extends GRRSubsystem {
     
     public List<Double> getIntakeTemperature() {
         return intakeTemperature;
+    }
+
+      private void configureRollers() {
+        final TalonFXConfiguration config = new TalonFXConfiguration();
+
+        config.CurrentLimits.StatorCurrentLimit = 170.0;
+        config.CurrentLimits.SupplyCurrentLimit = 60.0;
+        config.CurrentLimits.SupplyCurrentLowerTime = 0.0;
+
+        config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+
+        config.Slot0.kP = .5;
+        config.Slot0.kI = 0.0;
+        config.Slot0.kD = 0.0;
+        config.Slot0.kG = 0.0;
+        config.Slot0.kS = 10.0;
+        config.Slot0.kV = 0.0;
+        config.Slot0.kA = 0.0;
+
+        config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+        PhoenixUtil.run(() -> intakeMotor.clearStickyFaults());
+        PhoenixUtil.run(() -> intakeMotor.getConfigurator().apply(config));
+
+      
     }
 }

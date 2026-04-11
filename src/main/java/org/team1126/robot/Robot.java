@@ -10,16 +10,20 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import static edu.wpi.first.wpilibj2.command.Commands.none;
+
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
-import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.DisableWatchdog;
 import org.team1126.lib.util.command.RumbleCommand;
 import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.robot.commands.Autos;
 import org.team1126.robot.commands.Routines;
+import org.team1126.robot.subsystems.Feeder;
+import org.team1126.robot.subsystems.Hood;
 import org.team1126.robot.subsystems.Intake;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
@@ -27,7 +31,6 @@ import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
 import org.team1126.robot.util.ShiftTracker;
 import org.team1126.robot.util.nav.TrenchNavigator;
-import org.team1126.robot.util.nav.WaypointHeading;
 
 @Logged
 public final class Robot extends LoggedRobot {
@@ -38,7 +41,9 @@ public final class Robot extends LoggedRobot {
     public final Swerve swerve;
     public final Storage storage;
     public final Shooter shooter;
+    public final Hood hood;
     public final Intake intake;
+    public final Feeder feeder;
     public final ShiftTracker shiftTracker;
     private final boolean rumbleOn = true;
 
@@ -50,7 +55,7 @@ public final class Robot extends LoggedRobot {
     private final Orchestra orchestra;
     private Command autoSelected;
     private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .62);
-      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", .8);
+      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", 1.0);
     
 
     public Robot() {
@@ -66,7 +71,9 @@ public final class Robot extends LoggedRobot {
 
         storage = new Storage();
         shooter = new Shooter();
+        hood = new Hood();
         intake = new Intake();
+        feeder = new Feeder();
 
         shiftTracker = new ShiftTracker();
 
@@ -87,58 +94,38 @@ public final class Robot extends LoggedRobot {
 
         lights.sides.setDefaultCommand(routines.lightsTeleopMode());
         // Create triggers
-        // Trigger allowGoosing = coDriver.a().negate();
-        // Trigger changedReference = RobotModeTriggers.teleop().and(swerve::changedReference);
 
         // Driver bindings
         driver.leftTrigger().onTrue(swerve.tareRotation());
 
-        // driver.povLeft().onTrue(swerve.tareRotation());
-        // driver.y().whileTrue(swerve.apfDrive(() -> new Pose2d(2.26, 4.39, Rotation2d.fromDegrees(0)), () -> 0.25));
-        // driver.x().whileTrue(swerve.apfDrive(() -> new Pose2d(3.287, 0.607, Rotation2d.fromDegrees(0)), () -> 0.25));
-
-        driver
-            .povUp()
-            .and(driver.leftBumper())
-            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.NORTH, () -> true));
-        driver
-            .povUp()
-            .and(driver.rightBumper())
-            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.NORTH, () -> false));
-        driver
-            .povDown()
-            .and(driver.leftBumper())
-            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> true));
-        driver
-            .povDown()
-            .and(driver.rightBumper())
-            .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> false));
-        // driver.a().whileTrue(routines.aimAtHub(() -> 0.2));
-        // driver.x().whileTrue(routines.driveDepot());
+        // driver
+        //     .povUp()
+        //     .and(driver.leftBumper())
+        //     .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.NORTH, () -> true));
+        // driver
+        //     .povUp()
+        //     .and(driver.rightBumper())
+        //     .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.NORTH, () -> false));
+        // driver
+        //     .povDown()
+        //     .and(driver.leftBumper())
+        //     .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> true));
+        // driver
+        //     .povDown()
+        //     .and(driver.rightBumper())
+        //     .whileTrue(routines.driveTrenchWithLights(() -> WaypointHeading.SOUTH, () -> false));
         driver.a().whileTrue(swerve.driveToShootingArc(() -> 0.8));
-        // driver.b().whileTrue(swerve.drive(this::driverX, this::driverY, () -> swerve.getHubAngular()));
-        driver.b().whileTrue(swerve.driveFacingHub(this::driverX, this::driverY, this::driverAngular));
-        driver.y().whileTrue(swerve.driveFacingZone(this::driverX, this::driverY, this::driverAngular));
+        driver.b().whileTrue(swerve.driveFacingTarget(this::driverX, this::driverY, this::driverAngular));
+        // driver.y().whileTrue(swerve.driveFacingZone(this::driverX, this::driverY, this::driverAngular));
         driver.rightTrigger().whileTrue(swerve.drive(this::driverX, this::driverY, this::driverAngular, false));
-        // driver.a().whileTrue(routines.refuelFromDepot());
-        // driver.b().whileTrue(routines.refuelFromNeutral());
-        // driver.a().whileTrue(swerve.apfDrive(() -> Field.WAYPOINT_GOAL_FAR.get(), () -> 12.0));
-        // driver.povLeft().whileTrue(swerve.driveTrench(() -> false));
-        // driver.povRight().whileTrue(swerve.driveTrench(() -> true));
         driver.rightStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
         driver.start().onTrue(swerve.adjustShootingRadius());
 
-        // driver
-        //     .povRight()
-        //     .whileTrue(
-        //         (swerve.apfDrive(() -> swerve.getFuelPose(), () -> 0.25)).until(() -> swerve.getFuelPose() == null)
-        //     );
         // driver.rightBumper().whileTrue(swerve.resetOdometry());
 
         // changedReference.onTrue(new RumbleCommand(driver, 1.0).withTimeout(0.2));
 
         // Co-driver bindings
-        //coDriver.a().onTrue(none()); // Reserved (No goosing around)
         //        coDriver.x().onTrue(storage.moveMotorCommand(true));
         //        coDriver.b().onTrue(storage.moveMotorCommand(false));
 
@@ -146,30 +133,43 @@ public final class Robot extends LoggedRobot {
         // coDriver.leftTrigger().whileTrue(routines.readyFeederShooter());
 
         // coDriver.leftTrigger().whileTrue(routines.unJamFeederShooter());
-        coDriver.rightBumper().toggleOnTrue(shooter.readyShooter());
-        coDriver.rightTrigger().toggleOnTrue(shooter.readyFieldShooter(() -> true));
-        coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
-        coDriver.leftBumper().toggleOnTrue(shooter.haltShooter());
-        coDriver.povRight().whileTrue(routines.shootFuel());
+        // coDriver.rightBumper().toggleOnTrue(shooter.readyShooter());
+        // coDriver.rightTrigger().toggleOnTrue(shooter.readyFieldShooter(() -> true));
+
+        var shoot = coDriver.rightTrigger();
+        // Operator shoots with right trigger, runs intake at the same time with x, forces shooting with left trigger
+        shoot.whileTrue(routines.shoot(coDriver.b(), coDriver.leftTrigger()));
+        coDriver.leftTrigger().onTrue(none()); // Reserved for shooting override
+        coDriver.back().whileTrue(hood.zeroPositionCommand());
+        coDriver.rightBumper().whileTrue(routines.staticShoot());
+
+        // coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
+        coDriver.leftBumper().toggleOnTrue(routines.shootFuelTest());
+        // coDriver.povRight().whileTrue(routines.shootFuel());
         coDriver.povLeft().whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightTrigger().and(coDriver.povRight()).whileTrue(routines.shootFuel());
         // coDriver.rightTrigger().and(coDriver.povLeft()).whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
-        coDriver.a().whileTrue(intake.extendIntake(true));
-        coDriver.y().whileTrue(intake.retrackIntakeTest());
+        // coDriver.povRight().whileTrue(feeder.feedShooter());
+        coDriver.povLeft().whileTrue(shooter.readyShooter());
+        coDriver.a().onTrue(intake.extendIntake());
+        coDriver.y().whileTrue(intake.retrackIntake());
 
-        coDriver.x().whileTrue(intake.moveIntakeTest(false));
-        coDriver.b().whileTrue(intake.moveIntakeTest(true));
+        coDriver.b().and(shoot.negate()).whileTrue(intake.moveIntake(true));
+        // coDriver.b().whileTrue(intake.moveIntake(true));
         // coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
         //        coDriver.x().whileTrue(routines.shootFuel());
         //        coDriver.x().whileTrue(routines.shootFuel());
         // coDriver.b().whileTrue(routines.releaseAll());
         //        coDriver.povRight().whileTrue(storage.moveMotorCommand(false));
         //        coDriver.povLeft().whileTrue(storage.moveMotorCommand(true));
-        coDriver.povUp().whileTrue(storage.moveMotorCommand(true));
-        coDriver.povDown().whileTrue(storage.moveMotorCommand(false));
+        // coDriver.povUp().whileTrue(storage.moveMotorCommand(true));
+        // coDriver.povDown().whileTrue(storage.moveMotorCommand(false));
+// coDriver.b().whileTrue(hood.zeroPositiCommand().ignoringDisable(true));
+        coDriver.povUp().whileTrue(hood.targetDistanceCommand(       ));
+        coDriver.povDown().whileTrue(hood.goToZero(true ));
         // coDriver.rightBumper().onTrue(swerve.playMusic("enemy").ignoringDisable(true));
         //
         // RobotModeTriggers.autonomous().whileTrue(autos.outpost());
@@ -243,10 +243,10 @@ public final class Robot extends LoggedRobot {
         // } catch (Exception ignored) {}
     }
 
-    private void playSong(String filename) {
-        orchestra.loadMusic(filename);
-        orchestra.play();
-    }
+    // private void playSong(String filename) {
+    //     orchestra.loadMusic(filename);
+    //     orchestra.play();
+    // }
 
     @Override
     public void autonomousInit() {

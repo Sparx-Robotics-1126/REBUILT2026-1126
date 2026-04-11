@@ -22,17 +22,17 @@ public final class Constants {
     public static final CameraConfig[] AT_CAMERAS = {
         new CameraConfig(
             "center",
-            new Translation3d(.195, .0, Z_HEIGHT_FLOOR_TO_ROBOT + 0.49),
+            new Translation3d(.18, .0, Z_HEIGHT_FLOOR_TO_ROBOT + 0.58),
             new Rotation3d(0.0, Math.toRadians(5), Math.toRadians(0.0))
         ),
         new CameraConfig(
             "left",
-            new Translation3d(.175, 0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.49),
+            new Translation3d(.16, 0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.58),
             new Rotation3d(0.0, Math.toRadians(10), Math.toRadians(45.0))
         ),
         new CameraConfig(
             "right",
-            new Translation3d(.175, -0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.49),
+            new Translation3d(.16, -0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.58),
             new Rotation3d(0.0, Math.toRadians(5), Math.toRadians(-45.0))
         )
     };
@@ -48,10 +48,14 @@ public final class Constants {
     //Storage
     public static final int STORAGE_MOTOR = 20;
 
-    public static final int INTAKE_MOTOR = 23;
-    public static final int PIVOT_MOTOR = 24;
+    public static final int INTAKE_MOTOR = 22;
+    public static final int PIVOT_MOTOR_LEAD = 23;
+    public static final int PIVOT_MOTOR_FOLLOW = 24;
     public static final int FEEDER_MOTOR = 25;
-    public static final int SHOOTER_MOTOR = 26;
+    public static final int SHOOTER_MOTOR_LEAD = 26;
+
+    public static final int SHOOTER_MOTOR_FOLLOW = 27;
+        public static final int HOOD_MOTOR = 28;
 
     public static final class LowerCAN {
 

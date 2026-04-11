@@ -73,25 +73,20 @@ public final class BacknForth extends BaseAutosRoutine {
                 .andThen(driveWaypoint(flip, 1, blue))
                 .andThen(
                     robot.intake
-                        .extendIntake(false)
+                        .extendIntake()
                         .withTimeout(1.5)
-                        .andThen(robot.intake.moveIntakeTest(false))
+                        .andThen(robot.intake.moveIntake(false))
                         .withDeadline(driveWaypoint(flip, 2, blue)
                         .andThen(driveWaypoint(flip, 3, blue))
                         .andThen(driveWaypoint(flip, 4, blue)))
                 )
                 .andThen(driveWaypoint(flip, 5, blue))
-                .andThen(driveWaypoint(flip, 6, blue)),
-                driveArchAndShootFuel(),
-                driveWaypoint(flip, 7, blue))
+                .andThen(driveWaypoint(flip, 6, blue))
+                .andThen(robot.intake.moveIntake(false))
+                .withDeadline(driveWaypoint(flip, 7, blue)
+                .andThen(Commands.waitSeconds(1.0)))
                 .andThen(driveWaypoint(flip, 8, blue))
-                .andThen(driveWaypoint(flip, 9, blue))
-                .andThen(robot.intake.moveIntakeTest(false))
-                .withDeadline(driveWaypoint(flip, 10, blue)
-                .andThen(driveWaypoint(flip, 11, blue))
-                .andThen(driveWaypoint(flip, 12)))
-                .andThen(driveWaypoint(flip, 13, blue))
-                .andThen(driveWaypoint(flip, 14, blue),
+                .andThen(driveWaypoint(flip, 9, blue)),
                 driveArchAndShootFuel()
         ).withName(getCommandName());
     }

@@ -1,9 +1,12 @@
 package org.team1126.robot.commands;
 
 import static edu.wpi.first.wpilibj2.command.Commands.parallel;
+import static edu.wpi.first.wpilibj2.command.Commands.race;
+import static edu.wpi.first.wpilibj2.command.Commands.either;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
+import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,8 +19,11 @@ import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableBoolean;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
+import org.team1126.lib.tunable.Tunables.TunableInteger;
 import org.team1126.lib.util.Alliance;
 import org.team1126.robot.Robot;
+import org.team1126.robot.subsystems.Feeder;
+import org.team1126.robot.subsystems.Hood;
 import org.team1126.robot.subsystems.Intake;
 import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
@@ -52,22 +58,29 @@ public final class Routines {
     private static final TunableDouble waypointTol = tunables.value("waypointTol", 0.25);
 
     private static final TunableBoolean autoDrive = tunables.value("autoDrive", true);
+    private static final TunableDouble staticShootDistance = tunables.value("staticShootDistance", 2.49);
+    private static final TunableDouble staticShootHoodPosition = tunables.value("staticShootHoodPosition", 6.0);
 
+    private static final TunableInteger shootingMinRqTagsSeen = tunables.value("shootingMinRqTagsSeen", 25);
     private final Robot robot;
 
     private final Lights lights;
     private final Swerve swerve;
     private final Shooter shooter;
+    private final Hood hood;
     private final Storage storage;
     private final Intake intake;
+    private final Feeder feeder;
 
     private Routines(Robot robot) {
         this.robot = robot;
         lights = robot.lights;
         swerve = robot.swerve;
         shooter = robot.shooter;
+        hood = robot.hood;
         storage = robot.storage;
         intake = robot.intake;
+        feeder = robot.feeder;
         //        selection = robot.selection;
     }
 
@@ -75,17 +88,17 @@ public final class Routines {
         var goal = Field.WAYPOINT_DEPOT.get();
         return parallel(
             swerve.apfDrive(() -> new Pose2d(goal.getX(), goal.getY(), Rotation2d.fromDegrees(180)), () -> 0.3),
-            intake.extendIntake(true).withTimeout(3.0)
+            intake.extendIntake().withTimeout(3.0)
         ).withName("Routines.fuelFromOutpost()");
     }
 
     public Command lightsDisabledMode() {
         if (Alliance.isBlue()) {
-            return parallel(lights.top.setSolidBlue(), lights.sides.setSolidBlue()).withName(
+            return parallel(lights.topLeftTop.setSolidBlue(), lights.topLeftBottom.setSolidBlue(), lights.sides.setSolidBlue(), lights.topRightBottom.setSolidBlue(), lights.topRightTop.setSolidBlue()).withName(
                 "Routines.lightsDisabledMode()"
             );
         } else {
-            return parallel(lights.top.setSolidRed(), lights.sides.setSolidRed()).withName(
+            return parallel(lights.topLeftTop.setSolidRed(), lights.topLeftBottom.setSolidRed(), lights.sides.setSolidRed(), lights.topRightBottom.setSolidRed(), lights.topRightTop.setSolidRed()).withName(
                 "Routines.lightsDisabledMode()"
             );
         }
@@ -93,11 +106,11 @@ public final class Routines {
 
     public Command lightsTeleopMode() {
         if (Alliance.isBlue()) {
-            return parallel(lights.top.setSolidBlue(), lights.sides.setSolidBlue()).withName(
+            return parallel(lights.topLeftTop.setSolidBlue(), lights.topLeftBottom.setSolidBlue(), lights.sides.setSolidBlue(), lights.topRightBottom.setSolidBlue(), lights.topRightTop.setSolidBlue()).withName(
                 "Routines.lightsDisabledMode()"
             );
         } else {
-            return parallel(lights.top.setSolidRed(), lights.sides.setSolidRed()).withName(
+            return parallel(lights.topLeftTop.setSolidRed(), lights.topLeftBottom.setSolidRed(), lights.sides.setSolidRed(), lights.topRightBottom.setSolidRed(), lights.topRightTop.setSolidRed()).withName(
                 "Routines.lightsDisabledMode()"
             );
         }
@@ -113,49 +126,117 @@ public final class Routines {
         return sequence(swerve.apfDrive(() -> goal, () -> 0.3)).withName("Routines.driveOutpost()");
     }
 
-    public Command outpost() {
-        return sequence(
-            selfDriveLights(),
-            readyFeederShooter(),
-            shootFuel(),
-            waitSeconds(3),
-            swerve.apfDrive(() -> new Pose2d(1.388, 5.717, Rotation2d.fromDegrees(0)), () -> 0.3)
-        ).withName("Routines.outpost()");
+    // public Command outpost() {
+    //     return sequence(
+    //         selfDriveLights(),
+    //         // readyFeederShooter(),
+    //         shootFuel(),
+    //         waitSeconds(3),
+    //         swerve.apfDrive(() -> new Pose2d(1.388, 5.717, Rotation2d.fromDegrees(0)), () -> 0.3)
+    //     ).withName("Routines.outpost()");
+    // }
+
+    // public Command prepareForShooting() {
+    //     return parallel(shooter.getReadyCommand()).withName("Routines.prepareForShooting()");
+    // }
+
+    // public Command feedShooter() {
+    //     return parallel(shootingLights(), storage.feedShooter(shooter::shooterIsReady), feeder.feedShooter()).withName(
+    //         "Routines.score()"
+    //     );
+    // }
+
+    // TODO: Implement this with setpoints and all that
+    // public Command newShootFuel() {
+    //     return parallel(
+    //         hood.targetDistance(swerve::targetDistance),
+    //         shooter.targetDistance(swerve::targetDistance),)
+    // }
+
+ /**
+     * Shoots at the hub, without commanding the drivetrain.
+     * @param runIntake Whether the intake should also be intaking.
+     * @param force A supplier that if {@code true} will force the indexer to feed the shooters.
+     */
+    public Command shoot(BooleanSupplier runIntake, BooleanSupplier force) {
+        return parallel(
+            hood.targetDistance(swerve::distanceToTarget),
+            shooter.targetDistance(swerve::distanceToTarget),
+            // feeder.readyFeeder(),
+            sequence(
+                sequence(
+                    waitSeconds(0.05),
+                    waitUntil(
+                        () ->
+                            (hood.atPosition()
+                                && shooter.shooterIsReady()
+                                && swerve.aimingAtTarget()
+                                && swerve.tagsSeen() >= shootingMinRqTagsSeen.get())
+                            || force.getAsBoolean()
+                    )
+                ).deadlineFor(storage.spill().withTimeout(0.25)),
+                feeder.feedShooter(()-> true),
+                storage.feedShooter(()-> true)
+            ),
+            sequence(
+                race(waitUntil(runIntake), waitSeconds(0.75)),
+                either(sequence(intake.extendIntake(), intake.moveIntake(true)).onlyWhile(runIntake), intake.agitate().until(runIntake), runIntake)
+            ).repeatedly()
+        ).withName("Routines.shoot()");
     }
 
-    public Command prepareForShooting() {
-        return parallel(shooter.getReadyCommand()).withName("Routines.prepareForShooting()");
+    /**
+     * Shoots at the hub from a fixed distance, as a backup.
+     */
+    public Command staticShoot() {
+        return parallel(
+            hood.targetDistance(staticShootHoodPosition),
+            shooter.targetDistance(staticShootDistance),
+            feeder.feedShooter(() -> true),
+            storage.feedShooter(feeder::isReady)
+        ).withName("Routines.shoot()");
     }
 
-    public Command feedShooter() {
-        return parallel(shootingLights(), storage.feedShooter(shooter::shooterIsReady), shooter.feedShooter()).withName(
-            "Routines.score()"
-        );
-    }
 
     public Command shootFuelAuto() {
         return parallel(
             //    lights.top.setSolidRed()
-            shooter.shoot(shooter::feederIsReady),
+            shooter.targetDistance(swerve::distanceToTarget),
             storage.feedShooter(shooter::shooterIsReady)
         ).withName("Routines.scoreAuto()");
     }
 
-    public Command shootFuel() {
-        return parallel(
-            // shootingLights(),
-            lights.sides.chase(Lights.Color.SHOOTING),
-            lights.top.convergeToMiddle(Lights.Color.SHOOTING),
-            storage.feedShooter(shooter::shooterIsReady),
-            shooter.shoot(shooter::feederIsReady)
-        ).withName("Routines.score()");
-    }
+public Command shootFuelTest(){
+    return parallel(
+        storage.feedShooter(() -> true),
+        feeder.feedShooter(shooter::shooterIsReady  ),
+         shooter.readyShooter()
+        // shootingLights(),
+        // lights.sides.chase(Lights.Color.SHOOTING),
+        // lights.top.convergeToMiddle(Lights.Color.SHOOTING),
+        // hood.targetDistance(swerve::distanceToTarget),
+        // shooter.targetDistance(swerve::distanceToTarget),
+        // sequence(waitUntil(() -> (shooter.shooterIsReady() && hood.atPosition() && swerve.aimingAtTarget())), parallel(feeder.feedShooter(), storage.feedShooter(() -> feeder.isReady())))
+    ).withName("Routines.score()");
+}
+
+    // public Command shootFuel() {
+    //     return parallel(
+    //         // shootingLights(),
+    //         lights.sides.chase(Lights.Color.SHOOTING),
+    //         lights.top.convergeToMiddle(Lights.Color.SHOOTING),
+    //         hood.targetDistance(swerve::distanceToTarget),
+    //         shooter.targetDistance(swerve::distanceToTarget),
+    //         sequence(waitUntil(() -> (shooter.shooterIsReady() && hood.atPosition() && swerve.aimingAtTarget())), parallel(feeder.feedShooter(), storage.feedShooter(() -> feeder.isReady())))
+    //     ).withName("Routines.score()");
+    // }
+
 
     public Command shootFuelRev() {
         return parallel(
             // shootingLights(),
             storage.feedShooter(shooter::shooterIsReady),
-            shooter.shoot(shooter::feederIsReady)
+            shooter.targetDistance(swerve::distanceToTarget)
         ).withName("Routines.score()");
     }
 
@@ -163,7 +244,7 @@ public final class Routines {
         return parallel(
             // shootingLights(),
             storage.feedShooter(shooter::shooterIsReady),
-            shooter.shootField(shooter::feederIsReady)
+            shooter.targetDistance(swerve::distanceToTarget)
         ).withName("Routines.score()");
     }
 
@@ -171,7 +252,7 @@ public final class Routines {
         return parallel(
             shootingLights(),
             storage.feedShooterReverse(shooter::shooterIsReady),
-            shooter.shoot(shooter::feederIsReady)
+             shooter.targetDistance(swerve::distanceToTarget)
         ).withName("Routines.score()");
     }
 
@@ -195,13 +276,13 @@ public final class Routines {
         return parallel(storage.spill()).withName("Spill Fuel");
     }
 
-    public Command readyFeederShooter() {
-        return parallel(
-            // lights.aiming(),
+    // public Command readyFeederShooter() {
+    //     return parallel(
+    //         // lights.aiming(),
              
-            shooter.getReadyCommand()
-        ).withName("Routines.readyFeederShooter()");
-    }
+    //         shooter.getReadyCommand()
+    //     ).withName("Routines.readyFeederShooter()");
+    // }
 
     /**
      * Displays the pre-match animation.
@@ -214,21 +295,28 @@ public final class Routines {
     }
 
     public Command lightsSolidRed() {
-        return lights.top.setSolidRed().withName("Routines.lightsSolidRed()");
+        return parallel(lights.topLeftTop.setSolidRed(), lights.topLeftBottom.setSolidRed(), lights.sides.setSolidRed(), lights.topRightBottom.setSolidRed(), lights.topRightTop.setSolidRed()).withName("Routines.lightsSolidRed()");
         // return lights.top.setSolidRed();
     }
 
     public Command shootingLights() {
         return parallel(
             // lights.sides.chase(Lights.Color.SHOOTING),
-            lights.top.convergeToMiddle(Lights.Color.SHOOTING)
+            lights.topLeftTop.convergeToMiddle(Lights.Color.SHOOTING),
+            lights.topLeftBottom.convergeToMiddle(Lights.Color.SHOOTING),
+            lights.topRightBottom.convergeToMiddle(Lights.Color.SHOOTING),
+            lights.topRightTop.convergeToMiddle(Lights.Color.SHOOTING),
+            lights.sides.chase(Lights.Color.SHOOTING)
         ).withName("Routines.shootingLights()");
     }
 
     public Command selfDriveLights() {
         return parallel(
             lights.sides.fade(Lights.Color.BLUE, Lights.Color.RED),
-            lights.top.knightRider(Lights.Color.BLUE, Lights.Color.RED)
+            lights.topLeftTop.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+            lights.topLeftBottom.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+            lights.topRightBottom.knightRider(Lights.Color.BLUE, Lights.Color.RED),
+            lights.topRightTop.knightRider(Lights.Color.BLUE, Lights.Color.RED)
         ).withName("Routines.selfDriveLights()");
     }
 

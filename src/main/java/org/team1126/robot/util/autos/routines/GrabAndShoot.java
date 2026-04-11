@@ -80,7 +80,7 @@ public final class GrabAndShoot extends BaseAutosRoutine {
     public Command action(Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
             atStartingPoint(() -> START_AT.get(blue.getAsBoolean(), flip.get().shouldFlip())),
-            robot.intake.extendIntake(false).withTimeout(intakeTimer.getAsDouble()),
+            robot.intake.extendIntake().withTimeout(intakeTimer.getAsDouble()),
             robot.intake
                 .moveIntakeMotorCommand(false)
                 .withDeadline(
