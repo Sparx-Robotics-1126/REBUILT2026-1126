@@ -85,6 +85,6 @@ public final class Constants {
 
     public static final class RioIO {
 
-        public static final int LIGHTS = 0;
+        public static final int LIGHTS = 9;
     }
 }
