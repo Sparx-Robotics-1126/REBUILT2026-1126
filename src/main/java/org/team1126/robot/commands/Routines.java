@@ -315,7 +315,7 @@ public Command shootFuelTest(){
 
     public Command extendIntakeIfNeeded(BooleanSupplier isNeeded) {
         if (isNeeded.getAsBoolean()) {
-            return robot.intake.extendIntake().withDeadline(Commands.waitSeconds((3.0)));
+            return robot.intake.extendIntake().withDeadline(Commands.waitSeconds((1.5)));
         } else {
             return Commands.none();
         }
