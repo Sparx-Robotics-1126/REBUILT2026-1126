@@ -57,50 +57,17 @@ public final class BacknForth extends BaseAutosRoutine {
     public Command action(Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
             atStartingPoint(() -> START_AT.get(blue.getAsBoolean(), flip.get().shouldFlip())),
-
-            driveWaypoint(flip, 0, blue)
-            .andThen(driveWaypoint(flip, bumpPivot, blue))
-            .andThen(driveWaypoint(flip, centerLinePivot, blue))
-            .andThen(
-                robot.intake
-                    .extendIntake()
-                    .withTimeout(1.5)
-                    .andThen(robot.intake.moveIntake(false))
-                    .withDeadline(driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue)))
-            )
-            .andThen(driveWaypoint(flip, shootingPoint, blue),
-            driveArchAndShootFuel().withDeadline(Commands.waitSeconds(1.5)))
-            
-            .andThen(
-                driveWaypoint(flip, 0, blue)
-                .andThen(driveWaypoint(flip, bumpPivot, blue))
-                .andThen(driveWaypoint(flip, centerLinePivot, blue))
-                .andThen(
-                    robot.intake
-                        .extendIntake()
-                        .withTimeout(1.5)
-                        .andThen(robot.intake.moveIntake(false))
-                        .withDeadline(driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue)))
-                )
-                .andThen(driveWaypoint(flip, shootingPoint, blue),
-                driveArchAndShootFuel().withDeadline(Commands.waitSeconds(1.5)))
-            )
+            routine(flip, blue, () -> true).andThen(routine(flip, blue, () -> false))
         ).withName(getCommandName());
     }
     
-    private Command routine(Supplier<AutosFlip> flip, BooleanSupplier blue) {
+    private Command routine(Supplier<AutosFlip> flip, BooleanSupplier blue, BooleanSupplier extendIntake) {
         return driveWaypoint(flip, 0, blue)
             .andThen(driveWaypoint(flip, bumpPivot, blue))
             .andThen(driveWaypoint(flip, centerLinePivot, blue))
-            .andThen(
-                robot.intake
-                    .extendIntake()
-                    .withTimeout(1.5)
-                    .andThen(robot.intake.moveIntake(false))
-                    .withDeadline(driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue)))
-            )
-            .andThen(robot.intake.moveIntake(false))
+            .andThen(routines.extendIntakeIfNeeded(extendIntake))
+            .andThen(robot.intake.moveIntake(false).withDeadline(driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue))))
             .andThen(driveWaypoint(flip, shootingPoint, blue),
-            driveArchAndShootFuel().withDeadline(Commands.waitSeconds(1.5)));
+            driveArchAndShootFuel().withDeadline(Commands.waitSeconds(10.0)));
     }
 }

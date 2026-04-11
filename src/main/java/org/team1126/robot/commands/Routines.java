@@ -12,6 +12,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -309,6 +311,14 @@ public Command shootFuelTest(){
             lights.topRightTop.convergeToMiddle(Lights.Color.SHOOTING),
             lights.sides.chase(Lights.Color.SHOOTING)
         ).withName("Routines.shootingLights()");
+    }
+
+    public Command extendIntakeIfNeeded(BooleanSupplier isNeeded) {
+        if (isNeeded.getAsBoolean()) {
+            return robot.intake.extendIntake().withDeadline(Commands.waitSeconds((3.0)));
+        } else {
+            return Commands.none();
+        }
     }
 
     public Command selfDriveLights() {
