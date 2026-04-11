@@ -160,13 +160,14 @@ public final class Routines {
      */
     public Command shoot(BooleanSupplier runIntake, BooleanSupplier force) {
         return parallel(
+           shootingLights(),
             hood.targetDistance(swerve::distanceToTarget),
             shooter.targetDistance(swerve::distanceToTarget),
             // feeder.readyFeeder(),
-            storage.feedShooter(()-> true),
             sequence(
                 sequence(
                     waitSeconds(0.05),
+
                     waitUntil(
                         () ->
                             (hood.atPosition()
@@ -176,8 +177,7 @@ public final class Routines {
                             || force.getAsBoolean()
                     )
                 ).deadlineFor(storage.spill().withTimeout(0.25)),
-                feeder.feedShooter(()-> true),
-                storage.feedShooter(()-> true)
+                parallel(feeder.readyFeeder(), storage.feedShooter(() -> true))
             ),
             sequence(
                 race(waitUntil(runIntake), waitSeconds(0.75)),

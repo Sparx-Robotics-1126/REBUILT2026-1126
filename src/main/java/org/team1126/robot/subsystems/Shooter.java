@@ -276,7 +276,7 @@ public final class Shooter extends GRRSubsystem {
 
         config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-        config.Slot0.kP = 0.7;
+        config.Slot0.kP = 0.8;
         config.Slot0.kI = 0.0;
         config.Slot0.kD = 0.0;
         config.Slot0.kG = 0.0;
