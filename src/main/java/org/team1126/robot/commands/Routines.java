@@ -162,7 +162,7 @@ public final class Routines {
         return parallel(
             hood.targetDistance(swerve::distanceToTarget),
             shooter.targetDistance(swerve::distanceToTarget),
-                feeder.readyFeeder(),
+            // feeder.readyFeeder(),
             sequence(
                 sequence(
                     waitSeconds(0.05),
@@ -175,11 +175,12 @@ public final class Routines {
                             || force.getAsBoolean()
                     )
                 ).deadlineFor(storage.spill().withTimeout(0.25)),
-                 storage.feedShooter(()-> true)
+                feeder.feedShooter(()-> true),
+                storage.feedShooter(()-> true)
             ),
             sequence(
                 race(waitUntil(runIntake), waitSeconds(0.75)),
-                either(intake.moveIntake(true).onlyWhile(runIntake), intake.agitate().until(runIntake), runIntake)
+                either(sequence(intake.extendIntake(), intake.moveIntake(true)).onlyWhile(runIntake), intake.agitate().until(runIntake), runIntake)
             ).repeatedly()
         ).withName("Routines.shoot()");
     }
