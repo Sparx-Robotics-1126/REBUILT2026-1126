@@ -5,7 +5,6 @@ import static edu.wpi.first.wpilibj2.command.Commands.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
-import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -57,17 +56,17 @@ public final class BacknForth extends BaseAutosRoutine {
     public Command action(Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
             atStartingPoint(() -> START_AT.get(blue.getAsBoolean(), flip.get().shouldFlip())),
-            routine(flip, blue, () -> true).andThen(routine(flip, blue, () -> false))
+            routine(flip, blue).andThen(routine(flip, blue))
         ).withName(getCommandName());
     }
     
-    private Command routine(Supplier<AutosFlip> flip, BooleanSupplier blue, BooleanSupplier extendIntake) {
+    private Command routine(Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return driveWaypoint(flip, 0, blue)
             .andThen(driveWaypoint(flip, bumpPivot, blue))
             .andThen(driveWaypoint(flip, centerLinePivot, blue))
-            .andThen(routines.extendIntakeIfNeeded(extendIntake))
+            .andThen(robot.intake.extendIntake().withDeadline(Commands.waitSeconds(1.25)))
             .andThen(robot.intake.moveIntake(false).withDeadline(driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue))))
-            .andThen(driveWaypoint(flip, shootingPoint, blue),
-            driveArchAndShootFuel().withDeadline(Commands.waitSeconds(5.0)));
+            .andThen(driveWaypoint(flip, shootingPoint, blue))
+            .andThen(driveArchAndShootFuel().withDeadline(Commands.waitSeconds(5.0)));
     }
 }
