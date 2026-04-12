@@ -23,7 +23,7 @@ public class PourMeSomeFuel extends BaseAutosRoutine {
     public static final String ABBREVIATION = "PMSF";
 
     public static final ExtPose STARTING_POINT = new ExtPose(AutosStart.BUMP.getStartingPoint(true, false));
-    public static final Waypoint OUTPOST = new Waypoint(0.500, 0.253, Math.toRadians(180.0), getDefaultDecel());
+    public static final Waypoint OUTPOST = new Waypoint(0.500, 0.25, Math.toRadians(180.0), getDefaultDecel());
 
     private static PourMeSomeFuel instance;
 
