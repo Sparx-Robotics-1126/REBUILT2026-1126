@@ -44,7 +44,7 @@ public final class Intake extends GRRSubsystem {
 
     private SparkFlexConfig pivotConfig;
     private SparkClosedLoopController pivotController;
-    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -1.65);
+    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -1.7);
     
     private List<Double> outputCurrent = new ArrayList<>();
     private List<Double> appliedOutput = new ArrayList<>();
