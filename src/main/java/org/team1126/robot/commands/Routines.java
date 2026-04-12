@@ -173,7 +173,7 @@ public final class Routines {
                     waitUntil(
                         () ->
                             (hood.atPosition()
-                                // && shooter.shooterIsReady()
+                                && shooter.shooterIsReady()
                                 && swerve.aimingAtTarget()
                                 && swerve.tagsSeen() >= shootingMinRqTagsSeen.get())
                             || force.getAsBoolean()
