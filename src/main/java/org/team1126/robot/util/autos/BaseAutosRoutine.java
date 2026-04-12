@@ -26,7 +26,7 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
 
     protected static final TunableTable tunables = Tunables.getNested("Robot Autos Defaults");
     protected static final TunableDouble flywheelWarmupTimer = tunables.value("Flywheel Warmup Timer", 1.0);
-    protected static final TunableDouble secondsPerBall = tunables.value("Seconds per Ball (shooting)", 0.7);
+    protected static final TunableDouble secondsPerBall = tunables.value("Seconds per Ball (shooting)", 0.5);
     protected static final TunableDouble simulationDecel = tunables.value("Simulation Default Deceleration", 20.0);
     protected static final TunableDouble defaultDecel = tunables.value("Robot Autos Default Deceleration", 1.3);
     protected static final TunableDouble intakeTimer = tunables.value("Intake extension timer", 1.5);
@@ -43,7 +43,7 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
     protected static final TunableDouble defaultFuelLoad = tunables.value("Default fuel amount at start of autos", 8.0);
     protected static final TunableDouble maxShootingArcTravelTime = tunables.value(
         "Max amount of time to drive to shooting arc",
-        1.0
+        1.75
     );
     protected static final TunableDouble intakeForwardOscilation = tunables.value(
         "Forward Intake Oscilation Distance",

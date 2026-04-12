@@ -34,7 +34,9 @@ public final class Feeder extends GRRSubsystem {
     public Feeder() {
         feederMotor = new TalonFX(FEEDER_MOTOR);
         feederConfig = new TalonFXConfiguration();
-        
+        feederConfig.CurrentLimits.StatorCurrentLimit = 160;
+
+    
         feederConfig.Slot0.kP = 0.1;
         feederConfig.Slot0.kI = 0.00001;
         feederConfig.Slot0.kD = 0;

@@ -38,7 +38,7 @@ public final class Intake extends GRRSubsystem {
 
     // private TalonFXConfiguration intakeConfig;
         private final VelocityTorqueCurrentFOC intakeVelocityControl;
-    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 100);
+    private final Tunables.TunableInteger intakeSpeed = tunables.value("Intake Speed", 200);
         private final Tunables.TunableInteger intakeAcceleration = tunables.value("Intake Acceleration", 800);
     private static final TunableTable tunables = Tunables.getNested("intake");
 

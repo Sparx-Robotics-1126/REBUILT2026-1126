@@ -13,6 +13,7 @@ import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.BaseAutosRoutine;
 import org.team1126.robot.util.nav.Waypoint;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -23,7 +24,8 @@ public class PourMeSomeFuel extends BaseAutosRoutine {
     public static final String ABBREVIATION = "PMSF";
 
     public static final ExtPose STARTING_POINT = new ExtPose(AutosStart.BUMP.getStartingPoint(true, false));
-    public static final Waypoint OUTPOST = new Waypoint(0.500, 0.253, Math.toRadians(180.0), getDefaultDecel());
+    public static final Waypoint OUTPOST = new Waypoint(.302, .75, Math.toRadians(180.0), getDefaultDecel());
+    public static final Waypoint PIVOT = new Waypoint(3.00, .7, Math.toRadians(180.0), getDefaultDecel());
 
     private static PourMeSomeFuel instance;
 
@@ -46,10 +48,10 @@ public class PourMeSomeFuel extends BaseAutosRoutine {
     public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
             atStartingPoint(() -> STARTING_POINT.get(blue.getAsBoolean(), flip.get().shouldFlip())),
-            driveArchAndShootFuelStart(),
+            driveWaypoint(flip,PIVOT, blue),
             driveWaypoint(flip, OUTPOST, blue)
-                .andThen(robot.intake.extendIntake())
-                .andThen(Commands.waitSeconds(2.0)),
+                .alongWith(robot.intake.extendIntake().withTimeout(2.0)))
+                .andThen(Commands.waitSeconds(4),
             driveArchAndShootFuel()
         ).withName(getCommandName());
     }

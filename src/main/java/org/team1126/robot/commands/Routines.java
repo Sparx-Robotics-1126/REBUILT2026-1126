@@ -205,7 +205,8 @@ public final class Routines {
         return parallel(
             //    lights.top.setSolidRed()
             shooter.targetDistance(swerve::distanceToTarget),
-            storage.feedShooter(shooter::shooterIsReady)
+            storage.feedShooter(shooter::shooterIsReady),
+            feeder.feedShooter(() -> true)
         ).withName("Routines.scoreAuto()");
     }
 
