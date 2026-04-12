@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import org.team1126.lib.math.geometry.ExtPose;
 import org.team1126.robot.Robot;
 import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
@@ -20,6 +21,9 @@ public class PourMeSomeFuel extends BaseAutosRoutine {
     public static final String COMMAND_NAME = "ShootOutpostFuel.action";
     public static final String DISPLAY_NAME = "Pour Me Some Fuel";
     public static final String ABBREVIATION = "PMSF";
+
+    public static final ExtPose STARTING_POINT = new ExtPose(AutosStart.BUMP.getStartingPoint(true, false));
+    public static final Waypoint OUTPOST = new Waypoint(0.500, 0.453, Math.toRadians(180.0), getDefaultDecel());
 
     private static PourMeSomeFuel instance;
 
@@ -36,30 +40,16 @@ public class PourMeSomeFuel extends BaseAutosRoutine {
 
     private PourMeSomeFuel(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
-        waypoints = Arrays.asList(
-            new Waypoint(3.028, 2.425, Math.toRadians(40.0), getDefaultDecel()),
-            new Waypoint(1.994, 1.651, Math.toRadians(270.0), getDefaultDecel()),
-            new Waypoint(1.215, 0.453, Math.toRadians(180.0), getDefaultDecel()),
-            new Waypoint(0.500, 0.453, Math.toRadians(180.0), getDefaultDecel()),
-            new Waypoint(1.215, 0.453, Math.toRadians(180.0), getDefaultDecel()),
-            new Waypoint(1.994, 1.651, Math.toRadians(90.0), getDefaultDecel()),
-            new Waypoint(3.028, 2.425, Math.toRadians(40.0), getDefaultDecel())
-        ).toArray(new Waypoint[0]);
+        waypoints = new Waypoint[0];
     }
 
     public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
-            atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean(), flip.get().shouldFlip())),
-            driveWaypoint(flip, 0, blue),
+            atStartingPoint(() -> STARTING_POINT.get(blue.getAsBoolean(), flip.get().shouldFlip())),
             driveArchAndShootFuelStart(),
-            driveWaypoint(flip, 1, blue)
-                .andThen(driveWaypoint(flip, 2, blue))
-                .andThen(driveWaypoint(flip, 3, blue))
+            driveWaypoint(flip, OUTPOST, blue)
                 .andThen(robot.intake.extendIntake())
-                .andThen(Commands.waitSeconds(4.0))
-                .andThen(driveWaypoint(flip, 4, blue))
-                .andThen(driveWaypoint(flip, 5, blue))
-                .andThen(driveWaypoint(flip, 6, blue)),
+                .andThen(Commands.waitSeconds(2.0)),
             driveArchAndShootFuel()
         ).withName(getCommandName());
     }
