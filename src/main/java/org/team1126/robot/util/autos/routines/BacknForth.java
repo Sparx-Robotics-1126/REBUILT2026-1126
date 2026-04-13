@@ -27,10 +27,11 @@ public final class BacknForth extends BaseAutosRoutine {
     
     private static BacknForth instance;
     
-    public static final ExtPose START_AT = new ExtPose(AutosStart.BUMP.getStartingPoint(true, false));
-    public static final Waypoint bumpPivot = new Waypoint(5.712, 2.5, Math.toRadians(0.0),getDefaultDecel());
-    public static final Waypoint centerLinePivot = new Waypoint(7.692, 0.685, Math.toRadians(90.0), getDefaultDecel());
-    public static final Waypoint middlePivot = new Waypoint(7.692, 3.46, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get());
+    public static final ExtPose START_AT = new ExtPose(AutosStart.BUMP_ANG.getStartingPoint(true, false));
+    public static final Waypoint bumpPivot = new Waypoint(5.712, 2.5, Math.toRadians(45.0),getDefaultDecel());
+    public static final Waypoint centerLinePivot = new Waypoint(8.2, 0.685, Math.toRadians(90.0), getDefaultDecel());
+    public static final Waypoint middlePivot = new Waypoint(8.2, 3.46, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get());
+    public static final Waypoint crosswalk = new Waypoint(5.2, 2.557, Math.toRadians(45.0), getDefaultDecel());
     public static final Waypoint shootingPoint = new Waypoint(2.74, 2.8, Math.toRadians(45.0), getDefaultDecel() * intakeFactor.get());
 
     public static void init(Robot robot) {
@@ -63,9 +64,12 @@ public final class BacknForth extends BaseAutosRoutine {
     private Command routine(Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return driveWaypoint(flip, 0, blue)
             .andThen(driveWaypoint(flip, bumpPivot, blue))
-            .andThen(driveWaypoint(flip, centerLinePivot, blue))
-            .andThen(robot.intake.extendIntake().withDeadline(Commands.waitSeconds(1.25)))
-            .andThen(robot.intake.moveIntake(false).withDeadline(driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue))))
+            .andThen(parallel(
+                driveWaypoint(flip, centerLinePivot, blue),
+                robot.intake.extendIntake().withTimeout(0.75)))
+            .andThen(robot.intake.moveIntake(false).withDeadline(
+                driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue))))
+            .andThen(driveWaypoint(flip, crosswalk, blue))
             .andThen(driveWaypoint(flip, shootingPoint, blue))
             .andThen(driveArchAndShootFuel().withDeadline(Commands.waitSeconds(5.0)));
     }

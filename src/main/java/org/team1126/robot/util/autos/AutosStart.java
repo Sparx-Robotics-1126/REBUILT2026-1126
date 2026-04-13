@@ -7,6 +7,7 @@ import org.team1126.lib.math.geometry.ExtPose;
 public enum AutosStart {
     CENTER(3.611, 4.046, 0.0, "HUB", "HUB"),
     BUMP(3.611, 2.544, 0.0, "BUMP", "BUMP"),
+    BUMP_ANG(3.611, 2.544, 45.0, "BUMP", "BUMP"),
     TRENCH(3.611, 0.625, 0.0, "TRENCH", "TRENCH"),
     OTHER(0.0, 0.0, 0.0, "", "");
 
