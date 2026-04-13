@@ -21,6 +21,7 @@ import org.team1126.robot.util.autos.routines.HerdIntoSection;
 import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
 import org.team1126.robot.util.autos.routines.PourMeSomeFuel;
+import org.team1126.robot.util.autos.routines.PourMeSomeFuelTest;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
 import org.team1126.robot.util.autos.routines.ShootIntakeShootAtAlliance;
 import org.team1126.robot.util.autos.routines.SweepCenter;
@@ -69,6 +70,7 @@ public final class Autos {
         PourMeSomeFuel.init(robot);
         BacknForth.init(robot);
         DepotPlaceholder.init(robot);
+        PourMeSomeFuelTest.init(robot);
 
         AutosFlip right = AutosFlip.RIGHT;
         AutosFlip left = AutosFlip.LEFT;
@@ -196,6 +198,12 @@ public final class Autos {
         chooser.addOption(
             PourMeSomeFuel.get().getDisplayName(startBump, right, true),
             PourMeSomeFuel.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
+        );
+
+        //PourMeSomeFuelTest
+        chooser.addOption(
+            PourMeSomeFuelTest.get().getDisplayName(startBump, right, true),
+            PourMeSomeFuelTest.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
         );
 
         //DepotPlaceholder
