@@ -16,15 +16,12 @@ import org.team1126.robot.util.autos.AutosFlip;
 import org.team1126.robot.util.autos.AutosStart;
 import org.team1126.robot.util.autos.routines.BacknForth;
 import org.team1126.robot.util.autos.routines.DepotPlaceholder;
-import org.team1126.robot.util.autos.routines.GrabAndShoot;
 import org.team1126.robot.util.autos.routines.HerdIntoSection;
-import org.team1126.robot.util.autos.routines.InTheTrenches;
-import org.team1126.robot.util.autos.routines.IntakeCenter;
 import org.team1126.robot.util.autos.routines.PourMeSomeFuel;
+import org.team1126.robot.util.autos.routines.PourMeSomeFuelAndDriveToNeutralZone;
 import org.team1126.robot.util.autos.routines.PourMeSomeFuelTest;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
 import org.team1126.robot.util.autos.routines.ShootIntakeShootAtAlliance;
-import org.team1126.robot.util.autos.routines.SweepCenter;
 
 /**
  * The Autos class declares autonomous modes, and adds them
@@ -60,14 +57,10 @@ public final class Autos {
 
         routines = robot.routines;
 
-        SweepCenter.init(robot);
-        IntakeCenter.init(robot);
-        GrabAndShoot.init(robot);
         ShootFirstAskQuestionsLater.init(robot);
-        InTheTrenches.init(robot);
         ShootIntakeShootAtAlliance.init(robot);
-        HerdIntoSection.init(robot);
         PourMeSomeFuel.init(robot);
+        PourMeSomeFuelAndDriveToNeutralZone.init(robot);
         BacknForth.init(robot);
         DepotPlaceholder.init(robot);
         PourMeSomeFuelTest.init(robot);
@@ -81,22 +74,6 @@ public final class Autos {
 
         // Create the auto chooser
         chooser.setDefaultOption("Do nothing", Commands.none());
-        // chooser.addOption(
-        //     InTheTrenches.get().getDisplayName(startBump, right, true),
-        //     InTheTrenches.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     InTheTrenches.get().getDisplayName(startCenter, right, true),
-        //     InTheTrenches.get().action(() -> startCenter, () -> right, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     InTheTrenches.get().getDisplayName(startBump, left, true),
-        //     InTheTrenches.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     InTheTrenches.get().getDisplayName(startCenter, left, true),
-        //     InTheTrenches.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
-        // );
 
         // PEWPEW
         chooser.addOption(
@@ -116,51 +93,6 @@ public final class Autos {
             ShootFirstAskQuestionsLater.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
         );
 
-        // Sweep Center
-        // chooser.addOption(
-        //     SweepCenter.get().getDisplayName(startCenter, right, true),
-        //     SweepCenter.get().action(() -> startCenter, () -> right, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     SweepCenter.get().getDisplayName(startBump, right, true),
-        //     SweepCenter.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     SweepCenter.get().getDisplayName(startCenter, left, true),
-        //     SweepCenter.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     SweepCenter.get().getDisplayName(startBump, left, true),
-        //     SweepCenter.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
-        // );
-
-        // Intake Center
-        // chooser.addOption(
-        //     IntakeCenter.get().getDisplayName(startCenter, right, true),
-        //     IntakeCenter.get().action(() -> startCenter, () -> right, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     IntakeCenter.get().getDisplayName(startBump, right, true),
-        //     IntakeCenter.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     IntakeCenter.get().getDisplayName(startCenter, left, true),
-        //     IntakeCenter.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     IntakeCenter.get().getDisplayName(startBump, left, true),
-        //     IntakeCenter.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
-        // );
-
-        // chooser.addOption(
-        //     GrabAndShoot.get().getDisplayName(right, true),
-        //     GrabAndShoot.get().action(() -> right, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     GrabAndShoot.get().getDisplayName(left, true),
-        //     GrabAndShoot.get().action(() -> left, () -> Alliance.isBlue())
-        // );
-
         //BacknForth
         chooser.addOption(
             BacknForth.get().getDisplayName(right, true),
@@ -171,28 +103,7 @@ public final class Autos {
             BacknForth.get().action(() -> left, () -> Alliance.isBlue())
         );
 
-        //ShootIntakeShootAtAlliance
-        // chooser.addOption(
-        //     ShootIntakeShootAtAlliance.get().getDisplayName(startBump, right, true),
-        //     ShootIntakeShootAtAlliance.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     ShootIntakeShootAtAlliance.get().getDisplayName(startBump, left, true),
-        //     ShootIntakeShootAtAlliance.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
-        // );
-
-        // chooser.addOption("Depot", routines.dock());
-        // chooser.addOption("Depot", routines.dock());
         SmartDashboard.putData("autos", chooser);
-
-        // chooser.addOption(
-        //     HerdIntoSection.get().getDisplayName(right, true),
-        //     HerdIntoSection.get().action(() -> right, () -> Alliance.isBlue())
-        // );
-        // chooser.addOption(
-        //     HerdIntoSection.get().getDisplayName(left, true),
-        //     HerdIntoSection.get().action(() -> left, () -> Alliance.isBlue())
-        // );
 
         //PourMeSomeFuel
         chooser.addOption(
@@ -200,10 +111,10 @@ public final class Autos {
             PourMeSomeFuel.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
         );
 
-        //PourMeSomeFuelTest
+        //PourMeSomeFuelAndDriveToNeutralZone
         chooser.addOption(
-            PourMeSomeFuelTest.get().getDisplayName(startBump, right, true),
-            PourMeSomeFuelTest.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
+            PourMeSomeFuelAndDriveToNeutralZone.get().getDisplayName(startBump, right, true),
+            PourMeSomeFuelAndDriveToNeutralZone.get().action(()-> startBump, () -> right, () -> Alliance.isBlue())
         );
 
         //DepotPlaceholder
