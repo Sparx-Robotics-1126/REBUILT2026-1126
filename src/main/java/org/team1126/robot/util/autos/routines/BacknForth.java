@@ -32,7 +32,7 @@ public final class BacknForth extends BaseAutosRoutine {
     public static final Waypoint centerLinePivot = new Waypoint(8.2, 0.685, Math.toRadians(85.0), getDefaultDecel() * intakeFactor.get());
     public static final Waypoint middlePivot = new Waypoint(8.2, 3.46, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get());
     public static final Waypoint crosswalk = new Waypoint(5.2, 2.457, Math.toRadians(45.0), getDefaultDecel());
-    public static final Waypoint shootingPoint = new Waypoint(2.74, 2.8, Math.toRadians(45.0), getDefaultDecel() * intakeFactor.get());
+    public static final Waypoint shootingPoint = new Waypoint(2.74, 2.2, Math.toRadians(45.0), getDefaultDecel() * intakeFactor.get());
 
     public static void init(Robot robot) {
         instance = new BacknForth(COMMAND_NAME, DISPLAY_NAME, ABBREVIATION, robot);
@@ -70,6 +70,6 @@ public final class BacknForth extends BaseAutosRoutine {
             .andThen(robot.intake.moveIntake(false).withDeadline(
                 driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue))))
             .andThen(driveWaypoint(flip, shootingPoint, blue))
-            .andThen(driveArchAndShootFuel().withDeadline(Commands.waitSeconds(10.0)));
+            .andThen(routines.shoot(() -> true, () -> false).withDeadline(Commands.waitSeconds(6.0)));
     }
 }
