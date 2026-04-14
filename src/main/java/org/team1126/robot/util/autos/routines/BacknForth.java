@@ -28,8 +28,8 @@ public final class BacknForth extends BaseAutosRoutine {
     private static BacknForth instance;
     
     public static final ExtPose START_AT = new ExtPose(AutosStart.BUMP_ANG.getStartingPoint(true, false));
-    public static final Waypoint bumpPivot = new Waypoint(5.712, 2.5, Math.toRadians(45.0),getDefaultDecel());
-    public static final Waypoint centerLinePivot = new Waypoint(8.2, 0.685, Math.toRadians(80.0), getDefaultDecel());
+    public static final Waypoint bumpPivot = new Waypoint(5.712, 2.5, Math.toRadians(45.0),getDefaultDecel() * intakeFactor.get());
+    public static final Waypoint centerLinePivot = new Waypoint(8.2, 0.685, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get());
     public static final Waypoint middlePivot = new Waypoint(8.2, 3.46, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get());
     public static final Waypoint crosswalk = new Waypoint(5.2, 2.557, Math.toRadians(45.0), getDefaultDecel());
     public static final Waypoint shootingPoint = new Waypoint(2.74, 2.8, Math.toRadians(45.0), getDefaultDecel() * intakeFactor.get());
@@ -66,11 +66,10 @@ public final class BacknForth extends BaseAutosRoutine {
             .andThen(driveWaypoint(flip, bumpPivot, blue))
             .andThen(parallel(
                 driveWaypoint(flip, centerLinePivot, blue),
-                robot.intake.extendIntake().withTimeout(0.75)))
+                robot.intake.extendIntake().withTimeout(1.15)))
             .andThen(robot.intake.moveIntake(false).withDeadline(
                 driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue))))
-            .andThen(driveWaypoint(flip, crosswalk, blue))
             .andThen(driveWaypoint(flip, shootingPoint, blue))
-            .andThen(driveArchAndShootFuel().withDeadline(Commands.waitSeconds(5.0)));
+            .andThen(driveArchAndShootFuel().withDeadline(Commands.waitSeconds(10.0)));
     }
 }
