@@ -89,7 +89,7 @@ public final class Robot extends LoggedRobot {
 
         // Set default commands
         swerve.setDefaultCommand(
-            swerve.drive(this::driverX, this::driverY, this::driverAngular, Constants.DO_BEACHING_DEFAULT)
+            swerve.drive(this::driverX, this::driverY, this::driverAngular)
         );
 
         lights.sides.setDefaultCommand(routines.lightsTeleopMode());
@@ -117,7 +117,7 @@ public final class Robot extends LoggedRobot {
         driver.a().whileTrue(swerve.driveToShootingArc(() -> 0.8));
         driver.b().whileTrue(swerve.driveFacingTarget(this::driverX, this::driverY, this::driverAngular));
         // driver.y().whileTrue(swerve.driveFacingZone(this::driverX, this::driverY, this::driverAngular));
-        driver.rightTrigger().whileTrue(swerve.drive(this::driverX, this::driverY, this::driverAngular, false));
+        driver.rightTrigger().whileTrue(swerve.driveBump(this::driverX, this::driverY, this::driverAngular));
         driver.rightStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
         driver.start().onTrue(swerve.adjustShootingRadius());
 
