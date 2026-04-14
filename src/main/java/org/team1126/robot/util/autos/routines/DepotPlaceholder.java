@@ -19,8 +19,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 public class DepotPlaceholder extends BaseAutosRoutine {
     
     public static final String COMMAND_NAME = "ShootDepotFuel.action";
-    public static final String DISPLAY_NAME = "To Be Determined";
-    public static final String ABBREVIATION = "TBD";
+    public static final String DISPLAY_NAME = "Depot";
+    public static final String ABBREVIATION = "Depot";
 
     public static final ExtPose STARTING_POINT = new ExtPose(AutosStart.BUMP.getStartingPoint(true, false));
     public static final Waypoint DEPOT = new Waypoint(0.600, 5.856, Math.toRadians(180.0), getDefaultDecel() * intakeFactor.get());

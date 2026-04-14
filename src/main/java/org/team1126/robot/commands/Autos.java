@@ -20,7 +20,7 @@ import org.team1126.robot.util.autos.routines.GrabAndShoot;
 import org.team1126.robot.util.autos.routines.HerdIntoSection;
 import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
-import org.team1126.robot.util.autos.routines.PourMeSomeFuel;
+import org.team1126.robot.util.autos.routines.GoOutpostAndToss;
 import org.team1126.robot.util.autos.routines.PourMeSomeFuelTest;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
 import org.team1126.robot.util.autos.routines.ShootIntakeShootAtAlliance;
@@ -67,7 +67,7 @@ public final class Autos {
         InTheTrenches.init(robot);
         ShootIntakeShootAtAlliance.init(robot);
         HerdIntoSection.init(robot);
-        PourMeSomeFuel.init(robot);
+        GoOutpostAndToss.init(robot);
         BacknForth.init(robot);
         DepotPlaceholder.init(robot);
         PourMeSomeFuelTest.init(robot);
@@ -194,10 +194,10 @@ public final class Autos {
         //     HerdIntoSection.get().action(() -> left, () -> Alliance.isBlue())
         // );
 
-        //PourMeSomeFuel
+        //GoOutpostAndToss
         chooser.addOption(
-            PourMeSomeFuel.get().getDisplayName(startBump, right, true),
-            PourMeSomeFuel.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
+            GoOutpostAndToss.get().getDisplayName(startBump, right, true),
+            GoOutpostAndToss.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
         );
 
         //PourMeSomeFuelTest
