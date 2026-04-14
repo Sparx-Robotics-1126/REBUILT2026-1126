@@ -43,8 +43,6 @@ public final class Constants {
     //     new Rotation3d(0, 0, 0)
     // );
 
-    public static final boolean DO_BEACHING_DEFAULT = true;
-
     //Storage
     public static final int STORAGE_MOTOR = 20;
 

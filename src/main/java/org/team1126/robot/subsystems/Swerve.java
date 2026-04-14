@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.team1126.lib.logging.LoggedRobot;
@@ -397,7 +398,20 @@ SmartDashboard.putNumber("Distance to Target", distanceToTarget);
      * @param y The Y value from the driver's joystick.
      * @param angular The CCW+ angular speed to apply, from {@code [-1.0, 1.0]}.
      */
-    public Command drive(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular, boolean doBeaching) {
+    public Command drive(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
+        return commandBuilder("Swerve.drive()").onExecute(() ->
+            api.applyDriverInput(
+                x.getAsDouble(),
+                y.getAsDouble(),
+                angular.getAsDouble(),
+                Perspective.OPERATOR,
+                true,
+                true
+            )
+        );
+    }
+
+    public Command driveBump(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
         return commandBuilder("Swerve.drive()")
             .onInitialize(() -> {
                 angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond);
@@ -408,26 +422,10 @@ SmartDashboard.putNumber("Distance to Target", distanceToTarget);
                 }
             })
             .onExecute(() -> {
-                double pitch = state.pitch.getRadians();
-                double roll = state.roll.getRadians();
-
-                ChassisSpeeds driverAssistedSpeeds = null;
-                if (doBeaching) {
-                    driverAssistedSpeeds = Perspective.OPERATOR.toPerspectiveSpeeds(
-                        new ChassisSpeeds(
-                            Math.abs(pitch) > beachTolerance.get() ? Math.copySign(beachSpeed.get(), pitch) : 0.0,
-                            Math.abs(roll) > beachTolerance.get() ? Math.copySign(beachSpeed.get(), -roll) : 0.0,
-                            0.0
-                        ),
-                        state.rotation
-                    );
-                } else {
-                    driverAssistedSpeeds = Perspective.OPERATOR.toPerspectiveSpeeds(
+                ChassisSpeeds driverAssistedSpeeds = Perspective.OPERATOR.toPerspectiveSpeeds(
                         new ChassisSpeeds(0.0, 0.0, angularPID.calculate(state.rotation.getRadians(), rampAngle)),
                         state.rotation
-                    );
-                    // angularPID.calculate(state.rotation.getRadians(), rampAngle.getAsDouble());
-                }
+                );
 
                 api.applyAssistedDriverInput(
                     x.getAsDouble(),
@@ -438,7 +436,8 @@ SmartDashboard.putNumber("Distance to Target", distanceToTarget);
                     true,
                     true
                 );
-            });
+            }
+            );
     }
 
     public Command driveFacingTarget(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
@@ -491,7 +490,7 @@ SmartDashboard.putNumber("Distance to Target", distanceToTarget);
      */
     public Command turboSpin(DoubleSupplier x, DoubleSupplier y, DoubleSupplier angular) {
         Mutable<Double> configured = new Mutable<>(0.0);
-        return drive(x, y, angular, true)
+        return drive(x, y, angular)
             .beforeStarting(() -> {
                 configured.value = api.config.driverAngularVel;
                 api.config.driverAngularVel = turboSpin.get();

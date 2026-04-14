@@ -218,7 +218,7 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
     protected Command driveArchAndShootFuel() {
         return sequence(
             driveToShootingArch().withTimeout(maxShootingArcTravelTime.getAsDouble())
-            .andThen(routines.shoot(() -> false, () -> false))
+            .andThen(routines.shoot(() -> false, () -> true))
         );
     }
 

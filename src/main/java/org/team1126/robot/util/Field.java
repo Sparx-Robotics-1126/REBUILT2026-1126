@@ -148,9 +148,6 @@ public final class Field {
         new LateralObstacle(0.0, 1.5, 0.1), 
         new LateralObstacle(FieldInfo.width(), 1.5, 0.1),
         
-        // Center Line should only be an obstacle during autos.
-        new LongitudinalObstacle(CENTER_X, 10, Swerve.OFFSET + 0.5),
-        
         // No-Go Zone:
         // We want to repulse from the edges where the hub and the bump are very strongly, but not too far to shoot.
         // However we do not want to repulse too far from the trench sides. From the standpoint of tuning, we could
