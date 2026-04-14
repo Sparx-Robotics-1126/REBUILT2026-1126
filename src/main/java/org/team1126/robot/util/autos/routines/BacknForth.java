@@ -70,6 +70,6 @@ public final class BacknForth extends BaseAutosRoutine {
             .andThen(robot.intake.moveIntake(false).withDeadline(
                 driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue))))
             .andThen(driveWaypoint(flip, shootingPoint, blue))
-            .andThen(routines.shoot(() -> true, () -> false).withDeadline(Commands.waitSeconds(6.0)));
+            .andThen(routines.shoot(() -> false, () -> true).withDeadline(Commands.waitSeconds(6.0)));
     }
 }
