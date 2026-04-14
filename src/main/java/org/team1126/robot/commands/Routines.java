@@ -31,6 +31,7 @@ import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.subsystems.Shooter;
 import org.team1126.robot.subsystems.Storage;
 import org.team1126.robot.subsystems.Swerve;
+import org.team1126.robot.subsystems.Lights.Color;
 import org.team1126.robot.util.Field;
 import org.team1126.robot.util.nav.TrenchNavigator;
 import org.team1126.robot.util.nav.WaypointHeading;
@@ -108,12 +109,12 @@ public final class Routines {
 
     public Command lightsTeleopMode() {
         if (Alliance.isBlue()) {
-            return parallel(lights.topLeftTop.setSolidBlue(), lights.topLeftBottom.setSolidBlue(), lights.sides.setSolidBlue(), lights.topRightBottom.setSolidBlue(), lights.topRightTop.setSolidBlue()).withName(
-                "Routines.lightsDisabledMode()"
+            return parallel(lights.topLeftTop.knightRider(Color.BLUE, Color.RED), lights.topLeftBottom.knightRider(Color.BLUE, Color.RED), lights.sides.fade(Color.BLUE, Color.RED), lights.topRightBottom.knightRider(Color.BLUE, Color.RED), lights.topRightTop.knightRider(Color.BLUE, Color.RED)).withName(
+                "Routines.lightsTeleopMode()"
             );
         } else {
-            return parallel(lights.topLeftTop.setSolidRed(), lights.topLeftBottom.setSolidRed(), lights.sides.setSolidRed(), lights.topRightBottom.setSolidRed(), lights.topRightTop.setSolidRed()).withName(
-                "Routines.lightsDisabledMode()"
+            return parallel(lights.topLeftTop.knightRider(Color.RED, Color.BLUE), lights.topLeftBottom.knightRider(Color.RED, Color.BLUE), lights.sides.fade(Color.RED, Color.BLUE), lights.topRightBottom.knightRider(Color.RED, Color.BLUE), lights.topRightTop.knightRider(Color.RED, Color.BLUE)).withName(
+                "Routines.lightsTeleopMode()"
             );
         }
     }

@@ -61,6 +61,7 @@ public final class Autos {
 
         ShootFirstAskQuestionsLater.init(robot);
         ShootIntakeShootAtAlliance.init(robot);
+        OutpostAndCenter.init(robot);
         HerdIntoSection.init(robot);
         GoOutpostAndToss.init(robot);
         BacknForth.init(robot);
