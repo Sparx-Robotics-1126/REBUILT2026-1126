@@ -18,8 +18,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 public class GoOutpostAndToss extends BaseAutosRoutine {
     
     public static final String COMMAND_NAME = "ShootOutpostFuel.action";
-    public static final String DISPLAY_NAME = "Go Outpost And Toss";
-    public static final String ABBREVIATION = "GOAT";
+    public static final String DISPLAY_NAME = "Outpost";
+    public static final String ABBREVIATION = "OUT";
 
     public static final ExtPose STARTING_POINT = new ExtPose(AutosStart.BUMP.getStartingPoint(true, false));
     public static final Waypoint OUTPOST = new Waypoint(.302, .75, Math.toRadians(180.0), getDefaultDecel());

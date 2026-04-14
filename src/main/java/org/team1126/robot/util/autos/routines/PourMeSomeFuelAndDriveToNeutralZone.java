@@ -18,8 +18,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 public class PourMeSomeFuelAndDriveToNeutralZone extends BaseAutosRoutine {
     
     public static final String COMMAND_NAME = "ShootOutpostFuelAndDriveToNeutralZone.action";
-    public static final String DISPLAY_NAME = "Pour Me Some Fuel and Drive To Neutral Zone";
-    public static final String ABBREVIATION = "P-MID";
+    public static final String DISPLAY_NAME = "Outpost But Goes To Center";
+    public static final String ABBREVIATION = "OUTCENTER";
 
     public static final ExtPose STARTING_POINT = new ExtPose(AutosStart.BUMP.getStartingPoint(true, false));
     public static final Waypoint OUTPOST = new Waypoint(.302, .75, Math.toRadians(180.0), getDefaultDecel());
