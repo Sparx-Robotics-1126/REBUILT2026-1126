@@ -15,7 +15,7 @@ import org.team1126.robot.util.nav.Waypoint;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
-public class PourMeSomeFuelAndDriveToNeutralZone extends BaseAutosRoutine {
+public class OutpostAndCenter extends BaseAutosRoutine {
     
     public static final String COMMAND_NAME = "ShootOutpostFuelAndDriveToNeutralZone.action";
     public static final String DISPLAY_NAME = "Outpost But Goes To Center";
@@ -27,20 +27,20 @@ public class PourMeSomeFuelAndDriveToNeutralZone extends BaseAutosRoutine {
     public static final Waypoint SHOOT_FROM_HERE = new Waypoint(2.74, 2.2, Math.toRadians(45.0), getDefaultDecel() * intakeFactor.get());
     public static final Waypoint NEUTRAL_ZONE = new Waypoint(7.6, 2.6, Math.toRadians(45.0), getDefaultDecel() * intakeFactor.get());
 
-    private static PourMeSomeFuelAndDriveToNeutralZone instance;
+    private static OutpostAndCenter instance;
 
     public static void init(Robot robot) {
-        instance = new PourMeSomeFuelAndDriveToNeutralZone(COMMAND_NAME, DISPLAY_NAME, ABBREVIATION, robot);
+        instance = new OutpostAndCenter(COMMAND_NAME, DISPLAY_NAME, ABBREVIATION, robot);
     }
 
-    public static PourMeSomeFuelAndDriveToNeutralZone get() {
+    public static OutpostAndCenter get() {
         if (instance == null) {
             return null;
         }
         return instance;
     }
 
-    private PourMeSomeFuelAndDriveToNeutralZone(String commandName, String displayName, String abbreviatedName, Robot robot) {
+    private OutpostAndCenter(String commandName, String displayName, String abbreviatedName, Robot robot) {
         super(commandName, displayName, abbreviatedName, robot);
         waypoints = new Waypoint[0];
     }

@@ -21,6 +21,7 @@ import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
 import org.team1126.robot.util.autos.routines.GoOutpostAndToss;
 import org.team1126.robot.util.autos.routines.PourMeSomeFuelTest;
+import org.team1126.robot.util.autos.routines.OutpostAndCenter;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
 import org.team1126.robot.util.autos.routines.ShootIntakeShootAtAlliance;
 
@@ -123,8 +124,8 @@ public final class Autos {
 
         //PourMeSomeFuelAndDriveToNeutralZone
         chooser.addOption(
-            PourMeSomeFuelAndDriveToNeutralZone.get().getDisplayName(startBump, right, true),
-            PourMeSomeFuelAndDriveToNeutralZone.get().action(()-> startBump, () -> right, () -> Alliance.isBlue())
+            OutpostAndCenter.get().getDisplayName(startBump, right, true),
+            OutpostAndCenter.get().action(()-> startBump, () -> right, () -> Alliance.isBlue())
         );
 
         //DepotPlaceholder
