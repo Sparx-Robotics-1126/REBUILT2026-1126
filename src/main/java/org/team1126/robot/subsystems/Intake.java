@@ -44,7 +44,7 @@ public final class Intake extends GRRSubsystem {
 
     private SparkFlexConfig pivotConfig;
     private SparkClosedLoopController pivotController;
-    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -1.7);
+    private final Tunables.TunableDouble pivotPosition = tunables.value("Pivot Position", -1.69);
     
     private List<Double> outputCurrent = new ArrayList<>();
     private List<Double> appliedOutput = new ArrayList<>();
@@ -66,7 +66,7 @@ public final class Intake extends GRRSubsystem {
             .p(1, ClosedLoopSlot.kSlot0)
             .i(0, ClosedLoopSlot.kSlot0)
             .d(0, ClosedLoopSlot.kSlot0)
-            .feedForward.kCos(1, ClosedLoopSlot.kSlot0);
+            .feedForward.kCos(1.2, ClosedLoopSlot.kSlot0);
         pivotConfig.closedLoop.maxMotion
             .maxAcceleration(250, ClosedLoopSlot.kSlot0) // REDUCED from 200 — slower ramp
             .allowedProfileError(5, ClosedLoopSlot.kSlot0)

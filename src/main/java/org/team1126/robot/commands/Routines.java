@@ -109,11 +109,11 @@ public final class Routines {
 
     public Command lightsTeleopMode() {
         if (Alliance.isBlue()) {
-            return parallel(lights.topLeftTop.knightRider(Color.BLUE, Color.RED), lights.topLeftBottom.knightRider(Color.BLUE, Color.RED), lights.sides.fade(Color.BLUE, Color.RED), lights.topRightBottom.knightRider(Color.BLUE, Color.RED), lights.topRightTop.knightRider(Color.BLUE, Color.RED)).withName(
+            return parallel(lights.topLeftTop.knightRider(Color.BLUE, Color.RED), lights.topLeftBottom.knightRider(Color.BLUE, Color.RED), lights.sides.fadeAllianceSlow(), lights.topRightBottom.knightRider(Color.BLUE, Color.RED), lights.topRightTop.knightRider(Color.BLUE, Color.RED)).withName(
                 "Routines.lightsTeleopMode()"
             );
         } else {
-            return parallel(lights.topLeftTop.knightRider(Color.RED, Color.BLUE), lights.topLeftBottom.knightRider(Color.RED, Color.BLUE), lights.sides.fade(Color.RED, Color.BLUE), lights.topRightBottom.knightRider(Color.RED, Color.BLUE), lights.topRightTop.knightRider(Color.RED, Color.BLUE)).withName(
+            return parallel(lights.topLeftTop.knightRider(Color.RED, Color.BLUE), lights.topLeftBottom.knightRider(Color.RED, Color.BLUE), lights.sides.fadeAllianceSlow(), lights.topRightBottom.knightRider(Color.RED, Color.BLUE), lights.topRightTop.knightRider(Color.RED, Color.BLUE)).withName(
                 "Routines.lightsTeleopMode()"
             );
         }
@@ -175,12 +175,13 @@ public final class Routines {
                         () ->
                             (hood.atPosition()
                                 // && shooter.shooterIsReady()
-                                && swerve.aimingAtTarget()
-                                && swerve.tagsSeen() >= shootingMinRqTagsSeen.get())
+                                // && swerve.aimingAtTarget()
+                                && swerve.tagsSeen() >= shootingMinRqTagsSeen.get()
+                            )
                             || force.getAsBoolean()
                     )
                 ).deadlineFor(storage.spill().withTimeout(0.25)),
-                parallel(feeder.readyFeeder(), storage.feedShooter(() -> true))
+                parallel(feeder.feedShooter(() -> true), storage.feedShooter(() -> true))
             ),
             sequence(
                 race(waitUntil(runIntake), waitSeconds(0.75)),

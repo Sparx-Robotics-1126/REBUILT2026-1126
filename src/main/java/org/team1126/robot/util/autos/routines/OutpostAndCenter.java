@@ -19,8 +19,8 @@ public class OutpostAndCenter extends BaseAutosRoutine {
     
     public static final String COMMAND_NAME = "ShootOutpostFuelAndDriveToNeutralZone.action";
     public static final String DISPLAY_NAME = "Outpost But Goes To Center";
-    public static final String ABBREVIATION = "OUTCENTER";
-
+    public static final String ABBREVIATION = "GOAT-C";
+    
     public static final ExtPose STARTING_POINT = new ExtPose(AutosStart.BUMP.getStartingPoint(true, false));
     public static final Waypoint OUTPOST = new Waypoint(.302, .75, Math.toRadians(180.0), getDefaultDecel());
     public static final Waypoint PIVOT = new Waypoint(3.00, .7, Math.toRadians(180.0), getDefaultDecel());
