@@ -415,11 +415,20 @@ SmartDashboard.putNumber("Distance to Target", distanceToTarget);
         return commandBuilder("Swerve.drive()")
             .onInitialize(() -> {
                 angularPID.reset(state.rotation.getRadians(), state.speeds.omegaRadiansPerSecond);
-                if (inNeutralZone()) {
-                    rampAngle = defaultRampAngle.getAsDouble() + Math.PI;
-                } else {
-                    rampAngle = defaultRampAngle.getAsDouble();
+                // Find the closest corner angle (45, 135, 225, 315 degrees)
+                double[] cornerAngles = {45, 135, 225, 315};
+                double currentAngle = state.rotation.getDegrees();
+                double minDiff = 360.0;
+                double closestAngle = 45.0;
+                for (double angle : cornerAngles) {
+                    double diff = Math.abs(Math.IEEEremainder(currentAngle - angle, 360));
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestAngle = angle;
+                    }
                 }
+                // Set rampAngle to the closest angle in radians
+                rampAngle = Math.toRadians(closestAngle);
             })
             .onExecute(() -> {
                 ChassisSpeeds driverAssistedSpeeds = Perspective.OPERATOR.toPerspectiveSpeeds(
