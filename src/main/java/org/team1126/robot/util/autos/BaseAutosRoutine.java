@@ -16,7 +16,6 @@ import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.Alliance;
 import org.team1126.robot.Robot;
 import org.team1126.robot.commands.Routines;
-import org.team1126.robot.subsystems.Lights;
 import org.team1126.robot.util.nav.Waypoint;
 
 /**
@@ -29,6 +28,7 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
     protected static final TunableDouble secondsPerBall = tunables.value("Seconds per Ball (shooting)", 0.5);
     protected static final TunableDouble simulationDecel = tunables.value("Simulation Default Deceleration", 20.0);
     protected static final TunableDouble defaultDecel = tunables.value("Robot Autos Default Deceleration", 1.3);
+    protected static final TunableDouble bumpDecel = tunables.value("Robot Autos Bump Deceleration", 3.142);
     protected static final TunableDouble intakeTimer = tunables.value("Intake extension timer", 1.5);
     protected static final TunableDouble intakeFactor = tunables.value("Intake factor on set deceleration", 0.5);
     protected static final TunableBoolean limitedField = tunables.value(
@@ -63,6 +63,13 @@ public abstract class BaseAutosRoutine implements AutosRoutine {
      */
     public static double getDefaultDecel() {
         return RobotBase.isSimulation() ? simulationDecel.get() : defaultDecel.get();
+    }
+
+    /**
+     * Sets the decel based on whether we are in a simulator instance or on the real robot.
+     */
+    public static double getBumpDecel() {
+        return RobotBase.isSimulation() ? simulationDecel.get() : bumpDecel.get();
     }
 
     /** This is final since we do not want this to be changes after instantiation */
