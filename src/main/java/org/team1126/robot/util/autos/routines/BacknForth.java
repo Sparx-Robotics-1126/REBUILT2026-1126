@@ -30,11 +30,11 @@ public final class BacknForth extends BaseAutosRoutine {
     public static final ExtPose START_AT = new ExtPose(AutosStart.BUMP_ANG.getStartingPoint(true, false));
     public static final Waypoint runway = new Waypoint(2.861, 2.544, Math.toRadians(45.0), getBumpDecel());
     public static final Waypoint bumpNorth = new Waypoint(5.712, 2.3, Math.toRadians(45.0), getBumpDecel());
-    public static final Waypoint bumpPivot = new Waypoint(5.712, 2.3, Math.toRadians(45.0),getDefaultDecel() * intakeFactor.get());
-    public static final Waypoint centerLinePivot = new Waypoint(8.2, 0.685, Math.toRadians(85.0), getDefaultDecel() * intakeFactor.get());
-    public static final Waypoint middlePivot = new Waypoint(8.2, 3.46, Math.toRadians(90.0), getDefaultDecel() * intakeFactor.get());
+    public static final Waypoint bumpPivot = new Waypoint(5.712, 2.3, Math.toRadians(45.0),getBumpDecel() * intakeFactor.get());
+    public static final Waypoint centerLinePivot = new Waypoint(8.2, 0.685, Math.toRadians(85.0), getBumpDecel() * intakeFactor.get());
+    public static final Waypoint middlePivot = new Waypoint(8.2, 3.46, Math.toRadians(90.0), getBumpDecel() * intakeFactor.get());
     public static final Waypoint crosswalk = new Waypoint(5.2, 2.457, Math.toRadians(45.0), getBumpDecel());
-    public static final Waypoint shootingPoint = new Waypoint(2.74, 2.2, Math.toRadians(45.0), getBumpDecel() * intakeFactor.get());
+    public static final Waypoint shootingPoint = new Waypoint(1.74, 1.8, Math.toRadians(45.0), getBumpDecel());
 
     public static void init(Robot robot) {
         instance = new BacknForth(COMMAND_NAME, DISPLAY_NAME, ABBREVIATION, robot);
