@@ -162,15 +162,20 @@ public final class Routines {
      * @param force A supplier that if {@code true} will force the indexer to feed the shooters.
      */
     public Command shoot(BooleanSupplier runIntake, BooleanSupplier force) {
+        // Use a different color for 'waiting to shoot' state
+        Command waitingLights = shootingLights(Lights.Color.RED); // red for waiting
+        Command readyLights = shootingLights(Lights.Color.SHOOTING); // yellow for shooting
+
         return parallel(
-           shootingLights(),
             hood.targetDistance(swerve::distanceToTarget),
             shooter.targetDistance(swerve::distanceToTarget),
             // feeder.readyFeeder(),
             sequence(
                 sequence(
-                    waitSeconds(0.05),
-
+                    parallel(
+                        waitingLights,
+                        waitSeconds(0.05)
+                    ),
                     waitUntil(
                         () ->
                             (hood.atPosition()
@@ -181,7 +186,11 @@ public final class Routines {
                             || force.getAsBoolean()
                     )
                 ).deadlineFor(storage.spill().withTimeout(0.25)),
-                parallel(feeder.feedShooter(() -> true), storage.feedShooter(() -> true))
+                parallel(
+                    readyLights,
+                    feeder.feedShooter(() -> true),
+                    storage.feedShooter(() -> true)
+                )
             ),
             sequence(
                 race(waitUntil(runIntake), waitSeconds(0.75)),
@@ -305,15 +314,19 @@ public Command shootFuelTest(){
         // return lights.top.setSolidRed();
     }
 
+
     public Command shootingLights() {
+        return shootingLights(Lights.Color.SHOOTING);
+    }
+
+    public Command shootingLights(Lights.Color color) {
         return parallel(
-            // lights.sides.chase(Lights.Color.SHOOTING),
-            lights.topLeftTop.convergeToMiddle(Lights.Color.SHOOTING),
-            lights.topLeftBottom.convergeToMiddle(Lights.Color.SHOOTING),
-            lights.topRightBottom.convergeToMiddle(Lights.Color.SHOOTING),
-            lights.topRightTop.convergeToMiddle(Lights.Color.SHOOTING),
-            lights.sides.chase(Lights.Color.SHOOTING)
-        ).withName("Routines.shootingLights()");
+            lights.topLeftTop.convergeToMiddle(color),
+            lights.topLeftBottom.convergeToMiddle(color),
+            lights.topRightBottom.convergeToMiddle(color),
+            lights.topRightTop.convergeToMiddle(color),
+            lights.sides.chase(color)
+        ).withName("Routines.shootingLights(" + color + ")");
     }
 
     public Command extendIntakeIfNeeded(BooleanSupplier isNeeded) {
