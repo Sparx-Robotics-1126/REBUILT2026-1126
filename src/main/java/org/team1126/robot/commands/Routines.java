@@ -176,7 +176,7 @@ public final class Routines {
                             (hood.atPosition()
                                 // && shooter.shooterIsReady()
                                 // && swerve.aimingAtTarget()
-                                && swerve.tagsSeen() >= shootingMinRqTagsSeen.get()
+                                // && swerve.tagsSeen() >= shootingMinRqTagsSeen.get()
                             )
                             || force.getAsBoolean()
                     )
