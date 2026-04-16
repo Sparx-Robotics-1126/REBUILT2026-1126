@@ -28,7 +28,7 @@ public final class BacknForth extends BaseAutosRoutine {
     private static BacknForth instance;
     
     public static final ExtPose START_AT = new ExtPose(AutosStart.BUMP_ANG.getStartingPoint(true, false));
-    public static final Waypoint runway = new Waypoint(3.111, 2.544, Math.toRadians(45.0), getBumpDecel());
+    public static final Waypoint runway = new Waypoint(2.861, 2.544, Math.toRadians(45.0), getBumpDecel());
     public static final Waypoint bumpNorth = new Waypoint(5.712, 2.3, Math.toRadians(45.0), getBumpDecel());
     public static final Waypoint bumpPivot = new Waypoint(5.712, 2.3, Math.toRadians(45.0),getDefaultDecel() * intakeFactor.get());
     public static final Waypoint centerLinePivot = new Waypoint(8.2, 0.685, Math.toRadians(85.0), getDefaultDecel() * intakeFactor.get());
@@ -59,13 +59,13 @@ public final class BacknForth extends BaseAutosRoutine {
     public Command action(Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
             atStartingPoint(() -> START_AT.get(blue.getAsBoolean(), flip.get().shouldFlip())),
+            driveWaypoint(flip, runway, blue),
             routine(flip, blue).andThen(routine(flip, blue))
         ).withName(getCommandName());
     }
     
     private Command routine(Supplier<AutosFlip> flip, BooleanSupplier blue) {
-        return driveWaypoint(flip, runway, blue)
-            .andThen(driveWaypoint(flip, bumpNorth, blue))
+        return driveWaypoint(flip, bumpNorth, blue)
             .andThen(parallel(
                 driveWaypoint(flip, centerLinePivot, blue),
                 robot.intake.extendIntake().withTimeout(1.15)))
