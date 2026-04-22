@@ -59,6 +59,7 @@ public final class ShootFirstAskQuestionsLater extends BaseAutosRoutine {
         return sequence(
             atStartingPoint(() -> startAt.get().getStartingPoint(blue.getAsBoolean(), flip.get().shouldFlip())),
             driveWaypoint(flip, shootingPoint, blue)
+            .andThen(robot.intake.extendIntake().withTimeout(1.15))
             .andThen(routines.shoot(() -> false, () -> true).withDeadline(Commands.waitSeconds(6.0)))
         ).withName(getCommandName());
     }

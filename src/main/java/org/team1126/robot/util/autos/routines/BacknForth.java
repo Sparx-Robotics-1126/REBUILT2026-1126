@@ -65,10 +65,8 @@ public final class BacknForth extends BaseAutosRoutine {
     }
     
     private Command routine(Supplier<AutosFlip> flip, BooleanSupplier blue) {
-        return driveWaypoint(flip, bumpNorth, blue)
-            .andThen(parallel(
-                driveWaypoint(flip, centerLinePivot, blue),
-                robot.intake.extendIntake().withTimeout(1.15)))
+        return robot.intake.extendIntake().withTimeout(1.15).andThen(driveWaypoint(flip, bumpNorth, blue))
+            .andThen(driveWaypoint(flip, centerLinePivot, blue))
             .andThen(robot.intake.moveIntake(false).withDeadline(
                 driveWaypoint(flip, middlePivot, blue).andThen(driveWaypoint(flip, bumpPivot, blue))))
             .andThen(driveWaypoint(flip, shootingPoint, blue))

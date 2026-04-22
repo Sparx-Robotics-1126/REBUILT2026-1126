@@ -189,6 +189,35 @@ public final class Routines {
             ).repeatedly()
         ).withName("Routines.shoot()");
     }
+    public Command shootDemo(BooleanSupplier runIntake, BooleanSupplier force) {
+        return parallel(
+           shootingLights(),
+           hood.goTo( ()->1.5),
+            shooter.targetDistance(()-> .5),
+            // feeder.readyFeeder(),
+            sequence(
+                sequence(
+                    waitSeconds(0.05),
+
+                    waitUntil(
+                        () ->
+                            (hood.atPosition()
+                                // && shooter.shooterIsReady()
+                                // && swerve.aimingAtTarget()
+                                // && swerve.tagsSeen() >= shootingMinRqTagsSeen.get()
+                            )
+                            || force.getAsBoolean()
+                    )
+                ).deadlineFor(storage.spill().withTimeout(0.25)),
+                parallel(feeder.feedShooter(() -> true), storage.feedShooter(() -> true))
+            ),
+            sequence(
+                race(waitUntil(runIntake), waitSeconds(0.75)),
+                either(sequence(intake.extendIntake(), intake.moveIntake(true)).onlyWhile(runIntake), intake.agitate().until(runIntake), runIntake)
+            ).repeatedly()
+        ).withName("Routines.shoot()");
+    }
+
 
     /**
      * Shoots at the hub from a fixed distance, as a backup.

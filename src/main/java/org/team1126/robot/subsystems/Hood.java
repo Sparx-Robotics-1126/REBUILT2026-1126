@@ -121,7 +121,7 @@ private static final TunableDouble hoodPosition = tunables.value("Hood Position"
      * Internal method to target a specified position.
      * @param position The hood's position in rotations at the rotor (gearing not included).
      */
-    private Command goTo(final DoubleSupplier position) {
+    public Command goTo(final DoubleSupplier position) {
         Debouncer debouncer = new Debouncer(0.1, DebounceType.kRising);
 
         return commandBuilder("Hood.goTo()")

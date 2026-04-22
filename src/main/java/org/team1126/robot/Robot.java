@@ -54,8 +54,9 @@ public final class Robot extends LoggedRobot {
     private final CommandXboxController coDriver;
     private final Orchestra orchestra;
     private Command autoSelected;
-    private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .62);
-      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", 1.0);
+    private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .4); //.62 non-demo speed
+      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", .62);//1.0 non-demo speed
+      private boolean demoMode = true;
     
 
     public Robot() {
@@ -138,7 +139,12 @@ public final class Robot extends LoggedRobot {
 
         var shoot = coDriver.rightTrigger();
         // Operator shoots with right trigger, runs intake at the same time with x, forces shooting with left trigger
-        shoot.whileTrue(routines.shoot(coDriver.b(), coDriver.leftTrigger()));
+        if (demoMode){
+shoot.whileTrue(routines.shootDemo(coDriver.b(), coDriver.leftTrigger()));
+        }else{
+shoot.whileTrue(routines.shoot(coDriver.b(), coDriver.leftTrigger()));
+        }
+        
         coDriver.leftTrigger().onTrue(none()); // Reserved for shooting override
         coDriver.back().whileTrue(hood.zeroPositionCommand());
         coDriver.rightBumper().whileTrue(routines.staticShoot());
@@ -224,6 +230,7 @@ public final class Robot extends LoggedRobot {
     @NotLogged
     public double driverY() {
         var speed = driver.leftBumper().getAsBoolean() ? driverAfterburnerSpeed.get() : driverDefaultSpeed.get();
+
         return driver.getLeftY() * speed;
         // return driver.getLeftY();
     }
