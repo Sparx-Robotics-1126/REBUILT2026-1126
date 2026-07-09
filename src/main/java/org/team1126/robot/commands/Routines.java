@@ -191,9 +191,9 @@ public final class Routines {
     }
     public Command shootDemo(BooleanSupplier runIntake, BooleanSupplier force) {
         return parallel(
-           shootingLights(),
-           hood.goTo( ()->0),
-            shooter.targetDistance(()-> 2.5),
+            shootingLights(),
+            hood.goTo(() -> 5),
+            shooter.targetDistance(() -> 4),
             // feeder.readyFeeder(),
             sequence(
                 sequence(
@@ -208,16 +208,17 @@ public final class Routines {
                             )
                             || force.getAsBoolean()
                     )
-                ).deadlineFor(storage.spill().withTimeout(0.25)),
-                parallel(feeder.feedShooter(() -> true), storage.feedShooter(() -> true))
-            ),
-            sequence(
-                race(waitUntil(runIntake), waitSeconds(0.75))
-                // either(sequence( intake.moveIntake(true)).onlyWhile(runIntake), intake.agitate().until(runIntake), runIntake)
-            ).repeatedly()
+                ),
+                parallel(feeder.feedShooter(() -> true))
+            )
+            // sequence(
+            //     race(waitUntil(runIntake), waitSeconds(0.75))
+            //     // either(sequence( intake.moveIntake(true)).onlyWhile(runIntake), intake.agitate().until(runIntake), runIntake)
+            // ).repeatedly()
         ).withName("Routines.shoot()");
     }
-  public Command staticShootDemo() {
+
+    public Command staticShootDemo() {
         return parallel(
             shootingLights(),
             storage.feedShooter(() -> true),

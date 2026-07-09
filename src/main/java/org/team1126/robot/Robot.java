@@ -55,8 +55,8 @@ public final class Robot extends LoggedRobot {
     private final Orchestra orchestra;
     private Command autoSelected;
     private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .62); //.62 non-demo speed
-      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", 1.0);//1.0 non-demo speed
-      private boolean demoMode = true;
+    private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", 1.0);//1.0 non-demo speed
+    private boolean demoMode = true;
     
 
     public Robot() {
@@ -89,9 +89,11 @@ public final class Robot extends LoggedRobot {
         coDriver = new CommandXboxController(Constants.CO_DRIVER);
 
         // Set default commands
-        swerve.setDefaultCommand(
-            swerve.drive(this::driverX, this::driverY, this::driverAngular)
-        );
+        if(!demoMode) {
+            swerve.setDefaultCommand(
+                swerve.drive(this::driverX, this::driverY, this::driverAngular)
+            );
+        }   
 
         lights.sides.setDefaultCommand(routines.lightsTeleopMode());
         // Create triggers
@@ -141,9 +143,9 @@ public final class Robot extends LoggedRobot {
         var shoot = coDriver.rightTrigger();
         // Operator shoots with right trigger, runs intake at the same time with x, forces shooting with left trigger
         if (demoMode){
-shoot.whileTrue(routines.shootDemo(()-> true, () -> false));
+            shoot.whileTrue(routines.shootDemo(()-> true, () -> false));
         }else{
-shoot.whileTrue(routines.shoot(coDriver.b(), coDriver.leftTrigger()));
+            shoot.whileTrue(routines.shoot(coDriver.b(), coDriver.leftTrigger()));
         }
         
         coDriver.leftTrigger().onTrue(none()); // Reserved for shooting override
