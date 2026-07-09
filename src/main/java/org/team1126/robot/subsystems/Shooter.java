@@ -96,7 +96,7 @@ public final class Shooter extends GRRSubsystem {
      * @param velocity The velocity in rotations/second at the rotor (gearing not included).
      */
 
-      private Command runVelocity(final DoubleSupplier velocity) {
+      public Command runVelocity(final DoubleSupplier velocity) {
         return commandBuilder("Shooter.runVelocity()")
             .onExecute(() -> {
                 velocityControl.withVelocity(velocity.getAsDouble());

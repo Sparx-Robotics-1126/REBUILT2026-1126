@@ -192,8 +192,8 @@ public final class Routines {
     public Command shootDemo(BooleanSupplier runIntake, BooleanSupplier force) {
         return parallel(
            shootingLights(),
-           hood.goTo( ()->1.5),
-            shooter.targetDistance(()-> .5),
+           hood.goTo( ()->0),
+            shooter.targetDistance(()-> 2.5),
             // feeder.readyFeeder(),
             sequence(
                 sequence(
@@ -212,12 +212,20 @@ public final class Routines {
                 parallel(feeder.feedShooter(() -> true), storage.feedShooter(() -> true))
             ),
             sequence(
-                race(waitUntil(runIntake), waitSeconds(0.75)),
-                either(sequence(intake.extendIntake(), intake.moveIntake(true)).onlyWhile(runIntake), intake.agitate().until(runIntake), runIntake)
+                race(waitUntil(runIntake), waitSeconds(0.75))
+                // either(sequence( intake.moveIntake(true)).onlyWhile(runIntake), intake.agitate().until(runIntake), runIntake)
             ).repeatedly()
         ).withName("Routines.shoot()");
     }
-
+  public Command staticShootDemo() {
+        return parallel(
+            shootingLights(),
+            storage.feedShooter(() -> true),
+           hood.goTo( ()->0),
+            shooter.targetDistance(()-> 5.5),
+            feeder.feedShooter(() -> true)
+        ).withName("Routines.shoot()");
+    }
 
     /**
      * Shoots at the hub from a fixed distance, as a backup.

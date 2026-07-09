@@ -54,8 +54,8 @@ public final class Robot extends LoggedRobot {
     private final CommandXboxController coDriver;
     private final Orchestra orchestra;
     private Command autoSelected;
-    private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .4); //.62 non-demo speed
-      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", .62);//1.0 non-demo speed
+    private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .62); //.62 non-demo speed
+      private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", 1.0);//1.0 non-demo speed
       private boolean demoMode = true;
     
 
@@ -120,6 +120,7 @@ public final class Robot extends LoggedRobot {
         // driver.y().whileTrue(swerve.driveFacingZone(this::driverX, this::driverY, this::driverAngular));
         driver.rightTrigger().whileTrue(swerve.driveBump(this::driverX, this::driverY, this::driverAngular));
         driver.rightStick().whileTrue(swerve.turboSpin(this::driverX, this::driverY, this::driverAngular));
+        
         driver.start().onTrue(swerve.adjustShootingRadius());
 
         // driver.rightBumper().whileTrue(swerve.resetOdometry());
@@ -140,7 +141,7 @@ public final class Robot extends LoggedRobot {
         var shoot = coDriver.rightTrigger();
         // Operator shoots with right trigger, runs intake at the same time with x, forces shooting with left trigger
         if (demoMode){
-shoot.whileTrue(routines.shootDemo(coDriver.b(), coDriver.leftTrigger()));
+shoot.whileTrue(routines.shootDemo(()-> true, () -> false));
         }else{
 shoot.whileTrue(routines.shoot(coDriver.b(), coDriver.leftTrigger()));
         }
@@ -152,18 +153,19 @@ shoot.whileTrue(routines.shoot(coDriver.b(), coDriver.leftTrigger()));
         // coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
         coDriver.leftBumper().toggleOnTrue(routines.shootFuelTest());
         // coDriver.povRight().whileTrue(routines.shootFuel());
-        coDriver.povLeft().whileTrue(routines.shootFuelReverseStorage());
+        coDriver.povLeft().whileTrue(storage.feedShooter(()-> true));
         // coDriver.rightTrigger().and(coDriver.povRight()).whileTrue(routines.shootFuel());
         // coDriver.rightTrigger().and(coDriver.povLeft()).whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
         // coDriver.a().whileTrue(storage.spill());
         // coDriver.y().whileTrue(storage.shoot());
         // coDriver.povRight().whileTrue(feeder.feedShooter());
-        coDriver.povLeft().whileTrue(shooter.readyShooter());
+        // coDriver.povLeft().whileTrue(shooter.readyShooter());
         coDriver.a().onTrue(intake.extendIntake());
         coDriver.y().whileTrue(intake.retrackIntake());
 
         coDriver.b().and(shoot.negate()).whileTrue(intake.moveIntake(true));
+        driver.rightBumper().and(shoot.negate()).whileTrue(intake.moveIntake(true));
         // coDriver.b().whileTrue(intake.moveIntake(true));
         // coDriver.povUp().and(coDriver.rightBumper()).whileTrue(Commands.none());
         //        coDriver.x().whileTrue(routines.shootFuel());
