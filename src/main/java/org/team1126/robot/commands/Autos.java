@@ -81,22 +81,22 @@ public final class Autos {
         chooser.setDefaultOption("Do nothing", Commands.none());
 
         // GAS
-        chooser.addOption(
-            GrabAndShoot.get().getDisplayName(startBump, right, true),
-            GrabAndShoot.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
-        );
-        chooser.addOption(
-            GrabAndShoot.get().getDisplayName(startCenter, right, true),
-            GrabAndShoot.get().action(() -> startCenter, () -> right, () -> Alliance.isBlue())
-        );
-        chooser.addOption(
-            GrabAndShoot.get().getDisplayName(startBump, left, true),
-            GrabAndShoot.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
-        );
-        chooser.addOption(
-            GrabAndShoot.get().getDisplayName(startCenter, left, true),
-            GrabAndShoot.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
-        );
+        // chooser.addOption(
+        //     GrabAndShoot.get().getDisplayName(startBump, right, true),
+        //     GrabAndShoot.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
+        // );
+        // chooser.addOption(
+        //     GrabAndShoot.get().getDisplayName(startCenter, right, true),
+        //     GrabAndShoot.get().action(() -> startCenter, () -> right, () -> Alliance.isBlue())
+        // );
+        // chooser.addOption(
+        //     GrabAndShoot.get().getDisplayName(startBump, left, true),
+        //     GrabAndShoot.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
+        // );
+        // chooser.addOption(
+        //     GrabAndShoot.get().getDisplayName(startCenter, left, true),
+        //     GrabAndShoot.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
+        // );
 
         // PEWPEW
         chooser.addOption(
