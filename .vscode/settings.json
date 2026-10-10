@@ -175,4 +175,5 @@
     "WPIMath",
     "Writables"
   ],
+  "editor.minimap.enabled": false,
 }

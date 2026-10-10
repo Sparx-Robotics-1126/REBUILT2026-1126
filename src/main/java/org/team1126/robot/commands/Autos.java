@@ -20,6 +20,7 @@ import org.team1126.robot.util.autos.routines.HerdIntoSection;
 import org.team1126.robot.util.autos.routines.InTheTrenches;
 import org.team1126.robot.util.autos.routines.IntakeCenter;
 import org.team1126.robot.util.autos.routines.GoOutpostAndToss;
+import org.team1126.robot.util.autos.routines.GrabAndShoot;
 import org.team1126.robot.util.autos.routines.PourMeSomeFuelTest;
 import org.team1126.robot.util.autos.routines.OutpostAndCenter;
 import org.team1126.robot.util.autos.routines.ShootFirstAskQuestionsLater;
@@ -67,6 +68,7 @@ public final class Autos {
         BacknForth.init(robot);
         DepotPlaceholder.init(robot);
         PourMeSomeFuelTest.init(robot);
+        GrabAndShoot.init(robot);
 
         AutosFlip right = AutosFlip.RIGHT;
         AutosFlip left = AutosFlip.LEFT;
@@ -77,6 +79,24 @@ public final class Autos {
 
         // Create the auto chooser
         chooser.setDefaultOption("Do nothing", Commands.none());
+
+        // GAS
+        chooser.addOption(
+            GrabAndShoot.get().getDisplayName(startBump, right, true),
+            GrabAndShoot.get().action(() -> startBump, () -> right, () -> Alliance.isBlue())
+        );
+        chooser.addOption(
+            GrabAndShoot.get().getDisplayName(startCenter, right, true),
+            GrabAndShoot.get().action(() -> startCenter, () -> right, () -> Alliance.isBlue())
+        );
+        chooser.addOption(
+            GrabAndShoot.get().getDisplayName(startBump, left, true),
+            GrabAndShoot.get().action(() -> startBump, () -> left, () -> Alliance.isBlue())
+        );
+        chooser.addOption(
+            GrabAndShoot.get().getDisplayName(startCenter, left, true),
+            GrabAndShoot.get().action(() -> startCenter, () -> left, () -> Alliance.isBlue())
+        );
 
         // PEWPEW
         chooser.addOption(
