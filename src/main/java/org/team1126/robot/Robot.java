@@ -56,7 +56,7 @@ public final class Robot extends LoggedRobot {
     private Command autoSelected;
     private Tunables.TunableDouble driverDefaultSpeed = tunables.value("Default Drive Speed", .62); //.62 non-demo speed
     private Tunables.TunableDouble driverAfterburnerSpeed = tunables.value("Afterburner Drive Speed", 1.0);//1.0 non-demo speed
-    private boolean demoMode = true;
+    private boolean demoMode = false;
     
 
     public Robot() {
