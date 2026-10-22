@@ -4,6 +4,8 @@ import static org.team1126.robot.Constants.INTAKE_MOTOR;
 import static org.team1126.robot.Constants.PIVOT_MOTOR_LEAD;
 import static org.team1126.robot.Constants.PIVOT_MOTOR_FOLLOW;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
+import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -245,8 +247,9 @@ public final class Intake extends GRRSubsystem {
     // }
 
     @NotLogged
-    private void stopPivot() {
-        pivotMotorLead.setVoltage(0);
+    public Command stopPivot() {
+        // pivotMotorLead.setVoltage(0);
+        return commandBuilder().onExecute(() -> pivotMotorLead.setVoltage(0));
     }
 
     public List<Double> getOutputCurrent() {

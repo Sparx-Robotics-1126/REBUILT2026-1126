@@ -47,9 +47,8 @@ public class GoOutpostAndToss extends BaseAutosRoutine {
     public Command action(Supplier<AutosStart> startAt, Supplier<AutosFlip> flip, BooleanSupplier blue) {
         return sequence(
             atStartingPoint(() -> STARTING_POINT.get(blue.getAsBoolean(), flip.get().shouldFlip())),
-            driveWaypoint(flip,PIVOT, blue),
-            driveWaypoint(flip, OUTPOST, blue)
-                .alongWith(robot.intake.extendIntake().withTimeout(2.0)))
+            driveWaypoint(flip,PIVOT, blue).alongWith(robot.intake.extendIntake().withTimeout(2.0)).andThen(robot.intake.stopPivot()),
+            driveWaypoint(flip, OUTPOST, blue))
                 .andThen(Commands.waitSeconds(4),
             driveWaypoint(flip, SHOOT_FROM_HERE, blue),
             routines.shoot(() -> false, () -> true)

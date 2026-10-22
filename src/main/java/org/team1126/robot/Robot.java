@@ -164,6 +164,7 @@ public final class Robot extends LoggedRobot {
         // coDriver.povRight().whileTrue(feeder.feedShooter());
         // coDriver.povLeft().whileTrue(shooter.readyShooter());
         coDriver.a().onTrue(intake.extendIntake());
+        coDriver.x().onTrue(intake.stopPivot());
         coDriver.y().whileTrue(intake.retrackIntake());
 
         coDriver.b().and(shoot.negate()).whileTrue(intake.moveIntake(true));
