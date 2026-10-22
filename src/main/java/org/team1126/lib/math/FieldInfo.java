@@ -29,7 +29,7 @@ public final class FieldInfo {
     private static SymmetryType symmetryType;
 
     static {
-        setLayout(AprilTagFields.k2026RebuiltAndymark);
+        setLayout(AprilTagFields.k2026RebuiltWelded);
     }
 
     /**
