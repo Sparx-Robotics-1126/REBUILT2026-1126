@@ -9,6 +9,8 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -20,6 +22,7 @@ import org.team1126.lib.util.vendors.PhoenixUtil;
 import org.team1126.lib.systemcheck.FaultReporter;
 import org.team1126.lib.systemcheck.SystemChecks;
 
+@Logged
 public final class Feeder extends GRRSubsystem {
 
     /** Name used for this subsystem in the system check (SystemStatus/Feeder on the dashboard). */
