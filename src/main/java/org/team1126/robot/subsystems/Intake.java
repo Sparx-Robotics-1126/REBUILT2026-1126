@@ -26,6 +26,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Commands;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
@@ -310,6 +311,11 @@ public final class Intake extends GRRSubsystem {
     // System check (see lib/systemcheck/README.md)
     // ------------------------------------------------------------------
 
+    /** Pivot travel limits, in motor rotations: 0 is retracted, -1.75 is fully extended. It can't go positive. */
+    private static final double PIVOT_RETRACTED = 0.0;
+    private static final double PIVOT_FULLY_EXTENDED = -1.75;
+    /** If the pivot ever reads this far outside its travel, the check stops it. */
+    private static final double CHECK_PIVOT_RANGE_MARGIN = 0.15;
     /** How close the pivot must get to its target, in motor rotations. */
     private static final double CHECK_PIVOT_TOLERANCE = 0.15;
     /** How long each pivot move gets to reach its target, in seconds. */
@@ -323,26 +329,68 @@ public final class Intake extends GRRSubsystem {
      * Intake system check:
      * <ol>
      *   <li>Spins the roller open-loop at 3 V and checks it turns.</li>
-     *   <li>Retracts, extends, then retracts the pivot using the normal
-     *       {@link #retrackIntake()} / {@link #extendIntake()} commands, and checks
-     *       each move reaches its position in time.</li>
+     *   <li>Retracts, extends, then retracts the pivot using the same
+     *       controller settings as {@link #retrackIntake()} / {@link #extendIntake()},
+     *       and checks each move reaches its position in time.</li>
      *   <li>During each pivot move, compares the peak current of the two pivot
      *       motors. If the follower isn't drawing current while the leader is,
      *       the follower isn't helping (unplugged motor wires, bad follower
      *       config), even if the leader alone can still move the pivot.</li>
      * </ol>
-     * <b>The intake needs room to extend.</b>
+     * The pivot only ever targets positions between 0 (retracted) and -1.75
+     * (fully extended), even if the "Pivot Position" tunable is set outside
+     * that range. If the pivot ever reads outside that range (for example the
+     * robot was powered on with the intake not retracted, so the encoder's 0 is
+     * wrong), the check stops the pivot and reports it.
+     *
+     * <p><b>The intake needs room to extend.</b>
      */
     public Command systemCheck() {
+        double extended = MathUtil.clamp(pivotPosition.get(), PIVOT_FULLY_EXTENDED, PIVOT_RETRACTED);
         return Commands.sequence(
             SystemChecks.spinTalonFX(SYSTEM_CHECK_NAME, this, "intake roller", intakeMotor, 3.0, 8.0),
-            checkPivotMove("retract", retrackIntake(), 0.0),
-            checkPivotMove("extend", extendIntake(), pivotPosition.get()),
-            checkPivotMove("retract", retrackIntake(), 0.0)
-        ).withName("Intake.systemCheck()");
+            checkPivotMove("retract", PIVOT_RETRACTED, false),
+            checkPivotMove("extend", extended, true),
+            checkPivotMove("retract", PIVOT_RETRACTED, false)
+        )
+            .until(this::pivotOutOfRange)
+            .finallyDo(() -> {
+                if (pivotOutOfRange()) {
+                    pivotMotorLead.setVoltage(0.0);
+                    FaultReporter.getInstance()
+                        .addFault(
+                            SYSTEM_CHECK_NAME,
+                            String.format(
+                                "[pivot] read %.2f rot, outside its 0 to %.2f travel - check stopped. Was the intake retracted when the robot was powered on?",
+                                pivotMotorLead.getEncoder().getPosition(),
+                                PIVOT_FULLY_EXTENDED
+                            )
+                        );
+                }
+            })
+            .withName("Intake.systemCheck()");
     }
 
-    private Command checkPivotMove(String label, Command moveCommand, double target) {
+    private boolean pivotOutOfRange() {
+        double position = pivotMotorLead.getEncoder().getPosition();
+        return position > PIVOT_RETRACTED + CHECK_PIVOT_RANGE_MARGIN
+            || position < PIVOT_FULLY_EXTENDED - CHECK_PIVOT_RANGE_MARGIN;
+    }
+
+    /**
+     * Moves the pivot to a target with the same controller settings the match
+     * commands use (slot 0 going out, slot 1 coming in), checks it gets there,
+     * and compares the two pivot motors' current while it moves.
+     */
+    private Command checkPivotMove(String label, double target, boolean extending) {
+        Command moveCommand = commandBuilder("Intake.systemCheck(pivot " + label + ")").onExecute(() -> {
+            if (extending) {
+                moveMotorPosOut(target, false);
+            } else {
+                moveMotorPosIn(target);
+            }
+        });
+
         double[] peakCurrent = { 0.0, 0.0 }; // leader, follower
 
         Command reset = Commands.runOnce(() -> {
