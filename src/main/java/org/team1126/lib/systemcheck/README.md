@@ -18,7 +18,7 @@ It's adapted from the system-check code in [FRC 3061 Huskie Robotics' 3061-lib](
 | Swerve | Drives forward, left, backward and right, then spins both ways. Checks every module reaches its target angle (±10°) and wheel speed. | **Robot must be on blocks.** Catches dead motors, unread encoders and binding. It **can't** catch a wrong CANcoder offset or backwards drive motor, so watch the wheels: in "forward" all four should point straight ahead and roll the same way. Registers 8 TalonFX, 4 CANcoders, the Pigeon2 and the LowerCAN CANivore |
 | Shooter | Spins the flywheel at 3 V. The lead must reach ≥ 8 rot/s and the follower ≥ 80% of the lead. | |
 | Feeder | Spins at 3 V, must reach ≥ 8 rot/s | |
-| Intake | Spins the roller at 3 V, must reach ≥ 8 rot/s | The pivot is **not** moved because it has hard stops. Both pivot SparkFlexes are still watched for faults |
+| Intake | Spins the roller at 3 V (must reach ≥ 8 rot/s). Then retracts, extends and retracts the pivot with the normal commands; each move must get within 0.15 rot of its target in 2 s. During each move the follower must draw at least half the leader's current | **The intake needs room to extend.** The current comparison catches a follower that isn't helping, even when the leader alone can still move the pivot |
 | Storage | Spins the roller at 3 V, must reach ≥ 300 RPM | |
 | Hood | Homes gently against the bottom hard stop, moves to 1, 11, 20 and back to 1 rotor rotations (each must be reached within 0.5 rot in 2.5 s), then homes again and checks the hard stop still reads ~0 | See *Checking a position mechanism* below. Keep hands clear of the hood |
 | Robot | Battery: warning below 12.3 V, error below 11.8 V. roboRIO CAN bus health | |
@@ -29,7 +29,7 @@ It's adapted from the system-check code in [FRC 3061 Huskie Robotics' 3061-lib](
 2. Open Elastic (or Shuffleboard) and find the **`SystemStatus`** table.
 3. While the robot is still disabled, look at `SystemStatus/AllOK` and the alerts. Any red means a device is already reporting a problem.
 4. Enable the robot in **Test** mode. The checks refuse to run in any other mode, and pressing a button then just adds a reminder warning.
-5. Press **`SystemStatus/RunAllChecks`**. It runs every check in order and takes about 25 seconds. **Watch the swerve wheels** during the forward phase: all four should point straight ahead and roll the same way (the code can't detect a bad offset or a backwards motor).
+5. Press **`SystemStatus/RunAllChecks`**. It runs every check in order and takes about 30 seconds. **Watch the swerve wheels** during the forward phase: all four should point straight ahead and roll the same way (the code can't detect a bad offset or a backwards motor).
 6. Every subsystem should show `Status = OK` and `CheckRan = true`. If not, read `SystemStatus/<Subsystem>/Faults`, or the alerts. Each message says which device is affected and what to look at.
 7. After fixing something, press **`SystemStatus/ClearAllFaults`** to clear the old faults, including sticky faults stored on the devices, and run the check again.
 

@@ -26,6 +26,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.util.command.GRRSubsystem;
@@ -305,12 +306,84 @@ public final class Intake extends GRRSubsystem {
       
     }
 
+    // ------------------------------------------------------------------
+    // System check (see lib/systemcheck/README.md)
+    // ------------------------------------------------------------------
+
+    /** How close the pivot must get to its target, in motor rotations. */
+    private static final double CHECK_PIVOT_TOLERANCE = 0.15;
+    /** How long each pivot move gets to reach its target, in seconds. */
+    private static final double CHECK_PIVOT_TIMEOUT = 2.0;
+    /** Only compare the two pivot motors if the leader drew at least this much current, in amps. */
+    private static final double CHECK_PIVOT_MIN_CURRENT = 5.0;
+    /** The follower must draw at least this fraction of the leader's peak current. */
+    private static final double CHECK_FOLLOWER_CURRENT_RATIO = 0.5;
+
     /**
-     * System check: spins the intake roller open-loop at a low voltage and
-     * checks that it turns. The pivot is not moved (it has hard stops), but
-     * both pivot motors are still watched for faults.
+     * Intake system check:
+     * <ol>
+     *   <li>Spins the roller open-loop at 3 V and checks it turns.</li>
+     *   <li>Retracts, extends, then retracts the pivot using the normal
+     *       {@link #retrackIntake()} / {@link #extendIntake()} commands, and checks
+     *       each move reaches its position in time.</li>
+     *   <li>During each pivot move, compares the peak current of the two pivot
+     *       motors. If the follower isn't drawing current while the leader is,
+     *       the follower isn't helping (unplugged motor wires, bad follower
+     *       config), even if the leader alone can still move the pivot.</li>
+     * </ol>
+     * <b>The intake needs room to extend.</b>
      */
     public Command systemCheck() {
-        return SystemChecks.spinTalonFX(SYSTEM_CHECK_NAME, this, "intake roller", intakeMotor, 3.0, 8.0);
+        return Commands.sequence(
+            SystemChecks.spinTalonFX(SYSTEM_CHECK_NAME, this, "intake roller", intakeMotor, 3.0, 8.0),
+            checkPivotMove("retract", retrackIntake(), 0.0),
+            checkPivotMove("extend", extendIntake(), pivotPosition.get()),
+            checkPivotMove("retract", retrackIntake(), 0.0)
+        ).withName("Intake.systemCheck()");
+    }
+
+    private Command checkPivotMove(String label, Command moveCommand, double target) {
+        double[] peakCurrent = { 0.0, 0.0 }; // leader, follower
+
+        Command reset = Commands.runOnce(() -> {
+            peakCurrent[0] = 0.0;
+            peakCurrent[1] = 0.0;
+        });
+
+        // Runs alongside the move (no requirements) and records the highest current each motor draws.
+        Command sampleCurrent = Commands.run(() -> {
+            peakCurrent[0] = Math.max(peakCurrent[0], Math.abs(pivotMotorLead.getOutputCurrent()));
+            peakCurrent[1] = Math.max(peakCurrent[1], Math.abs(pivotMotorFollow.getOutputCurrent()));
+        });
+
+        Command move = SystemChecks.moveToPosition(
+            SYSTEM_CHECK_NAME,
+            "pivot " + label,
+            moveCommand,
+            () -> pivotMotorLead.getEncoder().getPosition(),
+            target,
+            CHECK_PIVOT_TOLERANCE,
+            CHECK_PIVOT_TIMEOUT,
+            "rot"
+        );
+
+        Command compareCurrent = Commands.runOnce(() -> {
+            double lead = peakCurrent[0];
+            double follow = peakCurrent[1];
+            if (lead >= CHECK_PIVOT_MIN_CURRENT && follow < CHECK_FOLLOWER_CURRENT_RATIO * lead) {
+                FaultReporter.getInstance()
+                    .addFault(
+                        SYSTEM_CHECK_NAME,
+                        String.format(
+                            "[pivot follower] drew only %.1f A while the leader drew %.1f A (%s) - check follower motor wires and follow config",
+                            follow,
+                            lead,
+                            label
+                        )
+                    );
+            }
+        });
+
+        return Commands.sequence(reset, Commands.deadline(move, sampleCurrent), compareCurrent);
     }
 }
