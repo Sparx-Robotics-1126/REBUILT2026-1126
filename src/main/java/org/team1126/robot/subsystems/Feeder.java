@@ -9,6 +9,8 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -18,6 +20,7 @@ import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.lib.util.vendors.PhoenixUtil;
 
+@Logged
 public final class Feeder extends GRRSubsystem {
 
     private static final TunableTable tunables = Tunables.getNested("feeder");
