@@ -20,7 +20,7 @@ It's adapted from the system-check code in [FRC 3061 Huskie Robotics' 3061-lib](
 | Feeder | Spins at 3 V, must reach ≥ 8 rot/s | |
 | Intake | Spins the roller at 3 V, must reach ≥ 8 rot/s | The pivot is **not** moved because it has hard stops. Both pivot SparkFlexes are still watched for faults |
 | Storage | Spins the roller at 3 V, must reach ≥ 300 RPM | |
-| Hood | Faults only, no motion | It has hard stops |
+| Hood | Homes gently against the bottom hard stop, moves to 1, 11, 20 and back to 1 rotor rotations (each must be reached within 0.5 rot in 2.5 s), then homes again and checks the hard stop still reads ~0 | See *Checking a position mechanism* below. Keep hands clear of the hood |
 | Robot | Battery: warning below 12.3 V, error below 11.8 V. roboRIO CAN bus health | |
 
 ## Pit procedure
@@ -29,7 +29,7 @@ It's adapted from the system-check code in [FRC 3061 Huskie Robotics' 3061-lib](
 2. Open Elastic (or Shuffleboard) and find the **`SystemStatus`** table.
 3. While the robot is still disabled, look at `SystemStatus/AllOK` and the alerts. Any red means a device is already reporting a problem.
 4. Enable the robot in **Test** mode. The checks refuse to run in any other mode, and pressing a button then just adds a reminder warning.
-5. Press **`SystemStatus/RunAllChecks`**. It runs every check in order and takes about 15 seconds. **Watch the swerve wheels** during the forward phase: all four should point straight ahead and roll the same way (the code can't detect a bad offset or a backwards motor).
+5. Press **`SystemStatus/RunAllChecks`**. It runs every check in order and takes about 25 seconds. **Watch the swerve wheels** during the forward phase: all four should point straight ahead and roll the same way (the code can't detect a bad offset or a backwards motor).
 6. Every subsystem should show `Status = OK` and `CheckRan = true`. If not, read `SystemStatus/<Subsystem>/Faults`, or the alerts. Each message says which device is affected and what to look at.
 7. After fixing something, press **`SystemStatus/ClearAllFaults`** to clear the old faults, including sticky faults stored on the devices, and run the check again.
 
@@ -91,16 +91,39 @@ Rules for checks:
 - Pass a **factory** (`this::systemCheck`), not a `Command`. The same check is used by its own button and by `RunAllChecks`.
 - Make the command **require the subsystem** so the default command (e.g. joystick drive) is paused during the check.
 - Prefer **small open-loop voltages** (2–4 V) for "does it spin" checks. They test the wiring and motor without depending on PID tuning. They can't tell if a motor is configured backwards, because inversion flips the command and the measurement together.
-- **Don't drive into hard stops.** Only move position mechanisms to safe, known positions.
+- **Don't drive into hard stops at full power.** Only move position mechanisms to safe, known positions, or home them gently with a current limit (like the hood does).
 
 Supported devices for `registerHardware`: `TalonFX`, `CANcoder`, `Pigeon2`, `SparkMax` / `SparkFlex` (any `SparkBase`), Redux `Canandgyro` / `Canandmag`, a `CANBus`, or any custom `SelfChecking`. For GRRBase objects whose type is only known at runtime (e.g. `module.moveMotor.getAPI()`), use `registerDevice(...)`.
+
+## Checking a position mechanism (hood, arm, pivot, elevator)
+
+A "does it spin" check doesn't fit a mechanism that moves to a position and has hard stops. Instead, check that it **gets where it's told to go, in a reasonable time**, using the subsystem's own position command so you're testing the same code the robot uses in a match. The hood check (`Hood.systemCheck()`) is the example:
+
+1. **Home first.** The hood drives gently down (velocity control with a 10 A torque limit) until it stalls against the bottom hard stop, then sets the encoder to 0. If it never stalls within 4 s, that's an error.
+2. **Move to a few positions** inside the soft limits (low, middle, high, back to low) with `SystemChecks.moveToPosition(...)`. It runs the hood's normal `goTo()` command and waits until the position is within tolerance. If it isn't there by the timeout, that's an error: binding, a loose belt, a dead motor, or something in the way.
+3. **Home again and compare.** After all that movement the hard stop should still read about 0. If it reads, say, 1.3 rotations, the encoder lost its place, which usually means a slipping belt or gear or skipped teeth. That's reported as a warning.
+
+To add the same kind of check to another position mechanism:
+
+```java
+public Command systemCheck() {
+    return Commands.sequence(
+        SystemChecks.moveToPosition(SYSTEM_CHECK_NAME, "arm", goTo(() -> 0.25), this::getPosition, 0.25, 0.02, 2.0, "rot"),
+        SystemChecks.moveToPosition(SYSTEM_CHECK_NAME, "arm", goTo(() -> 0.05), this::getPosition, 0.05, 0.02, 2.0, "rot")
+    );
+}
+```
+
+Pick targets well inside the travel, a tolerance a bit bigger than the mechanism normally settles to, and a timeout about twice as long as a normal move takes. If a healthy mechanism fails, loosen those numbers, don't remove the check.
+
+One limit: if the motor is completely dead, homing "finds" the hard stop right away, because nothing is moving. The moves after it will still fail, so the check still reports a problem.
 
 ## Files
 
 ```
 lib/systemcheck/
   FaultReporter.java          - collects faults, polls devices, publishes to the dashboard, runs checks
-  SystemChecks.java           - ready-made checks: spinTalonFX, spinSpark, spin, expectNear
+  SystemChecks.java           - ready-made checks: spinTalonFX, spinSpark, spin, moveToPosition, expectNear
   SubsystemFault.java         - one fault (description + warning/error)
   SystemStatus.java           - OK / WARNING / ERROR
   selfcheck/

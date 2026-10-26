@@ -26,7 +26,9 @@ import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import org.team1126.lib.systemcheck.FaultReporter;
+import org.team1126.lib.systemcheck.SystemChecks;
 
 @Logged
 public final class Hood extends GRRSubsystem {
@@ -76,8 +78,9 @@ private static final TunableDouble hoodPosition = tunables.value("Hood Position"
 
         tunables.add("motor", motor);
 
-        // System check: watch these devices for faults (the hood isn't moved by the system check because it has hard stops)
+        // System check: watch the motor for faults and register the hood system check
         FaultReporter.getInstance().registerHardware(SYSTEM_CHECK_NAME, "hood", motor);
+        FaultReporter.getInstance().registerSystemCheck(SYSTEM_CHECK_NAME, this::systemCheck);
     }
 
     @Override
@@ -188,6 +191,114 @@ private static final TunableDouble hoodPosition = tunables.value("Hood Position"
 
         PhoenixUtil.run(() -> motor.clearStickyFaults());
         PhoenixUtil.run(() -> motor.getConfigurator().apply(config));
+    }
+
+    // ------------------------------------------------------------------
+    // System check (see lib/systemcheck/README.md)
+    // ------------------------------------------------------------------
+
+    // Check positions are in rotations at the rotor, well inside the soft limits (0 to 22.938).
+    private static final double CHECK_LOW = 1.0;
+    private static final double CHECK_MID = 11.0;
+    private static final double CHECK_HIGH = 20.0;
+    /** How close to the target counts as "there", in rotor rotations. */
+    private static final double CHECK_TOLERANCE = 0.5;
+    /** How long each move gets to reach its target, in seconds. */
+    private static final double CHECK_MOVE_TIMEOUT = 2.5;
+    /** How long homing gets to find the hard stop, in seconds. */
+    private static final double CHECK_HOME_TIMEOUT = 4.0;
+    /** After moving around, the hard stop should still read as ~0. More than this means the encoder lost its place. */
+    private static final double CHECK_MAX_DRIFT = 0.5;
+
+    /**
+     * Hood system check:
+     * <ol>
+     *   <li>Home against the bottom hard stop (the same gentle, current-limited
+     *       homing the hood already uses) and zero the encoder.</li>
+     *   <li>Move to low, middle and high positions using the normal
+     *       {@link #goTo} command, checking each one is reached in time.</li>
+     *   <li>Home again and check the hard stop still reads ~0. If not, the
+     *       encoder lost its place during the moves (slipping belt or gear,
+     *       skipped teeth, or a loose hard stop).</li>
+     * </ol>
+     */
+    public Command systemCheck() {
+        return Commands.sequence(
+            checkHome(false),
+            checkMoveTo(CHECK_LOW),
+            checkMoveTo(CHECK_MID),
+            checkMoveTo(CHECK_HIGH),
+            checkMoveTo(CHECK_LOW),
+            checkHome(true)
+        )
+            .finallyDo(motor::stopMotor)
+            .withName("Hood.systemCheck()");
+    }
+
+    private Command checkMoveTo(double target) {
+        return SystemChecks.moveToPosition(
+            SYSTEM_CHECK_NAME,
+            "hood",
+            goTo(() -> target),
+            () -> motor.getPosition().getValueAsDouble(),
+            target,
+            CHECK_TOLERANCE,
+            CHECK_MOVE_TIMEOUT,
+            "rot"
+        );
+    }
+
+    /**
+     * Drives gently down into the bottom hard stop until the hood stalls, then zeros the encoder.
+     * @param checkDrift If true, report how far the encoder reading at the hard stop is from 0.
+     */
+    private Command checkHome(boolean checkDrift) {
+        Debouncer stalled = new Debouncer(0.1, DebounceType.kRising);
+        boolean[] foundStop = { false };
+
+        Command home = commandBuilder("Hood.systemCheck(home)")
+            .onInitialize(() -> {
+                stalled.calculate(false);
+                foundStop[0] = false;
+            })
+            .onExecute(() -> {
+                velocityTorque.withVelocity(homingVelocity.get());
+                motor.setControl(velocityTorque);
+                foundStop[0] = stalled.calculate(Math.abs(velocity.getValueAsDouble()) < stallVelocity.get());
+            })
+            .isFinished(() -> foundStop[0])
+            .onEnd(motor::stopMotor);
+
+        Command record = Commands.runOnce(() -> {
+            if (!foundStop[0]) {
+                FaultReporter.getInstance()
+                    .addFault(
+                        SYSTEM_CHECK_NAME,
+                        String.format(
+                            "[hood] never reached the bottom hard stop in %.1f s - check the motor and that nothing is blocking the hood",
+                            CHECK_HOME_TIMEOUT
+                        )
+                    );
+                return;
+            }
+
+            double positionAtStop = motor.getPosition().getValueAsDouble();
+            if (checkDrift && Math.abs(positionAtStop) > CHECK_MAX_DRIFT) {
+                FaultReporter.getInstance()
+                    .addFault(
+                        SYSTEM_CHECK_NAME,
+                        String.format(
+                            "[hood] hard stop read %.2f rot instead of 0 after moving - belt/gears may be slipping or the hard stop moved",
+                            positionAtStop
+                        ),
+                        true
+                    );
+            }
+            motor.setPosition(0.0);
+            isZeroed = true;
+        });
+
+        return Commands.sequence(home.withTimeout(CHECK_HOME_TIMEOUT), record);
     }
 }
 

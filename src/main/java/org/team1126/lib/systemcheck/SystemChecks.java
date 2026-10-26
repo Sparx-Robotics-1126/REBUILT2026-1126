@@ -6,6 +6,7 @@ import com.revrobotics.spark.SparkBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 
@@ -183,6 +184,63 @@ public final class SystemChecks {
         )
             .finallyDo(stop::run)
             .withName(subsystemName + ".spinCheck(" + label + ")");
+    }
+
+    /**
+     * Position check for arms, hoods, pivots and elevators: runs the
+     * subsystem's own "go to position" command and checks that the mechanism
+     * actually gets there within a time limit. If it doesn't, something is
+     * physically wrong: binding, a loose belt or chain, a dead motor, or
+     * something in the way.
+     *
+     * <p>Only use targets well inside the mechanism's travel, never at a hard stop.
+     *
+     * @param subsystemName The subsystem name used with the {@link FaultReporter}.
+     * @param label The name shown in fault messages, e.g. "hood".
+     * @param moveCommand The subsystem's command that drives to {@code target} (it must require the subsystem).
+     * @param position Returns the measured position.
+     * @param target The position to reach.
+     * @param tolerance How close counts as "there".
+     * @param timeoutSeconds How long the mechanism gets to reach the target.
+     * @param units Position units, for messages.
+     */
+    public static Command moveToPosition(
+        String subsystemName,
+        String label,
+        Command moveCommand,
+        DoubleSupplier position,
+        double target,
+        double tolerance,
+        double timeoutSeconds,
+        String units
+    ) {
+        BooleanSupplier atTarget = () -> Math.abs(position.getAsDouble() - target) <= tolerance;
+
+        Runnable verify = () -> {
+            double value = position.getAsDouble();
+            if (Math.abs(value - target) > tolerance) {
+                FaultReporter.getInstance()
+                    .addFault(
+                        subsystemName,
+                        String.format(
+                            "[%s] only got to %.2f %s of target %.2f in %.1f s - check for binding, a loose belt/chain or something in the way",
+                            label,
+                            value,
+                            units,
+                            target,
+                            timeoutSeconds
+                        )
+                    );
+            }
+        };
+
+        return Commands.deadline(
+            Commands.sequence(
+                Commands.waitUntil(atTarget).withTimeout(timeoutSeconds),
+                Commands.runOnce(verify)
+            ),
+            moveCommand
+        ).withName(subsystemName + ".positionCheck(" + label + " -> " + target + ")");
     }
 
     /**
