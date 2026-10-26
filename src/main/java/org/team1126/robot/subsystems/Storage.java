@@ -16,9 +16,14 @@ import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.command.GRRSubsystem;
+import org.team1126.lib.systemcheck.FaultReporter;
+import org.team1126.lib.systemcheck.SystemChecks;
 
 @Logged
 public final class Storage extends GRRSubsystem {
+
+    /** Name used for this subsystem in the system check (SystemStatus/Storage on the dashboard). */
+    public static final String SYSTEM_CHECK_NAME = "Storage";
 
     //fueling/ spill
     private final SparkMax rollerMotor;
@@ -43,6 +48,10 @@ public final class Storage extends GRRSubsystem {
             .inverted(false)
             .openLoopRampRate(0.25)
             .closedLoopRampRate(0.25);
+
+        // System check: watch these devices for faults and register the system check
+        FaultReporter.getInstance().registerHardware(SYSTEM_CHECK_NAME, "storage roller", rollerMotor);
+        FaultReporter.getInstance().registerSystemCheck(SYSTEM_CHECK_NAME, this::systemCheck);
     }
 
     public Command moveMotorCommand(boolean reverse) {
@@ -105,5 +114,12 @@ public final class Storage extends GRRSubsystem {
     public void periodic() {
         SmartDashboard.putBoolean("Intake at set point?", rollerController.isAtSetpoint());
         SmartDashboard.putNumber("Velocity", this.rollerEncoder.getVelocity());
+    }
+
+    /**
+     * System check: spins the storage roller open-loop at a low voltage and checks that it turns.
+     */
+    public Command systemCheck() {
+        return SystemChecks.spinSpark(SYSTEM_CHECK_NAME, this, "storage roller", rollerMotor, 3.0, 300.0);
     }
 }

@@ -23,8 +23,13 @@ import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.lib.util.vendors.PhoenixUtil;
+import org.team1126.lib.systemcheck.FaultReporter;
+import org.team1126.lib.systemcheck.SystemChecks;
 
 public final class Shooter extends GRRSubsystem {
+
+    /** Name used for this subsystem in the system check (SystemStatus/Shooter on the dashboard). */
+    public static final String SYSTEM_CHECK_NAME = "Shooter";
 
     private static final TunableTable tunables = Tunables.getNested("shooter");
 
@@ -66,6 +71,11 @@ public final class Shooter extends GRRSubsystem {
 
         tunables.add("motors", motorLead);
         tunables.add("motors", motorFollow);
+
+        // System check: watch these devices for faults and register the system check
+        FaultReporter.getInstance().registerHardware(SYSTEM_CHECK_NAME, "shooter lead", motorLead);
+        FaultReporter.getInstance().registerHardware(SYSTEM_CHECK_NAME, "shooter follower", motorFollow);
+        FaultReporter.getInstance().registerSystemCheck(SYSTEM_CHECK_NAME, this::systemCheck);
         
     }
 
@@ -294,5 +304,13 @@ public final class Shooter extends GRRSubsystem {
 
         // Inverts the direction for the other side.
         config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    }
+
+    /**
+     * System check: spins the flywheel open-loop at a low voltage and checks
+     * that the lead motor turns and the follower keeps up with it.
+     */
+    public Command systemCheck() {
+        return SystemChecks.spinTalonFX(SYSTEM_CHECK_NAME, this, "shooter lead", motorLead, 3.0, 8.0, motorFollow);
     }
 }

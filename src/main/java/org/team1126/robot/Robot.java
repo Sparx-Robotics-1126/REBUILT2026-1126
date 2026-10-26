@@ -1,5 +1,6 @@
 package org.team1126.robot;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.Orchestra;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.NotLogged;
@@ -15,6 +16,8 @@ import static edu.wpi.first.wpilibj2.command.Commands.none;
 
 import org.team1126.lib.logging.LoggedRobot;
 import org.team1126.lib.logging.Profiler;
+import org.team1126.lib.systemcheck.FaultReporter;
+import org.team1126.lib.systemcheck.selfcheck.SelfCheckingBattery;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.util.DisableWatchdog;
@@ -75,6 +78,14 @@ public final class Robot extends LoggedRobot {
         hood = new Hood();
         intake = new Intake();
         feeder = new Feeder();
+
+        // System check: each subsystem registers its own devices and check in its
+        // constructor. Add the battery and the roboRIO CAN bus, then put the
+        // RunAllChecks / ClearAllFaults buttons on the dashboard (SystemStatus/).
+        // See lib/systemcheck/README.md.
+        FaultReporter.getInstance().registerHardware("Robot", new SelfCheckingBattery(12.3, 11.8));
+        FaultReporter.getInstance().registerHardware("Robot", "rio", new CANBus());
+        FaultReporter.getInstance().publishDashboardCommands();
 
         shiftTracker = new ShiftTracker();
 

@@ -25,9 +25,13 @@ import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import org.team1126.lib.systemcheck.FaultReporter;
 
 
 public final class Hood extends GRRSubsystem {
+
+    /** Name used for this subsystem in the system check (SystemStatus/Hood on the dashboard). */
+    public static final String SYSTEM_CHECK_NAME = "Hood";
 
     private static final TunableTable tunables = Tunables.getNested("hood");
 
@@ -70,6 +74,9 @@ private static final TunableDouble hoodPosition = tunables.value("Hood Position"
         velocityTorque.Slot = 1;
 
         tunables.add("motor", motor);
+
+        // System check: watch these devices for faults (the hood isn't moved by the system check because it has hard stops)
+        FaultReporter.getInstance().registerHardware(SYSTEM_CHECK_NAME, "hood", motor);
     }
 
     @Override

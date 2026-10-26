@@ -15,6 +15,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -25,12 +26,14 @@ import org.team1126.lib.math.Math2;
 import org.team1126.lib.math.PAPFController;
 import org.team1126.lib.swerve.Perspective;
 import org.team1126.lib.swerve.SwerveAPI;
+import org.team1126.lib.swerve.SwerveModule;
 import org.team1126.lib.swerve.SwerveState;
 import org.team1126.lib.swerve.config.SwerveConfig;
 import org.team1126.lib.swerve.config.SwerveModuleConfig;
 import org.team1126.lib.swerve.hardware.SwerveEncoders;
 import org.team1126.lib.swerve.hardware.SwerveIMUs;
 import org.team1126.lib.swerve.hardware.SwerveMotors;
+import org.team1126.lib.systemcheck.FaultReporter;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
@@ -50,6 +53,9 @@ import org.team1126.robot.util.Vision;
  */
 @Logged
 public final class Swerve extends GRRSubsystem {
+
+    /** Name used for this subsystem in the system check (SystemStatus/Swerve on the dashboard). */
+    public static final String SYSTEM_CHECK_NAME = "Swerve";
 
     public static final double OFFSET = 0.2525; // 575mm from cancoder to cancoder
     // private static final double OFFSET_TO_BUMPER = 0.425; // 425mm to the edge of the bumper
@@ -227,6 +233,8 @@ public final class Swerve extends GRRSubsystem {
         tunables.add("api", api);
         tunables.add("apf", apf);
         tunables.add("angularPID", angularPID);
+
+        registerSystemCheck();
 
         // Seed pose from vision if available
         var measurements = vision.getUnreadResults(api.state.poseHistory, api.state.odometryPose, api.state.velocity);
@@ -642,5 +650,114 @@ public final class Swerve extends GRRSubsystem {
 
     public void applyOrchestra(Orchestra orchestra) {
         this.api.applyOrchestra(orchestra);
+    }
+
+    // ------------------------------------------------------------------
+    // System check (see lib/systemcheck/README.md)
+    // ------------------------------------------------------------------
+
+    /** Speed used for the translation phases of the system check, in m/s. */
+    private static final double CHECK_SPEED = 1.0;
+    /** Rotation rate used for the rotation phases of the system check, in rad/s. */
+    private static final double CHECK_OMEGA = 2.0;
+    /** How long each phase drives before the modules are measured, in seconds. */
+    private static final double CHECK_SETTLE_SECONDS = 1.5;
+    /** How far a module's angle may be from its target, in degrees. */
+    private static final double CHECK_ANGLE_TOLERANCE_DEG = 10.0;
+    /** How far a module's speed may be from its target, in m/s (or 20% of the target, whichever is larger). */
+    private static final double CHECK_SPEED_TOLERANCE = 0.25;
+
+    /**
+     * Registers every swerve motor, encoder, the gyro and the CANivore with the
+     * fault reporter, and registers the swerve system check.
+     */
+    private void registerSystemCheck() {
+        FaultReporter faults = FaultReporter.getInstance();
+        for (SwerveModule module : api.modules) {
+            faults.registerDevice(SYSTEM_CHECK_NAME, module.getName() + " move", module.moveMotor.getAPI());
+            faults.registerDevice(SYSTEM_CHECK_NAME, module.getName() + " turn", module.turnMotor.getAPI());
+            faults.registerDevice(SYSTEM_CHECK_NAME, module.getName() + " encoder", module.encoder.getAPI());
+        }
+        faults.registerDevice(SYSTEM_CHECK_NAME, "gyro", api.getIMUAPI());
+        faults.registerHardware(SYSTEM_CHECK_NAME, LowerCAN.LOWER_CAN + " bus", api.config.phoenixCanBus);
+        faults.registerSystemCheck(SYSTEM_CHECK_NAME, this::systemCheck);
+    }
+
+    /**
+     * Drives the modules forward, left, backward, right, then spins both ways,
+     * and checks that every module reaches its target angle and wheel speed.
+     * Catches dead or unplugged drive/turn motors, encoders that aren't
+     * reading, and modules that bind or can't keep up.
+     *
+     * <p>It can NOT catch a wrong CANcoder offset, a backwards drive motor or a
+     * wrong gear ratio, because the measurement uses the same settings as the
+     * target. Watch the wheels during the check: in "forward" every wheel should
+     * point straight ahead and roll the same way.
+     *
+     * <p><b>The robot must be up on blocks with the wheels off the ground.</b>
+     */
+    public Command systemCheck() {
+        return Commands.sequence(
+            checkModules("forward", CHECK_SPEED, 0.0, 0.0),
+            checkModules("left", 0.0, CHECK_SPEED, 0.0),
+            checkModules("backward", -CHECK_SPEED, 0.0, 0.0),
+            checkModules("right", 0.0, -CHECK_SPEED, 0.0),
+            checkModules("spin CCW", 0.0, 0.0, CHECK_OMEGA),
+            checkModules("spin CW", 0.0, 0.0, -CHECK_OMEGA)
+        )
+            .finallyDo(() -> api.applyStop(false))
+            .withName("Swerve.systemCheck()");
+    }
+
+    /**
+     * Drives at robot-relative speeds for a moment, then compares every
+     * module's measured state against the state it was told to reach.
+     */
+    private Command checkModules(String phase, double vx, double vy, double omega) {
+        Command drive = commandBuilder("Swerve.systemCheck(" + phase + ")").onExecute(() ->
+            // applySpeeds may modify the ChassisSpeeds it's given, so make a new one each loop.
+            api.applySpeeds(new ChassisSpeeds(vx, vy, omega), Perspective.ROBOT, false, false)
+        );
+
+        Command measure = Commands.runOnce(() -> {
+            FaultReporter faults = FaultReporter.getInstance();
+            for (SwerveModule module : api.modules) {
+                var target = module.getNextTarget();
+                var actual = module.getState();
+
+                double angleError = Math.abs(actual.angle.minus(target.angle).getDegrees());
+                if (angleError > CHECK_ANGLE_TOLERANCE_DEG) {
+                    faults.addFault(
+                        SYSTEM_CHECK_NAME,
+                        String.format(
+                            "[%s] %s: angle %.0f deg, expected %.0f deg - check turn motor, CANcoder and module binding",
+                            module.getName(),
+                            phase,
+                            actual.angle.getDegrees(),
+                            target.angle.getDegrees()
+                        )
+                    );
+                }
+
+                double speedTolerance = Math.max(
+                    CHECK_SPEED_TOLERANCE,
+                    0.2 * Math.abs(target.speedMetersPerSecond)
+                );
+                if (Math.abs(actual.speedMetersPerSecond - target.speedMetersPerSecond) > speedTolerance) {
+                    faults.addFault(
+                        SYSTEM_CHECK_NAME,
+                        String.format(
+                            "[%s] %s: wheel speed %.2f m/s, expected %.2f m/s - check drive motor and module binding",
+                            module.getName(),
+                            phase,
+                            actual.speedMetersPerSecond,
+                            target.speedMetersPerSecond
+                        )
+                    );
+                }
+            }
+        });
+
+        return Commands.deadline(Commands.sequence(Commands.waitSeconds(CHECK_SETTLE_SECONDS), measure), drive);
     }
 }

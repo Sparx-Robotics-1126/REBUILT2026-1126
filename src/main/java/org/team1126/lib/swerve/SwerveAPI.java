@@ -114,6 +114,14 @@ public class SwerveAPI implements Tunable, AutoCloseable {
     }
 
     /**
+     * Returns the IMU's underlying vendor device (e.g. a {@code Pigeon2}).
+     * Used to register the gyro with the system check.
+     */
+    public Object getIMUAPI() {
+        return imu.getAPI();
+    }
+
+    /**
      * Refreshes inputs from all swerve hardware. This must be called periodically
      * in order for the API to function. Typically, this method is called at the
      * start of the swerve subsystem's {@code periodic()} method.

@@ -30,9 +30,14 @@ import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.util.command.GRRSubsystem;
 import org.team1126.lib.util.vendors.PhoenixUtil;
+import org.team1126.lib.systemcheck.FaultReporter;
+import org.team1126.lib.systemcheck.SystemChecks;
 
 @Logged
 public final class Intake extends GRRSubsystem {
+
+    /** Name used for this subsystem in the system check (SystemStatus/Intake on the dashboard). */
+    public static final String SYSTEM_CHECK_NAME = "Intake";
 
     private final TalonFX intakeMotor;
     private final SparkFlex pivotMotorLead;
@@ -119,6 +124,12 @@ public final class Intake extends GRRSubsystem {
         tunables.add("Intake Motor", intakeMotor);
         tunables.add("Pivot Motor Lead", pivotMotorLead);
          tunables.add("Pivot Motor Follower", pivotMotorFollow);
+
+        // System check: watch these devices for faults and register the system check
+        FaultReporter.getInstance().registerHardware(SYSTEM_CHECK_NAME, "intake roller", intakeMotor);
+        FaultReporter.getInstance().registerHardware(SYSTEM_CHECK_NAME, "pivot lead", pivotMotorLead);
+        FaultReporter.getInstance().registerHardware(SYSTEM_CHECK_NAME, "pivot follower", pivotMotorFollow);
+        FaultReporter.getInstance().registerSystemCheck(SYSTEM_CHECK_NAME, this::systemCheck);
     }
 
     @NotLogged
@@ -292,5 +303,14 @@ public final class Intake extends GRRSubsystem {
         PhoenixUtil.run(() -> intakeMotor.getConfigurator().apply(config));
 
       
+    }
+
+    /**
+     * System check: spins the intake roller open-loop at a low voltage and
+     * checks that it turns. The pivot is not moved (it has hard stops), but
+     * both pivot motors are still watched for faults.
+     */
+    public Command systemCheck() {
+        return SystemChecks.spinTalonFX(SYSTEM_CHECK_NAME, this, "intake roller", intakeMotor, 3.0, 8.0);
     }
 }
