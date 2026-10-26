@@ -681,6 +681,9 @@ public final class Swerve extends GRRSubsystem {
         faults.registerDevice(SYSTEM_CHECK_NAME, "gyro", api.getIMUAPI());
         faults.registerHardware(SYSTEM_CHECK_NAME, LowerCAN.LOWER_CAN + " bus", api.config.phoenixCanBus);
         faults.registerSystemCheck(SYSTEM_CHECK_NAME, this::systemCheck);
+
+        // The cameras live in Vision, which is owned by Swerve.
+        vision.registerSystemCheck();
     }
 
     /**

@@ -21,6 +21,7 @@ It's adapted from the system-check code in [FRC 3061 Huskie Robotics' 3061-lib](
 | Intake | Spins the roller at 3 V (must reach ≥ 8 rot/s). Then retracts (0), extends (the `Pivot Position` tunable, clamped to 0 to -1.75) and retracts the pivot; each move must get within 0.15 rot of its target in 2 s. If the pivot ever reads outside 0 to -1.75, the check stops it and reports it (usually means the intake wasn't retracted at power-on). During each move the follower must draw at least half the leader's current | **The intake needs room to extend.** The current comparison catches a follower that isn't helping, even when the leader alone can still move the pivot |
 | Storage | Spins the roller at 3 V, must reach ≥ 300 RPM | |
 | Hood | Homes gently against the bottom hard stop, moves to 1, 11, 20 and back to 1 rotor rotations (each must be reached within 0.5 rot in 2.5 s), then homes again and checks the hard stop still reads ~0 | See *Checking a position mechanism* below. Keep hands clear of the hood |
+| Vision | Watches all three AprilTag cameras (center, left, right) for 3 s: each must deliver new frames (error if not) and see at least one AprilTag (warning if not). Always-on: each camera must be connected, calibrated for its resolution, and not in driver mode | **Hold or place an AprilTag where each camera can see it.** Nothing moves |
 | Robot | Battery: warning below 12.3 V, error below 11.8 V. roboRIO CAN bus health | |
 
 ## Pit procedure
@@ -29,7 +30,7 @@ It's adapted from the system-check code in [FRC 3061 Huskie Robotics' 3061-lib](
 2. Open Elastic (or Shuffleboard) and find the **`SystemStatus`** table.
 3. While the robot is still disabled, look at `SystemStatus/AllOK` and the alerts. Any red means a device is already reporting a problem.
 4. Enable the robot in **Test** mode. The checks refuse to run in any other mode, and pressing a button then just adds a reminder warning.
-5. Press **`SystemStatus/RunAllChecks`**. It runs every check in order and takes about 30 seconds. **Watch the swerve wheels** during the forward phase: all four should point straight ahead and roll the same way (the code can't detect a bad offset or a backwards motor).
+5. Press **`SystemStatus/RunAllChecks`**. It runs every check in order and takes about 35 seconds. **Watch the swerve wheels** during the forward phase: all four should point straight ahead and roll the same way (the code can't detect a bad offset or a backwards motor).
 6. Every subsystem should show `Status = OK` and `CheckRan = true`. If not, read `SystemStatus/<Subsystem>/Faults`, or the alerts. Each message says which device is affected and what to look at.
 7. After fixing something, press **`SystemStatus/ClearAllFaults`** to clear the old faults, including sticky faults stored on the devices, and run the check again.
 
@@ -93,7 +94,7 @@ Rules for checks:
 - Prefer **small open-loop voltages** (2–4 V) for "does it spin" checks. They test the wiring and motor without depending on PID tuning. They can't tell if a motor is configured backwards, because inversion flips the command and the measurement together.
 - **Don't drive into hard stops at full power.** Only move position mechanisms to safe, known positions, or home them gently with a current limit (like the hood does).
 
-Supported devices for `registerHardware`: `TalonFX`, `CANcoder`, `Pigeon2`, `SparkMax` / `SparkFlex` (any `SparkBase`), Redux `Canandgyro` / `Canandmag`, a `CANBus`, or any custom `SelfChecking`. For GRRBase objects whose type is only known at runtime (e.g. `module.moveMotor.getAPI()`), use `registerDevice(...)`.
+Supported devices for `registerHardware`: `TalonFX`, `CANcoder`, `Pigeon2`, PhotonVision `PhotonCamera`, `SparkMax` / `SparkFlex` (any `SparkBase`), Redux `Canandgyro` / `Canandmag`, a `CANBus`, or any custom `SelfChecking`. For GRRBase objects whose type is only known at runtime (e.g. `module.moveMotor.getAPI()`), use `registerDevice(...)`.
 
 ## Checking a position mechanism (hood, arm, pivot, elevator)
 
@@ -134,6 +135,7 @@ lib/systemcheck/
     SelfCheckingCanandgyro.java, SelfCheckingCanandmag.java   - Redux
     SelfCheckingCANBus.java   - CAN bus / CANivore health
     SelfCheckingBattery.java  - battery voltage
+    SelfCheckingPhotonCamera.java - PhotonVision camera connected / calibrated / not in driver mode
 ```
 
 The only change outside this folder and the subsystems is a small `getIMUAPI()` getter added to `lib/swerve/SwerveAPI.java`, so the gyro can be registered.

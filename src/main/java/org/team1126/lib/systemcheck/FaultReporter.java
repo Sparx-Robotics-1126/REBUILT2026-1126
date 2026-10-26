@@ -23,11 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import org.photonvision.PhotonCamera;
 import org.team1126.lib.systemcheck.selfcheck.SelfChecking;
 import org.team1126.lib.systemcheck.selfcheck.SelfCheckingCANBus;
 import org.team1126.lib.systemcheck.selfcheck.SelfCheckingCANcoder;
 import org.team1126.lib.systemcheck.selfcheck.SelfCheckingCanandgyro;
 import org.team1126.lib.systemcheck.selfcheck.SelfCheckingCanandmag;
+import org.team1126.lib.systemcheck.selfcheck.SelfCheckingPhotonCamera;
 import org.team1126.lib.systemcheck.selfcheck.SelfCheckingPigeon2;
 import org.team1126.lib.systemcheck.selfcheck.SelfCheckingSpark;
 import org.team1126.lib.systemcheck.selfcheck.SelfCheckingTalonFX;
@@ -166,6 +168,11 @@ public final class FaultReporter {
     /** Registers a Redux Canandmag. */
     public void registerHardware(String subsystemName, String label, Canandmag encoder) {
         registerHardware(subsystemName, new SelfCheckingCanandmag(label, encoder));
+    }
+
+    /** Registers a PhotonVision camera (pass the PhotonCamera the robot already uses). */
+    public void registerHardware(String subsystemName, PhotonCamera camera) {
+        registerHardware(subsystemName, new SelfCheckingPhotonCamera(camera));
     }
 
     /** Registers a CAN bus (roboRIO bus or a CANivore). */

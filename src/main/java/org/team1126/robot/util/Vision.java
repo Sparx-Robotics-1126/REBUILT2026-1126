@@ -4,6 +4,7 @@ import static org.photonvision.PhotonPoseEstimator.PoseStrategy.CONSTRAINED_SOLV
 import static org.photonvision.PhotonPoseEstimator.PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -16,6 +17,9 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +32,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.team1126.lib.math.FieldInfo;
 import org.team1126.lib.math.geometry.TimestampedPose;
 import org.team1126.lib.math.geometry.VisionMeasurement;
+import org.team1126.lib.systemcheck.FaultReporter;
 import org.team1126.lib.tunable.TunableTable;
 import org.team1126.lib.tunable.Tunables;
 import org.team1126.lib.tunable.Tunables.TunableDouble;
@@ -72,6 +77,69 @@ public final class Vision {
         // Hit the undocumented Photon Turbo Button™
         // https://github.com/PhotonVision/photonvision/pull/1662
         NetworkTableInstance.getDefault().getBooleanTopic("/photonvision/use_new_cscore_frametime").publish().set(true);
+    }
+
+    // ------------------------------------------------------------------
+    // System check (see lib/systemcheck/README.md)
+    // ------------------------------------------------------------------
+
+    /** Name used for the cameras in the system check (SystemStatus/Vision on the dashboard). */
+    public static final String SYSTEM_CHECK_NAME = "Vision";
+    /** How long the camera check watches for frames and AprilTags, in seconds. */
+    private static final double CHECK_WATCH_SECONDS = 3.0;
+
+    /**
+     * Registers every camera with the fault reporter (connected, calibrated,
+     * not in driver mode; checked while disabled) and registers the camera
+     * system check.
+     */
+    public void registerSystemCheck() {
+        for (var camera : cameras) {
+            FaultReporter.getInstance().registerHardware(SYSTEM_CHECK_NAME, camera.camera);
+        }
+        FaultReporter.getInstance().registerSystemCheck(SYSTEM_CHECK_NAME, this::systemCheck);
+    }
+
+    /**
+     * Camera system check: watches every camera for a few seconds and checks
+     * that (1) new frames are arriving and (2) it sees at least one AprilTag.
+     * <b>Hold or place an AprilTag where each camera can see it.</b> A camera
+     * that never sees a tag is a warning (it may just not be pointed at one);
+     * a camera with no new frames at all is an error. Nothing moves.
+     */
+    public Command systemCheck() {
+        double[] start = { 0.0 };
+        return Commands.sequence(
+            Commands.runOnce(() -> start[0] = Timer.getFPGATimestamp()),
+            Commands.waitSeconds(CHECK_WATCH_SECONDS),
+            Commands.runOnce(() -> {
+                for (var camera : cameras) {
+                    String name = camera.camera.getName();
+                    if (camera.lastFrameTime < start[0]) {
+                        FaultReporter.getInstance()
+                            .addFault(
+                                SYSTEM_CHECK_NAME,
+                                String.format(
+                                    "[camera %s] no new frames in %.0f s - check the camera's USB cable and that its pipeline is running",
+                                    name,
+                                    CHECK_WATCH_SECONDS
+                                )
+                            );
+                    } else if (camera.lastTagTime < start[0]) {
+                        FaultReporter.getInstance()
+                            .addFault(
+                                SYSTEM_CHECK_NAME,
+                                String.format(
+                                    "[camera %s] didn't see any AprilTag in %.0f s - hold a tag in front of it (if it still can't, check focus, exposure and the pipeline)",
+                                    name,
+                                    CHECK_WATCH_SECONDS
+                                ),
+                                true
+                            );
+                    }
+                }
+            })
+        ).withName("Vision.systemCheck()");
     }
 
     /**
@@ -130,6 +198,12 @@ public final class Vision {
         private final PhotonPoseEstimator estimator;
         private final Optional<ConstrainedSolvepnpParams> constrainedPnpParams;
         private final Debouncer disabledDebounce = new Debouncer(5.0, DebounceType.kFalling);
+        /** When this camera last delivered a frame / a frame with an AprilTag (for the system check). */
+        @NotLogged
+        private double lastFrameTime = Double.NEGATIVE_INFINITY;
+
+        @NotLogged
+        private double lastTagTime = Double.NEGATIVE_INFINITY;
 
         /**
          * Create a camera.
@@ -183,6 +257,10 @@ public final class Vision {
             boolean usingTrig = disabledDebounce.calculate(DriverStation.isEnabled());
             estimator.setPrimaryStrategy(usingTrig ? PNP_DISTANCE_TRIG_SOLVE : CONSTRAINED_SOLVEPNP);
             for (PhotonPipelineResult result : camera.getAllUnreadResults()) {
+                // Remember when frames and tags were last seen, for the system check.
+                double now = Timer.getFPGATimestamp();
+                lastFrameTime = now;
+                if (result.hasTargets()) lastTagTime = now;
                 // Get an estimate from the PhotonPoseEstimator.
                 var estimate = estimator.update(result, Optional.empty(), Optional.empty(), constrainedPnpParams);
                 if (estimate.isEmpty() || estimate.get().targetsUsed.isEmpty()) continue;
