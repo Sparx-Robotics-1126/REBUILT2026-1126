@@ -225,7 +225,7 @@ public final class Vision {
          */
         private boolean useTag(int id) {
             // Only utilize the current alliance's reef tags.
-            return Alliance.isBlue() ? (id >= 17 && id <= 22) : (id >= 6 && id <= 11);
+            return true; // Alliance.isBlue() ? (id >= 17 && id <= 22) : (id >= 6 && id <= 11);
         }
     }
 }
