@@ -83,7 +83,7 @@ public final class Robot extends LoggedRobot {
         // constructor. Add the battery and the roboRIO CAN bus, then put the
         // RunAllChecks / ClearAllFaults buttons on the dashboard (SystemStatus/).
         // See lib/systemcheck/README.md.
-        FaultReporter.getInstance().registerHardware("Robot", new SelfCheckingBattery(12.3, 11.8));
+        FaultReporter.getInstance().registerHardware("Robot", new SelfCheckingBattery(12.0, 11.8));
         FaultReporter.getInstance().registerHardware("Robot", "rio", new CANBus());
         FaultReporter.getInstance().publishDashboardCommands();
 

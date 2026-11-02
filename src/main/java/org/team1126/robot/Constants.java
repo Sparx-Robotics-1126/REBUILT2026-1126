@@ -19,21 +19,22 @@ public final class Constants {
     /** The height from the floor to the robot's reference point. Measured in meters. */
     private static final double Z_HEIGHT_FLOOR_TO_ROBOT = 0.03;
 
+
     public static final CameraConfig[] AT_CAMERAS = {
         new CameraConfig(
             "center",
-            new Translation3d(.18, .0, Z_HEIGHT_FLOOR_TO_ROBOT + 0.58),
-            new Rotation3d(0.0, Math.toRadians(5), Math.toRadians(0.0))
+            new Translation3d(.222, .0, Z_HEIGHT_FLOOR_TO_ROBOT + 0.581),
+            new Rotation3d(0.0, Math.toRadians(-15), Math.toRadians(0.0))
         ),
         new CameraConfig(
             "left",
-            new Translation3d(.16, 0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.58),
-            new Rotation3d(0.0, Math.toRadians(10), Math.toRadians(45.0))
+            new Translation3d(.205, 0.071, Z_HEIGHT_FLOOR_TO_ROBOT + 0.577),
+            new Rotation3d(Math.toRadians(0), Math.toRadians(-16.97), Math.toRadians(46.73))
         ),
         new CameraConfig(
             "right",
-            new Translation3d(.16, -0.005, Z_HEIGHT_FLOOR_TO_ROBOT + 0.58),
-            new Rotation3d(0.0, Math.toRadians(5), Math.toRadians(-45.0))
+            new Translation3d(.204, -0.070, Z_HEIGHT_FLOOR_TO_ROBOT + 0.576),
+            new Rotation3d(0, Math.toRadians(-12.01), Math.toRadians(-46.07))
         )
     };
 

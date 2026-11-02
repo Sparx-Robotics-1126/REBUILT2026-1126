@@ -199,8 +199,8 @@ private static final TunableDouble hoodPosition = tunables.value("Hood Position"
 
     // Check positions are in rotations at the rotor, well inside the soft limits (0 to 22.938).
     private static final double CHECK_LOW = 1.0;
-    private static final double CHECK_MID = 11.0;
-    private static final double CHECK_HIGH = 20.0;
+    private static final double CHECK_MID = 5.0;
+    private static final double CHECK_HIGH = 7.0;
     /** How close to the target counts as "there", in rotor rotations. */
     private static final double CHECK_TOLERANCE = 0.5;
     /** How long each move gets to reach its target, in seconds. */
