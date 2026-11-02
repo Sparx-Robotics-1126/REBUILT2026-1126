@@ -4,6 +4,7 @@ import static org.photonvision.PhotonPoseEstimator.PoseStrategy.CONSTRAINED_SOLV
 import static org.photonvision.PhotonPoseEstimator.PoseStrategy.PNP_DISTANCE_TRIG_SOLVE;
 
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -55,6 +56,19 @@ public final class Vision {
     // Variables for Epilogue logging.
     private final List<Pose2d> estimates = new ArrayList<>();
     private final List<Pose3d> targets = new ArrayList<>();
+
+    public static final int CAN_TAG_ID = 40;
+    private static final TunableDouble canRadius = tunables.value("canRadius", 0.15); // tag face to center of target in meters
+
+    public static final record TargetObservation(double x, double y, double timestamp) {}
+
+    @NotLogged
+    private volatile Optional<TargetObservation> latestTarget = Optional.empty();
+
+    @NotLogged
+    public Optional<TargetObservation> getTargetObservation() {
+        return latestTarget;
+    }
 
     /**
      * Create the vision manager.
@@ -130,6 +144,7 @@ public final class Vision {
         private final PhotonPoseEstimator estimator;
         private final Optional<ConstrainedSolvepnpParams> constrainedPnpParams;
         private final Debouncer disabledDebounce = new Debouncer(5.0, DebounceType.kFalling);
+        private final Transform3d robotToCamera;
 
         /**
          * Create a camera.
@@ -137,7 +152,7 @@ public final class Vision {
          * @param robotToCamera The {@link Transform3d} from the robot's center to the camera.
          */
         private Camera(CameraConfig config) {
-            Transform3d robotToCamera = new Transform3d(config.translation(), config.rotation());
+            this.robotToCamera = new Transform3d(config.translation(), config.rotation());
             camera = new PhotonCamera(config.name());
             estimator = new PhotonPoseEstimator(FieldInfo.aprilTags(), PNP_DISTANCE_TRIG_SOLVE, robotToCamera);
             constrainedPnpParams = Optional.of(new ConstrainedSolvepnpParams(true, 0.0));
@@ -183,6 +198,21 @@ public final class Vision {
             boolean usingTrig = disabledDebounce.calculate(DriverStation.isEnabled());
             estimator.setPrimaryStrategy(usingTrig ? PNP_DISTANCE_TRIG_SOLVE : CONSTRAINED_SOLVEPNP);
             for (PhotonPipelineResult result : camera.getAllUnreadResults()) {
+                boolean seesCan = false;
+                for (var t : result.getTargets()) {
+                    if (t.getFiducialId() != CAN_TAG_ID) continue;
+                    seesCan = true;
+                    // Tag +X points out of the tag face, so the target's center is
+                    // CAN_RADIUS behind the tag. Verify this sign on the real robot.
+                    Transform3d robotToCan = robotToCamera
+                        .plus(t.getBestCameraToTarget())
+                        .plus(new Transform3d(-canRadius.getAsDouble(), 0.0, 0.0, new Rotation3d()));
+                        
+                    latestTarget = Optional.of(new TargetObservation(robotToCan.getX(), robotToCan.getY(), result.getTimestampSeconds()));
+                }
+                // Keep the special tag away from the field pose estimator.
+                if (seesCan) continue;
+                
                 // Get an estimate from the PhotonPoseEstimator.
                 var estimate = estimator.update(result, Optional.empty(), Optional.empty(), constrainedPnpParams);
                 if (estimate.isEmpty() || estimate.get().targetsUsed.isEmpty()) continue;
