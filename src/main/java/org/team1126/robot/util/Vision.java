@@ -58,7 +58,7 @@ public final class Vision {
     private final List<Pose3d> targets = new ArrayList<>();
 
     public static final int CAN_TAG_ID = 40;
-    private static final TunableDouble canRadius = tunables.value("canRadius", 0.15); // tag face to center of target in meters
+    private static final TunableDouble canRadius = tunables.value("canRadius", 0.2); // tag face to center of target in meters
 
     public static final record TargetObservation(double x, double y, double timestamp) {}
 

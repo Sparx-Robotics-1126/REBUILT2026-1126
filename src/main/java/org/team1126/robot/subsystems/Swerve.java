@@ -172,7 +172,7 @@ public final class Swerve extends GRRSubsystem {
     private static final TunableDouble canFilter = tunables.value("canFilter", 0.3);
     private Translation2d canTarget = null; // latched field-relative target position
     private double lastCanObsTime = -1.0;
-    private boolean demoTargetMode = false; // or reuse your existing demo-mode flag
+    private boolean demoTargetMode = true; // or reuse your existing demo-mode flag
 
     private double distanceToTarget = 0.0;
     private double distanceToShootingPoint = 0.0;
