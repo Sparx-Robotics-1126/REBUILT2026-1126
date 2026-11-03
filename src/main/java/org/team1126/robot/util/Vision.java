@@ -20,7 +20,10 @@ import edu.wpi.first.wpilibj.RobotBase;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
@@ -57,17 +60,25 @@ public final class Vision {
     private final List<Pose2d> estimates = new ArrayList<>();
     private final List<Pose3d> targets = new ArrayList<>();
 
-    public static final int CAN_TAG_ID = 40;
-    private static final TunableDouble canRadius = tunables.value("canRadius", 0.2); // tag face to center of target in meters
 
-    public static final record TargetObservation(double x, double y, double timestamp) {}
+    private static final TunableDouble canRadius = tunables.value("canRadius", 0.15); // tag face to center of target in meters
+
+    // Each target tag and where that target's center is relative to the tag.
+    private static final Map<Integer, Transform3d> TARGET_TAGS = Map.of(
+        40, new Transform3d(-canRadius.getAsDouble(), 0.0, 0.0, new Rotation3d()),
+        41, new Transform3d(-canRadius.getAsDouble(), 0.0, 0.0, new Rotation3d()),
+        42, new Transform3d(-canRadius.getAsDouble(), 0.0, 0.0, new Rotation3d()),
+        43, new Transform3d(-canRadius.getAsDouble(), 0.0, 0.0, new Rotation3d())
+    );
+    
+    public static final record TargetObservation(int id, double x, double y, double timestamp) {}
+    
+    @NotLogged
+    private final Map<Integer, TargetObservation> latestTargets = new ConcurrentHashMap<>();
 
     @NotLogged
-    private volatile Optional<TargetObservation> latestTarget = Optional.empty();
-
-    @NotLogged
-    public Optional<TargetObservation> getTargetObservation() {
-        return latestTarget;
+    public Map<Integer, TargetObservation> getTargetObservations() {
+        return latestTargets;
     }
 
     /**
@@ -198,20 +209,21 @@ public final class Vision {
             boolean usingTrig = disabledDebounce.calculate(DriverStation.isEnabled());
             estimator.setPrimaryStrategy(usingTrig ? PNP_DISTANCE_TRIG_SOLVE : CONSTRAINED_SOLVEPNP);
             for (PhotonPipelineResult result : camera.getAllUnreadResults()) {
-                boolean seesCan = false;
+                boolean seesTarget = false;
                 for (var t : result.getTargets()) {
-                    if (t.getFiducialId() != CAN_TAG_ID) continue;
-                    seesCan = true;
-                    // Tag +X points out of the tag face, so the target's center is
-                    // CAN_RADIUS behind the tag. Verify this sign on the real robot.
-                    Transform3d robotToCan = robotToCamera
+                    int id = t.getFiducialId();
+                    var tagToCenter = TARGET_TAGS.get(id);
+                    if (tagToCenter == null) continue;
+                    seesTarget = true;
+
+                    Transform3d robotToCenter = robotToCamera
                         .plus(t.getBestCameraToTarget())
-                        .plus(new Transform3d(-canRadius.getAsDouble(), 0.0, 0.0, new Rotation3d()));
-                        
-                    latestTarget = Optional.of(new TargetObservation(robotToCan.getX(), robotToCan.getY(), result.getTimestampSeconds()));
+                        .plus(tagToCenter);
+                    latestTargets.put(id, new TargetObservation(id, robotToCenter.getX(), robotToCenter.getY(), result.getTimestampSeconds()));
                 }
+                
                 // Keep the special tag away from the field pose estimator.
-                if (seesCan) continue;
+                if (seesTarget) continue;
                 
                 // Get an estimate from the PhotonPoseEstimator.
                 var estimate = estimator.update(result, Optional.empty(), Optional.empty(), constrainedPnpParams);
