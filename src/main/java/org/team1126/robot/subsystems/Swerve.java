@@ -16,7 +16,12 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -170,8 +175,9 @@ public final class Swerve extends GRRSubsystem {
     // private boolean facingHub = false;
 
     private static final TunableDouble canFilter = tunables.value("canFilter", 0.3);
-    private Translation2d canTarget = null; // latched field-relative target position
-    private double lastCanObsTime = -1.0;
+    @NotLogged private final Map<Integer, Translation2d> targetPoints = new HashMap<>();
+    @NotLogged private final Map<Integer, Double> lastObsTimes = new HashMap<>();
+    private int selectedTargetId = -1; // -1 = auto (nearest latched target)
     private boolean demoTargetMode = false; // or reuse your existing demo-mode flag
 
     private double distanceToTarget = 0.0;
@@ -255,18 +261,17 @@ public final class Swerve extends GRRSubsystem {
         seesAprilTag = measurements.length > 0;
         api.addVisionMeasurements(measurements);
         
-        updateCanTarget();
+        updateTargets();   // replaces updateCanTarget()
 
-        SmartDashboard.putNumber("Goal X", apf.getGoal().getX());
-        SmartDashboard.putNumber("Goal Y", apf.getGoal().getY());
-
-        // The target is where we want to shoot fuel when the shoot button is pressed. 
-        // If we're in the neutral zone, we want to shoot at one of the ferry points; otherwise, we want to shoot at the hub
-        Translation2d target = (demoTargetMode && canTarget != null)
-            ? canTarget
+        Translation2d demoTarget = selectedTarget();
+        Translation2d target = (demoTargetMode && demoTarget != null)
+            ? demoTarget
             : (!inNeutralZone()
                 ? Field.HUB.get()
                 : (isLeftOfCenter() ? Field.LEFT_FERRY_TARGET.get() : Field.RIGHT_FERRY_TARGET.get()));
+
+        SmartDashboard.putNumber("Goal X", apf.getGoal().getX());
+        SmartDashboard.putNumber("Goal Y", apf.getGoal().getY());
                 
         final double deltaX = state.pose.getX() - target.getX();
         final double deltaY = state.pose.getY() - target.getY();
@@ -313,30 +318,60 @@ public final class Swerve extends GRRSubsystem {
         return aimingAtTarget;
     }
 
-    private void updateCanTarget() {
-        var obs = vision.getTargetObservation();
-        if (obs.isEmpty() || obs.get().timestamp() <= lastCanObsTime) return;
-        lastCanObsTime = obs.get().timestamp();
+    private void updateTargets() {
+        boolean slowEnough = state.velocity <= 0.5 && Math.abs(state.speeds.omegaRadiansPerSecond) <= 1.0;
 
-        // Camera latency means the current pose isn't the pose at capture time.
-        // Only trust observations while the robot is moving slowly.
-        if (state.velocity > 0.5 || Math.abs(state.speeds.omegaRadiansPerSecond) > 1.0) return;
+        for (var obs : vision.getTargetObservations().values()) {
+            // Mark as seen even if we skip it, so stale frames aren't applied later.
+            double last = lastObsTimes.getOrDefault(obs.id(), -1.0);
+            if (obs.timestamp() <= last) continue;
+            lastObsTimes.put(obs.id(), obs.timestamp());
+            if (!slowEnough) continue;
 
-        Translation2d measured = state.pose
-            .transformBy(new Transform2d(obs.get().x(), obs.get().y(), Rotation2d.kZero))
-            .getTranslation();
+            Translation2d measured = state.pose
+                .transformBy(new Transform2d(obs.x(), obs.y(), Rotation2d.kZero))
+                .getTranslation();
 
-        // Low-pass filter: first sighting snaps, later ones blend in.
-        double a = canFilter.get();
-        canTarget = (canTarget == null) ? measured : canTarget.times(1.0 - a).plus(measured.times(a));
+            double a = canFilter.get();
+            Translation2d prev = targetPoints.get(obs.id());
+            targetPoints.put(obs.id(), prev == null ? measured : prev.times(1.0 - a).plus(measured.times(a)));
+        }
     }
 
-    public Command resetCanTarget() {
-        return commandBuilder("Swerve.resetCanTarget()")
-            .onInitialize(() -> canTarget = null)
+    private Translation2d selectedTarget() {
+        if (selectedTargetId >= 0) return targetPoints.get(selectedTargetId); // may be null
+        Translation2d best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (var p : targetPoints.values()) {
+            double d = p.getDistance(state.translation);
+            if (d < bestDist) { bestDist = d; best = p; }
+        }
+        return best;
+    }
+
+    public Command resetTargets() {
+        return commandBuilder("Swerve.resetTargets()")
+            .onInitialize(() -> {
+                targetPoints.clear();
+                lastObsTimes.clear();
+                selectedTargetId = -1;
+            })
             .isFinished(true)
             .ignoringDisable(true);
     }
+
+    /** Cycles: auto -> lowest ID -> next ID -> ... -> auto. */
+    public Command cycleTarget() {
+        return commandBuilder("Swerve.cycleTarget()")
+            .onInitialize(() -> {
+                var ids = new ArrayList<>(targetPoints.keySet());
+                Collections.sort(ids);
+                int idx = ids.indexOf(selectedTargetId);
+                selectedTargetId = (idx + 1 < ids.size()) ? ids.get(idx + 1) : -1;
+            })
+            .isFinished(true)
+            .ignoringDisable(true);
+}
 
     /**
      * Returns the current blue origin relative pose of the robot.

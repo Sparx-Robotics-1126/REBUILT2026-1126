@@ -155,8 +155,8 @@ public final class Robot extends LoggedRobot {
         // coDriver.leftTrigger().whileTrue(routines.shootFieldFuel());
         coDriver.leftBumper().toggleOnTrue(routines.shootFuelTest());
         // coDriver.povRight().whileTrue(routines.shootFuel());
-        coDriver.povRight().onTrue(swerve.resetCanTarget());
-        coDriver.povLeft().whileTrue(storage.feedShooter(()-> true));
+        coDriver.povRight().onTrue(swerve.resetTargets());
+        coDriver.povLeft().onTrue(swerve.cycleTarget());
         // coDriver.rightTrigger().and(coDriver.povRight()).whileTrue(routines.shootFuel());
         // coDriver.rightTrigger().and(coDriver.povLeft()).whileTrue(routines.shootFuelReverseStorage());
         // coDriver.rightBumper().onTrue(shooter.idleShooterCommand());
